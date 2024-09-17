@@ -3,6 +3,20 @@
 -- such table (see below for an example).
 local theme = {}
 
+-- Of course we need a metadata table.
+theme.meta = {
+  -- This specifies the Chroma version for which the theme was written for. If
+  -- the theme is designed for a different version of Chroma, then Chroma will
+  -- give you a warning. Most likely, older theme versions will just crash while
+  -- applying the theme.
+	chroma_version = nil,
+
+  -- These fields are the metadata of the actual theme. Why, you ask? Why not?
+	version = nil,
+	author = nil,
+	description = nil,
+}
+
 -- You can also extend this by defining custom colors. Any additional colours
 -- defined in theme groups will be passed to theme handlers.
 local colors = {
@@ -146,7 +160,7 @@ theme.raw = {
 	format = "{name} {hexcode}",
 
 	-- You can also customize the file the complied themes will be output to. You
-  -- can include home-relative paths (~/) and they will be expanded.
+	-- can include home-relative paths (~/) and they will be expanded.
 	out = "~/.cache/chroma/colors.col",
 }
 

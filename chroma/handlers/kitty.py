@@ -3,10 +3,16 @@ Creates a color theme for Kitty.
 """
 
 import os
-import re
+
+from chroma.logger import Logger
+
+logger = Logger.get_logger()
 
 
 def apply(group):
+    logger.warn("The Kitty handler is currently borked. Skipping.")
+    return
+
     colors = group.colors
 
     theme = {
@@ -35,10 +41,9 @@ def apply(group):
         kitty_config = f.readlines()
 
     new_config = []
-    color_pattern = re.compile(r"^color\d+\s*")
 
     for line in kitty_config:
-        if color_pattern.match(line):
+        if any(col in line for col in theme.keys()):
             color_key = line.split()[0]
             if color_key in theme:
                 new_line = f"{color_key} {colors[color_key]}"
@@ -53,3 +58,5 @@ def apply(group):
 
     with open(os.path.expanduser("~/config/kitty/kitty.conf"), "w") as f:
         f.writelines(new_config)
+
+    logger.info("Successfully applied Kitty theme!")

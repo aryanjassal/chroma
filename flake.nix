@@ -14,7 +14,14 @@
       in {
         devShells.default = pkgs.mkShell {
           name = "chroma";
-          buildInputs = with python.pkgs; [ pip black isort lupa pywal ];
+          buildInputs = with python.pkgs; [
+            pip
+            black
+            isort
+            lupa
+            pywal
+            setuptools
+          ];
         };
       });
 }

@@ -1,2 +1,8 @@
-__pycache__
-__pycache__/*
+# Ignore cache
+__pycache__/
+__pycache__/
+
+# Ignore virtual environment and pip-related stuff
+.venv/
+venv/
+*.egg-info

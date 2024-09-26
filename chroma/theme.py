@@ -1,8 +1,8 @@
 import importlib
 
 import chroma
-from chroma.logger import Logger
 from chroma import utils
+from chroma.logger import Logger
 
 logger = Logger.get_logger()
 
@@ -11,9 +11,9 @@ def parse_file(runtime, filename) -> dict:
     with open(filename, mode="r") as f:
         theme = f.read()
     return runtime.execute(theme)
-    
 
-def parse_meta(meta) -> None:
+
+def parse_meta(meta) -> dict:
     if meta["chroma_version"] is None or not meta["chroma_version"]:
         logger.error(f"Chroma version is unset in theme {meta['name']}!")
         exit(1)
@@ -36,6 +36,15 @@ def parse_meta(meta) -> None:
             f" Chroma version {chroma.__version__} in {meta['name']} theme."
         )
 
+    parsed_meta = {}
+    for k, v in meta.items():
+        if v != "unset":
+            parsed_meta[k] = v
+            logger.debug(f"{k} = {v}")
+        else:
+            logger.debug(f"{k} is unset. Skipping.")
+    return parsed_meta
+
 
 def load(_, filename):
     # Create a blank dict for the theme, then assign themes in such a way that
@@ -44,30 +53,32 @@ def load(_, filename):
     theme = {}
     default_config = parse_file(utils.runtime(), utils.default_theme())
     user_config = parse_file(utils.runtime(), filename)
-    theme = utils.merge(default_config, user_config)
+
+    options = user_config["options"]
+    if options is not None and options["merge_tables"] is True:
+        theme = utils.merge(default_config, user_config)
+    else:
+        logger.warn("Theme table will not be merged with default table.")
+        logger.warn("Some fields may be left unset, which can break Chroma.")
 
     override_file = utils.override_theme()
     if override_file.is_file():
         override_config = parse_file(utils.runtime(), override_file)
         theme = utils.merge(theme, override_config)
 
-    logger.debug(f"Theme name: {theme['meta']['name']}")
-    logger.debug(f"Theme description: {theme['meta']['description']}")
-    logger.debug(f"Theme author: {theme['meta']['author']}")
-    logger.debug(f"Theme version: {theme['meta']['version']}")
-    logger.debug(f"Theme url: {theme['meta']['url']}")
-    logger.debug(f"Chroma version: {theme['meta']['chroma_version']}")
-    parse_meta(theme["meta"])
+    meta = parse_meta(theme["meta"])
 
     for group, config in theme.items():
         if group != "meta":
             logger.info(f"Applying theme for {group}")
             try:
                 handler = importlib.import_module(f"chroma.handlers.{group}")
-                if hasattr(handler, 'apply'):
-                    handler.apply(config)
+                if hasattr(handler, "apply") and callable(handler.apply):
+                    handler.apply(config, meta)
                 else:
-                    logger.error(f"Handler does not implement `apply()`. Skipping.")
+                    logger.error(
+                        f"Handler does not properly implement `apply()`. Skipping."
+                    )
             except ImportError:
                 logger.error(f"No handlers found for {group}. Skipping.")
             except Exception as e:

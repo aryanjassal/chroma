@@ -43,10 +43,10 @@ def main():
     shutil.copy(Path(args.theme_name), utils.themes_dir())
     shutil.move(utils.themes_dir() / theme_name, utils.themes_dir() / "current.lua")
 
-    if not Path(f"{str(utils.themes_dir())}/default.lua").is_file():
+    if not Path(f"{str(utils.cache_dir())}/example.lua").is_file():
         shutil.copy(
             utils.chroma_themes_dir() / "default.lua",
-            utils.themes_dir() / "default.lua",
+            utils.cache_dir() / "example.lua",
         )
 
     # If we are not loading any user overrides, then load the theme directly.

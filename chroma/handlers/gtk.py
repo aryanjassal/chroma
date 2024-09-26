@@ -2,7 +2,6 @@
 Creates a color theme for GTK 4, and writes that to `~/.config/gtk-4.0/gtk.css`.
 """
 
-import os
 from pathlib import Path
 
 import chroma
@@ -57,25 +56,25 @@ def validate_palette(palette: dict, index: int) -> dict | None:
         }
 
 
-def apply(group):
+def apply(group, _):
     palettes = []
 
     for i in range(1, 6):
         palette = group["palettes"].get(f"palette{i}")
         if palette is None:
-            logger.warn(f"Colorscheme {i} is unset. Skipping.")
+            logger.warn(f"Palette {i} is unset. Skipping.")
             continue
 
         validated_palette = validate_palette(palette, i)
         if validated_palette is None:
-            logger.warn(f"Colorscheme {i} contains invalid keys. Skipping.")
+            logger.warn(f"Palette {i} contains invalid keys. Skipping.")
             logger.debug(f"Got: {validated_palette}")
             continue
 
         palettes.append(validated_palette)
 
-    gtk3_valid = utils.validate_file(Path(group["out"]["gtk3"]), GTK_HEADER)
-    gtk4_valid = utils.validate_file(Path(group["out"]["gtk4"]), GTK_HEADER)
+    gtk3_valid = utils.validate_header(Path(group["out"]["gtk3"]), GTK_HEADER)
+    gtk4_valid = utils.validate_header(Path(group["out"]["gtk4"]), GTK_HEADER)
     if not gtk3_valid or not gtk4_valid:
         logger.error("Cannot write configuration for GTK. Skipping handler.")
         return
@@ -100,9 +99,9 @@ def apply(group):
     generated_file = [line + "\n" for line in generated_file]
 
     try:
-        with open(os.path.expanduser(group["out"]["gtk3"]), "w") as f:
+        with open(Path(group["out"]["gtk3"]).expanduser(), "w") as f:
             f.writelines(generated_file)
-        with open(os.path.expanduser(group["out"]["gtk4"]), "w") as f:
+        with open(Path(group["out"]["gtk4"]).expanduser(), "w") as f:
             f.writelines(generated_file)
     except FileNotFoundError as e:
         logger.error(e)

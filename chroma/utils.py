@@ -22,7 +22,7 @@ def config_dir() -> Path:
 
 def chroma_themes_dir() -> Path:
     path = Path(chroma.__file__).parent
-    path = path / "themes"
+    path = path / "builtins"
     return path
 
 
@@ -37,12 +37,13 @@ def override_theme() -> Path:
 
 
 def default_theme() -> Path:
-    return cache_dir() / "themes/default.lua"
+    return chroma_themes_dir() / "default.lua"
 
 
 def runtime():
     runtime = LuaRuntime(unpack_returned_tuples=True)
     runtime.execute(f"package.path = package.path .. ';{cache_dir().parent}/?.lua'")
+    runtime.execute(f"package.path = package.path .. ';{chroma_themes_dir()}/?.lua'")
     return runtime
 
 
@@ -57,7 +58,7 @@ def backup(path: Path) -> bool:
         return True
 
 
-def validate_file(path: Path, header: str) -> bool:
+def validate_header(path: Path, header: str) -> bool:
     path = path.expanduser()
 
     # If file does not exist, then we can generate config. Otherwise, try to

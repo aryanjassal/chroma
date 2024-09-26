@@ -1,7 +1,22 @@
 -- Define a table for storing theme groups. Each group is the application name
 -- with a table assigned to it. It can store tables. The color scheme is one
 -- such table (see below for an example).
+-- Note that you should import the default table when writing your own themes.
+-- [[ local theme = require("chroma.builtins.default") ]]
+-- This would ensure that any fields you haven't filled in will be set to a
+-- default value.
 local theme = {}
+
+-- These options control the behaviour of theme generation. Know what you are
+-- doing before chaging any option here.
+theme.options = {
+	-- By default, the theme generator merges the table with the default table.
+	-- This ensures doing something like this:
+	-- [[ themes.gtk { colors = { red = "#ff0000", } } ]]
+	-- Would not result in other values being nil. To disable this behaviour, set
+	-- this flag to false.
+	merge_tables = true,
+}
 
 -- Of course we need a metadata table.
 theme.meta = {
@@ -141,7 +156,7 @@ theme.kitty = {
 
 	-- You can also customize the file the complied themes will be output to.
 	-- You can include home-relative paths (~/) and they will be expanded.
-	out = "~/.config/kitty/kitty.conf",
+	out = "~/.config/kitty/theme.conf",
 }
 
 -- Output the colors to a file in a way which can be used by other programs. You

@@ -2,19 +2,22 @@
 Creates a color theme for Kitty.
 """
 
-import os
+from pathlib import Path
 
+import chroma
+from chroma import utils
 from chroma.logger import Logger
 
 logger = Logger.get_logger()
 
+KITTY_HEADER = f"# {chroma.CHROMA_GENERATED_HEADER}"
 
-def apply(group):
-    logger.warn("The Kitty handler is currently borked. Skipping.")
-    return
 
-    colors = group.colors
+def apply(group, meta):
+    colors = group["colors"]
 
+    # TODO: actually support all the themable options in kitty like this:
+    # https://github.com/kovidgoyal/kitty-themes/blob/master/template.conf
     theme = {
         "foreground": colors["foreground"],
         "background": colors["background"],
@@ -36,27 +39,35 @@ def apply(group):
         "color15": colors["bright_white"],
     }
 
-    kitty_config = []
-    with open(os.path.expanduser("~/config/kitty/kitty.conf"), "r") as f:
-        kitty_config = f.readlines()
+    metadata = {
+        "name": meta.get("name"),
+        "author": meta.get("author"),
+        "blurb": meta.get("description"),
+    }
 
-    new_config = []
+    if not utils.validate_header(Path(group["out"]), KITTY_HEADER):
+        logger.error("Cannot write configuration for Kitty. Skipping handler.")
+        return
 
-    for line in kitty_config:
-        if any(col in line for col in theme.keys()):
-            color_key = line.split()[0]
-            if color_key in theme:
-                new_line = f"{color_key} {colors[color_key]}"
-                new_config.append(new_line)
-            else:
-                print(" WARN  Line does not have a valid color:")
-                print(line)
-                new_config.append(line)
-        else:
-            # Non-color lines are unaffected
-            new_config.append(line)
+    generated_file = []
+    generated_file.append(KITTY_HEADER)
+    generated_file.append("# vim:ft=kitty")
 
-    with open(os.path.expanduser("~/config/kitty/kitty.conf"), "w") as f:
-        f.writelines(new_config)
+    for k, v in metadata.items():
+        if v is not None:
+            generated_file.append(f"## {k}: {v}")
+
+    for k, v in theme.items():
+        generated_file.append(f"{k} {v}")
+
+    # Manually insert newlines to make it play well with file.writelines()
+    generated_file = [line + "\n" for line in generated_file]
+
+    try:
+        with open(Path(group["out"]).expanduser(), "w") as f:
+            f.writelines(generated_file)
+    except FileNotFoundError as e:
+        logger.error(e)
+        logger.fatal("Failed to open file. Does the parent directory exist?")
 
     logger.info("Successfully applied Kitty theme!")

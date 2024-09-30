@@ -57,6 +57,9 @@ def validate_palette(palette: dict, index: int) -> dict | None:
 
 
 def apply(group, _):
+    if group.get("colors") is None:
+        logger.info("Colors for Kitty group is unset. Skipping handler.")
+        return
     palettes = []
 
     for i in range(1, 6):

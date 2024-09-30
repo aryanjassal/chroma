@@ -38,7 +38,7 @@ def parse_meta(meta) -> dict:
 
     parsed_meta = {}
     for k, v in meta.items():
-        if v != "unset":
+        if v != "":
             parsed_meta[k] = v
             logger.debug(f"{k} = {v}")
         else:
@@ -68,8 +68,9 @@ def load(_, filename):
 
     meta = parse_meta(theme["meta"])
 
+    special_groups = ["meta", "options"]
     for group, config in theme.items():
-        if group != "meta":
+        if group not in special_groups:
             logger.info(f"Applying theme for {group}")
             try:
                 handler = importlib.import_module(f"chroma.handlers.{group}")

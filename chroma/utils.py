@@ -2,6 +2,7 @@ import shutil
 from pathlib import Path
 
 from lupa import LuaRuntime, lua_type
+import re
 
 import chroma
 from chroma.logger import Logger
@@ -58,7 +59,7 @@ def backup(path: Path) -> bool:
         return True
 
 
-def validate_header(path: Path, header: str) -> bool:
+def validate_header(path: Path, header, should_backup: bool = True) -> bool:
     path = path.expanduser()
 
     # If file does not exist, then we can generate config. Otherwise, try to
@@ -74,14 +75,17 @@ def validate_header(path: Path, header: str) -> bool:
     # raise a warning and mark the file as unable to be written to. If the
     # header exists, then we can write to the file.
     if file_header != header:
-        if backup(path):
-            return True
+        if should_backup:
+            if backup(path):
+                return True
+            else:
+                logger.warn(
+                    f"Could not automatically back up {path} because a backup "
+                    "already exists. Manual intervention is required."
+                )
+                return False
         else:
-            logger.warn(
-                f"Could not automatically back up {path} because a backup "
-                "already exists. Manual intervention is required."
-            )
-            return False
+            logger.warn(f"Header mismatch detected in {path}. Overwriting.")
     return True
 
 
@@ -107,6 +111,35 @@ def merge(*dicts) -> dict:
         result = merge_recursive(result, d)
 
     return result
+
+
+def color_to(format: str, color: str) -> str | None:
+    hexcode_regex = r"^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+    hexvalue_regex = r"^([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+
+    if format == "hexcode":
+        is_hex = bool(re.match(hexcode_regex, color) or re.match(hexvalue_regex, color))
+        if is_hex:
+            if color[0] == "#":
+                return color
+            else:
+                return "#" + color
+        else:
+            logger.error(f"Unsupported color: {color}")
+            return
+    elif format == "hexvalue":
+        is_hex = bool(re.match(hexcode_regex, color) or re.match(hexvalue_regex, color))
+        if is_hex:
+            if color[0] == "":
+                return color[1:]
+            else:
+                return color
+        else:
+            logger.error(f"Unsupported color: {color}")
+            return
+    else:
+        logger.error(f"Unsupported format: {format}.")
+        return
 
 
 def inspect_dict(iterable) -> None:

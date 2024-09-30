@@ -14,7 +14,10 @@ KITTY_HEADER = f"# {chroma.CHROMA_GENERATED_HEADER}"
 
 
 def apply(group, meta):
-    colors = group["colors"]
+    colors = group.get("colors")
+    if colors is None:
+        logger.info("Colors for Kitty group is unset. Skipping handler.")
+        return
 
     # TODO: actually support all the themable options in kitty like this:
     # https://github.com/kovidgoyal/kitty-themes/blob/master/template.conf

@@ -4,7 +4,7 @@ Use a single command to theme your entire system.
 
 ## Installation
 
-I'm still figuring out an elegant way to install this as a system package. For now, make a virtual environment in root directory, and install it in the virtual environment.
+I'm still figuring out an elegant way to install this as a system package. For now, enter `nix develop`, make a virtual environment in root directory, and install it in the virtual environment.
 
 ```console
 [aryanj@laptop:~]$ git clone https://github.com/aryanjassal/chroma.git
@@ -18,6 +18,8 @@ Resolving deltas: 100% (22/22), done.
 
 [aryanj@laptop:~]$ cd chroma
 
+[aryanj@laptop:~/chroma]$ nix develop 
+
 [aryanj@laptop:~/chroma]$ python -m venv venv
 
 [aryanj@laptop:~/chroma]$ source venv/bin/activate
@@ -27,7 +29,7 @@ Resolving deltas: 100% (22/22), done.
 
 ## Usage
 
-Chroma is a command line tool. This means that you must interact with the *terminal* (oo, scary!).
+Chroma is a command line tool. This means that you must interact with the _terminal_ (oo, scary!).
 
 To load a theme, simply run the following command. It will load a theme at the given location, and print out a bunch of logs. By default, currently, it prints out everything including debug logs. Verbosity flags will be added in the future.
 
@@ -208,8 +210,6 @@ theme.kitty = {
 -- have full control over the formatting of the file to ensure it is maximally
 -- usable with your needs. Although, to establish a standard, a default format
 -- is provided.
--- Be very aware, the handler for raw theme still doesn't exist as of v0.1.0.
--- No options within this table will work.
 theme.raw = {
 	-- You can define multiple tables for the raw handler, and each table can have
 	-- its own attributes. All tables will be processed separately, and each table
@@ -236,7 +236,8 @@ theme.raw = {
 		-- You can also expand all environment variables available to the program
 		-- like in the shell. Extra variables have also been added, including:
 		-- $CACHEDIR: The cache directory for Chroma, usually `~/.cache/chroma`
-        -- Okay, I lied. As of 0.1.0, you still can't use custom exports.
+        -- Okay, I lied. As of 0.1.0, you still can't use custom exports. You have to
+        -- use the user-relative path.
 		out = "$CACHEDIR/colors.col",
 	},
 }
@@ -264,6 +265,19 @@ theme.kitty = {
 
 -- Of course, we still need to return the theme so Chroma can read the theme data.
 return theme
+```
+
+## Custom Handlers
+
+You can make custom integrations by making your own handler. Each handler must be inside `chroma/handlers`. Each handler is a Python file which must expose a `apply()` method. The `apply()` method should take in two variables: `group` and `meta`. The group will contain the group options, like `colors`, `out`, etc. and will be probably used the most. The `meta` field will have any relevant set metadata like the theme name, author, etc. which could be useful in embedding the metadata directly into the generated theme file.
+
+Take a look at `chroma/utils.py`. It implements many utility functions that would make your life implementing handlers easier. Take a look at the following minimum example for a handler. Of course, you should make it more featureful and informative, which would eventually come and help you in the future.
+
+```py
+# chroma/handlers/my_handler.py
+
+def apply(group, meta):
+    return
 ```
 
 ## Notes

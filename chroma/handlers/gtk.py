@@ -62,19 +62,24 @@ def apply(group, _):
         return
     palettes = []
 
-    for i in range(1, 6):
-        palette = group["palettes"].get(f"palette{i}")
-        if palette is None:
-            logger.warn(f"Palette {i} is unset. Skipping.")
-            continue
+    theme_palettes = dict(group.get("palettes"))
+    if theme_palettes is not None:
+        for i in range(1, 6):
+            palette = theme_palettes.get(f"palette{i}")
+            if palette is None:
+                logger.warn(f"Palette {i} is unset. Skipping.")
+                continue
 
-        validated_palette = validate_palette(palette, i)
-        if validated_palette is None:
-            logger.warn(f"Palette {i} contains invalid keys. Skipping.")
-            logger.debug(f"Got: {validated_palette}")
-            continue
+            if not isinstance(palette, dict):
+                palette = dict(palette)
 
-        palettes.append(validated_palette)
+            validated_palette = validate_palette(palette, i)
+            if validated_palette is None:
+                logger.warn(f"Palette {i} contains invalid keys. Skipping.")
+                logger.debug(f"Got: {validated_palette}")
+                continue
+
+            palettes.append(validated_palette)
 
     gtk3_valid = utils.validate_header(Path(group["out"]["gtk3"]), GTK_HEADER)
     gtk4_valid = utils.validate_header(Path(group["out"]["gtk4"]), GTK_HEADER)
@@ -95,7 +100,7 @@ def apply(group, _):
 
     # If the group has a field for extra GTK CSS, then add that to the
     # output file too.
-    if group["extra_css"]:
+    if group.get("extra_css") is not None:
         generated_file.append(group["extra_css"])
 
     # Manually insert newlines to make it play well with file.writelines()

@@ -78,8 +78,6 @@ def apply(group, _):
         logger.info("No changes detected. Skipping diff generation.")
         return
 
-    # try:
-    #     subprocess.run(["patch", str(out_path), str(diff_path)])
-    # except:
+    subprocess.run(["patch", str(out_path), str(diff_path)])
 
     logger.info("Successfully applied Foot theme!")

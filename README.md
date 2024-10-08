@@ -4,7 +4,7 @@ Use a single command to theme your entire system.
 
 ## Installation
 
-I'm still figuring out an elegant way to install this as a system package. For now, enter `nix develop`, make a virtual environment in root directory, and install it in the virtual environment.
+I'm still figuring out an elegant way to install this as a system package. For now, just enter `nix develop`.
 
 ```console
 [aryanj@laptop:~]$ git clone https://github.com/aryanjassal/chroma.git
@@ -19,12 +19,6 @@ Resolving deltas: 100% (22/22), done.
 [aryanj@laptop:~]$ cd chroma
 
 [aryanj@laptop:~/chroma]$ nix develop
-
-[aryanj@laptop:~/chroma]$ python -m venv venv
-
-[aryanj@laptop:~/chroma]$ source venv/bin/activate
-
-[aryanj@laptop:~/chroma]$ pip install -e .
 ```
 
 ## Usage

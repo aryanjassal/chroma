@@ -9,6 +9,7 @@ import subprocess
 VERSIONED_FILES = {
     "setup.py": r'(?P<prefix>version\s*=\s*["\'])(?P<version>\d+\.\d+\.\d+)(?P<suffix>["\'])',
     "chroma/__init__.py": r'(?P<prefix>__version__\s*=\s*["\'])(?P<version>\d+\.\d+\.\d+)(?P<suffix>["\'])',
+    "flake.nix": r'(?P<prefix>version\s*=\s*["\'])(?P<version>\d+\.\d+\.\d+)(?P<suffix>["\'])',
 }
 
 VERSION_REGEX = r"^\d+\.\d+\.\d+$"

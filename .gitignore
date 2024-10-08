@@ -6,6 +6,11 @@ __pycache__/
 .venv/
 venv/
 *.egg-info
+pip_packages
+tmp
 
 # Ignore log files
 *.log
+
+# Ignore the result file
+result

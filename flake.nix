@@ -22,6 +22,29 @@
             pywal
             setuptools
           ];
+          shellHook = ''
+            export PIP_PREFIX=$(pwd)/pip_packages
+            export PYTHONPATH=$PIP_PREFIX/lib/python${python.pythonVersion}/site-packages:$PYTHONPATH
+            export PATH=$PIP_PREFIX/bin:$PATH
+
+            mkdir -p $PIP_PREFIX
+            mkdir -p tmp
+            pip install -e .
+          '';
+        };
+
+        packages.default = python.pkgs.buildPythonPackage {
+          pname = "chroma";
+          version = "0.3.5";
+          src = ./.;
+          propagatedBuildInputs = with python.pkgs; [ lupa pywal ];
+          buildInputs = [ python.pkgs.setuptools ];
+          meta = with pkgs.lib; {
+            description = "Dynamic color scheme updater";
+            license = licenses.gpl3Only;
+            maintainers = ["aryanjassal"];
+            platforms = platforms.linux;
+          };
         };
       });
 }

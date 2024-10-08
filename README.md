@@ -18,7 +18,7 @@ Resolving deltas: 100% (22/22), done.
 
 [aryanj@laptop:~]$ cd chroma
 
-[aryanj@laptop:~/chroma]$ nix develop 
+[aryanj@laptop:~/chroma]$ nix develop
 
 [aryanj@laptop:~/chroma]$ python -m venv venv
 
@@ -52,194 +52,236 @@ In case the header changes in the future, all the old themes would need to be re
 -- default value. This is not necessary as the options are merged with the
 -- default table anyways (see `theme.options` below), but you might get
 -- hard to debug bugs without this, so its good practice to include it.
-local theme = require("chroma.builtins.default")
+-- Here, we also include `python`. It is an empty table whose sole purpose is
+-- to silence LSP errors when using `python.none` to signify a `None` value
+-- to the Python backend. Otherwise, a bunch of warnings will be generated
+-- and I hate that. If you don't need to use `python.none`, you can do this,
+-- too.
+-- local theme = require "chroma.bultins.default"
+local theme, python = require "chroma.builtins.default"
 
 -- These options control the behaviour of theme generation. Know what you are
--- doing before chaging any option here.
+-- doing before chaging any option here, as you most likely don't want to be
+-- changing anything here.
 theme.options = {
-	-- By default, the theme generator merges the table with the default table.
-	-- This ensures doing something like this:
-	-- [[ themes.gtk { colors = { red = "#ff0000", } } ]]
-	-- Would not result in other values being nil. To disable this behaviour, set
-	-- this flag to false.
-	merge_tables = true,
+  -- By default, the theme generator merges the table with the default table.
+  -- This ensures doing something like this:
+  -- [[ themes.gtk { colors = { red = "#ff0000", } } ]]
+  -- Would not result in other values, like the default out file, being nil. 
+  -- To disable this behaviour, set this flag to false.
+  merge_tables = true,
+
+  -- This specifies the Chroma version for which the theme was written for. If
+  -- the theme is designed for a different version of Chroma, then Chroma will
+  -- give you a warning. Most likely, older theme versions will just crash while
+  -- applying the theme. Must be defined like: "1.0.0" where there are three
+  -- numbers separated by two periods. See https://semver.org/.
+  chroma_version = "1.0.0",
 }
 
--- Of course we need a metadata table.
+-- Of course we need metadata.
 theme.meta = {
-	-- This specifies the Chroma version for which the theme was written for. If
-	-- the theme is designed for a different version of Chroma, then Chroma will
-	-- give you a warning. Most likely, older theme versions will just crash while
-	-- applying the theme. Must be defined like: "1.0.0" where there are three
-	-- numbers separated by two periods. See https://semver.org/.
-    chroma_version = "0.0.1",
-
-	-- These fields are the metadata of the actual theme. They need to be filled
-	-- out manually, but the fields are optional.
-	name = "unset",
-	description = "unset",
-	author = "unset",
-	version = "unset",
-	url = "unset",
+  -- These fields are the metadata of the actual theme. They need to be filled
+  -- out manually, but the fields are optional. Note that we have two version
+  -- fields, `chroma_version` and `version`. The `chroma_version` field is the
+  -- important one as that impacts the behaviour of Chroma based on the expected
+  -- version and actual version. The `version` in metadata is the version of the
+  -- actual theme.
+  -- All parameters within the meta table are purely cosmetic and shouldn't
+  -- seriously impact the behaviour of Chroma.
+  name = "Example",
+  description = "This is an example config",
+  author = "Chroma",
+  version = "0.0.1",
+  url = "https://github.com/aryanjassal/chroma",
 }
 
 -- You can also extend this by defining custom colors. Any additional colours
--- defined in theme groups will be passed to theme handlers.
+-- defined in theme groups will be passed to theme handlers. Some handlers
+-- accept multiple themes, while some need a strict set of keys. Set the keys
+-- manually for each handler when you can.
 local colors = {
-	black = "#000000",
-	red = "#ff0000",
-	green = "#00ff00",
-	yellow = "#ffff00",
-	blue = "#0000ff",
-	magenta = "#ff00ff",
-	cyan = "#00ffff",
-	white = "#ffffff",
+  black = "#000000",
+  red = "#ff0000",
+  green = "#00ff00",
+  yellow = "#ffff00",
+  blue = "#0000ff",
+  magenta = "#ff00ff",
+  cyan = "#00ffff",
+  white = "#ffffff",
 }
 
 -- You can also define variables. Note that any defined variables or functions
 -- will be discarded, and only the values in the returned table will be
--- processed.
+-- processed by Chroma.
 local foreground = colors.white
 local background = colors.black
+
+-- See, this is where the definition of `python.none` can come in handy.
+-- Basically, replace all references to `nil` for lua to `python.none` for
+-- Python compatibility.
 local gtk_defaultpalette = {
-	blue = nil,
-	green = nil,
-	yellow = nil,
-	orange = nil,
-	red = nil,
-	purple = nil,
-	brown = nil,
-	light = nil,
-	dark = nil,
+  blue = python.none,
+  green = python.none,
+  yellow = python.none,
+  orange = python.none,
+  red = python.none,
+  purple = python.none,
+  brown = python.none,
+  light = python.none,
+  dark = python.none,
 }
 
 -- Update GTK settings by changing the options in the GTK group.
 theme.gtk = {
-	colors = {
-		accent_color = colors.blue,
-		accent_fg_color = foreground,
-		accent_bg_color = colors.blue,
-		window_fg_color = foreground,
-		window_bg_color = background,
-		view_fg_color = foreground,
-		view_bg_color = background,
-		headerbar_fg_color = foreground,
-		headerbar_bg_color = background,
-		card_fg_color = foreground,
-		card_bg_color = background,
-		dialog_fg_color = foreground,
-		dialog_bg_color = background,
-		popover_fg_color = foreground,
-		popover_bg_color = background,
-		sidebar_fg_color = foreground,
-		sidebar_bg_color = background,
-		backdrop_fg_color = background,
-		backdrop_bg_color = background,
-	},
+  colors = {
+    accent_color = colors.blue,
+    accent_fg_color = foreground,
+    accent_bg_color = colors.blue,
+    window_fg_color = foreground,
+    window_bg_color = background,
+    view_fg_color = foreground,
+    view_bg_color = background,
+    headerbar_fg_color = foreground,
+    headerbar_bg_color = background,
+    card_fg_color = foreground,
+    card_bg_color = background,
+    dialog_fg_color = foreground,
+    dialog_bg_color = background,
+    popover_fg_color = foreground,
+    popover_bg_color = background,
+    sidebar_fg_color = foreground,
+    sidebar_bg_color = background,
+    backdrop_fg_color = background,
+    backdrop_bg_color = background,
+  },
 
-	-- GTK additionally allows themes to set 5 extra colors as theme palettes.
-	-- That can be set using the `colorscheme` table. In this table, you can
-	-- update colors on `scheme1` to `scheme5` to correspond to each of the five
-	-- palettes. If left unset, they will not be present in the GTK stylesheet,
-	-- and would not render. It is highly recommended to at least create one
-	-- colorscheme. No default values exist for this attribute.
-	palettes = {
-		palette1 = gtk_defaultpalette,
-		palette2 = gtk_defaultpalette,
-		palette3 = gtk_defaultpalette,
-		palette4 = gtk_defaultpalette,
-		palette5 = gtk_defaultpalette,
-	},
+  -- GTK additionally allows themes to set 5 extra colors as theme palettes.
+  -- That can be set using the `palettes` table. In this table, you can
+  -- update colors on `palette1` to `palette5` to correspond to each of the five
+  -- palettes. If left unset, they will not be present in the GTK stylesheet,
+  -- and would not render. It is highly recommended to at least create one
+  -- palette, but ideally, create all five. No default values exist for this 
+  -- attribute.
+  palettes = {
+    palette1 = gtk_defaultpalette,
+    palette2 = gtk_defaultpalette,
+    palette3 = gtk_defaultpalette,
+    palette4 = gtk_defaultpalette,
+    palette5 = gtk_defaultpalette,
+  },
 
-	-- This patch is necessary to ensure sidebars are also properly themed. Why
-	-- is this not hardcoded? Freedom. Get the classic, broken look by setting
-	-- this patch to an empty string.
-	sidebar_patch = [[
-.naviation-sidebar, .sidebar_pane, .top-bar {
-  color: @sidebar_fg_color;
-  background-color: @sidebar_bg_color;
-}
-.navigation-sidebar:backdrop, .sidebar_pane:backdrop, .top-bar:backdrop {
-  color: @backdrop_fg_color;
-  background-color: @backdrop_bg_color;
-}
-  ]],
+  -- We have a patch to ensure libadwaita sidebars are also properly themed. Why
+  -- is this not hardcoded? Freedom. Get the classic, broken look by setting
+  -- this patch to an empty string like this.
+  -- sidebar_patch = ""
 
-	-- Want to customize your experience EVEN MORE? There's an option for that.
-	extra_css = "",
+  -- Want to customize your experience EVEN MORE? There's an option for that.
+  -- Inject custom CSS into the css files to change behaviour in interesting
+  -- ways.
+  extra_css = "",
 
-	-- You can also customize the file the complied themes will be output to.
-	-- You can include home-relative paths (~/) and they will be expanded.
-	out = {
-		gtk3 = "~/.config/gtk-3.0/gtk.css",
-		gtk4 = "~/.config/gtk-4.0/gtk.css",
-	},
+  -- You can also customize the file the complied themes will be output to. You
+  -- can include home-relative paths (~/) and they will be expanded. As of now,
+  -- the content output to gtk3 and gtk4 are not separated. The same css file
+  -- will be written for both gtk versions. This might change in the future.
+  out = {
+    gtk3 = "~/.config/gtk-3.0/gtk.css",
+    gtk4 = "~/.config/gtk-4.0/gtk.css",
+  },
 }
 
--- Update Kitty options here. This application is only concerned with color
+-- Update kitty options here. This application is only concerned with color
 -- themes, and will not update other UI-related config like fonts, cursors,
--- opacity, etc.
+-- opacity, etc. so don't try to include them.
 theme.kitty = {
-	colors = {
-		background = background,
-		foreground = foreground,
-		black = colors.black,
-		red = colors.red,
-		green = colors.green,
-		yellow = colors.yellow,
-		blue = colors.blue,
-		magenta = colors.magenta,
-		cyan = colors.cyan,
-		white = colors.white,
-		bright_black = colors.black,
-		bright_red = colors.red,
-		bright_green = colors.green,
-		bright_yellow = colors.yellow,
-		bright_blue = colors.blue,
-		bright_magenta = colors.magenta,
-		bright_cyan = colors.cyan,
-		bright_white = colors.white,
-	},
+  colors = {
+    background = background,
+    foreground = foreground,
+    black = colors.black,
+    red = colors.red,
+    green = colors.green,
+    yellow = colors.yellow,
+    blue = colors.blue,
+    magenta = colors.magenta,
+    cyan = colors.cyan,
+    white = colors.white,
+    bright_black = colors.black,
+    bright_red = colors.red,
+    bright_green = colors.green,
+    bright_yellow = colors.yellow,
+    bright_blue = colors.blue,
+    bright_magenta = colors.magenta,
+    bright_cyan = colors.cyan,
+    bright_white = colors.white,
+  },
 
-	-- You can also customize the file the complied themes will be output to.
-	-- You can include home-relative paths (~/) and they will be expanded.
-	out = "~/.config/kitty/theme.conf",
+  -- You can also customize the file the complied themes will be output to. You
+  -- can include home-relative paths (~/) and they will be expanded. Here, the
+  -- output file is actually not `kitty.conf`. You would need to import the
+  -- theme in kitty using the `include` directive.
+  out = "~/.config/kitty/theme.conf",
 }
 
 -- Output the colors to a file in a way which can be used by other programs. You
 -- have full control over the formatting of the file to ensure it is maximally
--- usable with your needs. Although, to establish a standard, a default format
--- is provided.
+-- usable with your needs.
 theme.raw = {
-	-- You can define multiple tables for the raw handler, and each table can have
-	-- its own attributes. All tables will be processed separately, and each table
-	-- will be output to the specified output file following the specified
-	-- formatting.
-	spaced = {
-		-- Of course, as usual, you can set and override colors as needed. All
-		-- key-value pairs from the `colors` table will be output in the file
-		-- following the right formating rules. No error-checking or type safety
-		-- checks are done here, so you are on your own.
-		colors = colors,
+  -- You can define multiple tables for the raw handler, and each table can have
+  -- its own attributes. All tables will be processed separately, and each table
+  -- will be output to the specified output file following the specified
+  -- formatting. Note that each table inside the raw handler can have anything
+  -- for names. It doesn't matter. They are just there for convenience and
+  -- debugging purposes. However, DO NOT repeat names. That's bad. Very bad.
+  spaced = {
+    -- Of course, as usual, you can set and override colors as needed. All
+    -- key-value pairs from the `colors` table will be output in the file
+    -- following the right formating rules. No error-checking or type safety
+    -- checks are done here, so you are on your own.
+    colors = colors,
 
-		-- This defines how each line will be formatted in the output file. Variables
-		-- are defined by putting their names inside {}. For example, this format will
-		-- result in the following output:
-		-- white #ffffff
-		-- black #000000
-		-- Available variables are:
-		-- {name}: Color name (no spaces allowed)
-		-- {hexcode}: Hexadecimal color value (with leading hashtag)
-		-- {hexvalue}: Hexadecimal color value (without leading hashtag)
-		format = "{name} {hexcode}",
+    -- This defines how each line will be formatted in the output file. Variables
+    -- are defined by putting their names inside {}. For example, this format will
+    -- result in the following output:
+    -- white #ffffff
+    -- black #000000
+    -- Available variables are:
+    -- {name}: Color name (no spaces allowed)
+    -- {hexcode}: Hexadecimal color value (with leading hashtag)
+    -- {hexvalue}: Hexadecimal color value (without leading hashtag)
+    format = "{name} {hexcode}",
 
-		-- You can also expand all environment variables available to the program
-		-- like in the shell. Extra variables have also been added, including:
-		-- $CACHEDIR: The cache directory for Chroma, usually `~/.cache/chroma`
-        -- Okay, I lied. As of 0.1.0, you still can't use custom exports. You have to
-        -- use the user-relative path.
-		out = "$CACHEDIR/colors.col",
-	},
+    -- This format works similar to the color definition format, but instead,
+    -- this works on the header instead. The header tells Chroma if the file
+    -- was generated by the user (which we should back up), or by Chroma itself
+    -- (which it will overwrite without backups). The header format is
+    -- provided to ensure that the header will be formatted as a comment for
+    -- the file we are writing to.
+    -- Available variables are:
+    -- {header}: The header template, provided by Chroma
+    -- Set this to `nil` or `python.none` to not generate or check for a header.
+    -- This is not recommended.
+    header = "# {header}"
+
+    -- You can also expand all environment variables available to the program
+    -- like in the shell. DO NOT OVERWRITE THE SAME FILE AGAIN! Lua is 
+    -- intrinsically random with table order, so it is undefined behaviour to 
+    -- replace the same file!
+    out = "~/cache/chroma/colors.col",
+  },
+
+  -- Similarly, another handler for sass colors is also provided to get the hang of
+  -- the formatting.
+  scss = {
+    colors = colors,
+    out = "~/cache/chroma/_colors.scss",
+    header = "// {header}"
+
+    -- This format will result in the following output:
+    -- $white: #ffffff;
+    -- $black: #000000;
+    format = "${name}: {hexcode};",
+  },
 }
 
 -- You need to return the theme table at the end. Without this, Chroma can't see
@@ -247,20 +289,20 @@ theme.raw = {
 return theme
 ```
 
-This documentation is updated less frequently, and might not be up-to-date. Refer to the file under `~/.cache/chroma/example.lua` for exhaustive and up-to-date documentation.
-
 ## Overrides
 
 We can create themes, sure. But, what if I have my configuration files saved somewhere else? Or you want particular colors in GTK's palette 5? This is where the overrides come into play. All you need to do is create `~/.config/chroma/overrides.lua` and populate it with the overrides you want. Note that you need to reference the current theme to override its options. This override file, if existing, will make overrides to every loaded theme.
 
 ```lua
--- Note the different require clause to import current theme.
+-- Note the different require clause to import current theme. Python is also
+-- unavailable to be imported here, as this is directly importing the loaded
+-- theme, and it doesn't necessarily export python.
 local theme = require("chroma.themes.current")
 
 -- The override table is merged with the themes table. This ensures only the
 -- overridden values are updated, and other values are untouched.
 theme.kitty = {
-    out = "~/.config/kitty/themes/" .. theme.meta.name .. '.conf'
+  out = "~/.config/kitty/themes/" .. theme.meta.name .. '.conf'
 }
 
 -- Of course, we still need to return the theme so Chroma can read the theme data.
@@ -280,6 +322,8 @@ def apply(group, meta):
     return
 ```
 
+Of course, this is only for development. If Chroma is installed globally, this can't be done. Work is being done on allowing custom handlers in `~/.config/chroma/handlers`, so you will be able to write up a handler for Chroma and start using it locally.
+
 ## Notes
 
-I have been trying to inject the default theme table into lua's system path, so theme developers can get type hints. Applications like `vim` (kind of) do it, so it should be possible. I just can't figure out how to do it. If anyone does, you're welcome to contribute.
+I have been trying to inject the default theme table into lua's system path, so theme developers can get type hints. Applications like `vim` (kind of) do it, so it should be possible. I just can't figure out how to do it. If anyone does, you're welcome to contribute. Rather, *please* contribute.

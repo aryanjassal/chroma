@@ -65,6 +65,9 @@ def apply(group, _):
     generated_theme.append("[colors]")
 
     for k, v in theme.items():
+        if v is None:
+            logger.info(f"Key {k} is unset.")
+            continue
         col = utils.color_to("hexvalue", v)
         generated_theme.append(f"{k}={col}")
 

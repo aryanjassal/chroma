@@ -26,12 +26,12 @@ def setup_args():
     return args
 
 
-def exception_hook(exc_type, value, traceback):
-    _ = value
+def exception_hook(exc_type, exc_val, exc_tb):
     logger.error("An unhandled exception occured. Bailing!")
     logger.error(f"Raised: {exc_type.__name__}")
-    logger.error("Traceback (most recent call last)")
-    logger.error("".join(tb.format_tb(traceback)).rstrip())
+    logger.error(f"Reason: {exc_val}")
+    logger.error("Traceback (most recent call last):")
+    logger.error("".join(tb.format_tb(exc_tb)).rstrip())
     logger.error("Report this at https://github.com/aryanjassal/chroma/issues")
 
 
@@ -53,12 +53,6 @@ def main():
     # which will reflect the current theme.
     shutil.copy(Path(args.theme_name), utils.themes_dir())
     shutil.move(utils.themes_dir() / theme_name, utils.themes_dir() / "current.lua")
-
-    if not Path(f"{str(utils.cache_dir())}/example.lua").is_file():
-        shutil.copy(
-            utils.chroma_themes_dir() / "default.lua",
-            utils.cache_dir() / "example.lua",
-        )
 
     # If we are not loading any user overrides, then load the theme directly.
     # Otherwise, the user override must load the theme file anyways, so we

@@ -38,7 +38,7 @@ def parse_meta(meta) -> dict:
 
     parsed_meta = {}
     for k, v in meta.items():
-        if v != "":
+        if v != "" or v is not None:
             parsed_meta[k] = v
             logger.debug(f"{k} = {v}")
         else:

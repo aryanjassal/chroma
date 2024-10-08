@@ -182,6 +182,34 @@ theme.kitty = {
 	out = "~/.config/kitty/theme.conf",
 }
 
+theme.foot = {
+	-- 	colors = {
+	-- 		foreground = colors.foreground,
+	-- 		background = colors.background,
+	-- 		selection_foreground = colors.foreground,
+	-- 		selection_background = colors.background,
+	-- 		cursor = colors.blue,
+	-- 		cursor_text = colors.red,
+	-- 		black = colors.black,
+	-- 		red = colors.red,
+	-- 		green = colors.green,
+	-- 		yellow = colors.yellow,
+	-- 		blue = colors.blue,
+	-- 		magenta = colors.magenta,
+	-- 		cyan = colors.cyan,
+	-- 		white = colors.white,
+	-- 		bright_black = colors.black,
+	-- 		bright_red = colors.red,
+	-- 		bright_green = colors.green,
+	-- 		bright_yellow = colors.yellow,
+	-- 		bright_blue = colors.blue,
+	-- 		bright_magenta = colors.magenta,
+	-- 		bright_cyan = colors.cyan,
+	-- 		bright_white = colors.white,
+	-- 	},
+	out = "~/.config/foot/foot.ini",
+}
+
 -- -- Output the colors to a file in a way which can be used by other programs. You
 -- -- have full control over the formatting of the file to ensure it is maximally
 -- -- usable with your needs. Although, to establish a standard, a default format

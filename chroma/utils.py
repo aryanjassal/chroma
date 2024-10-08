@@ -136,7 +136,7 @@ def color_to(format: str, color: str) -> str | None:
     elif format == "hexvalue":
         is_hex = bool(re.match(hexcode_regex, color) or re.match(hexvalue_regex, color))
         if is_hex:
-            if color[0] == "":
+            if color[0] == "#":
                 return color[1:]
             else:
                 return color

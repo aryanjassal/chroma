@@ -3,8 +3,8 @@ Creates a color theme for foot as a diff file and writes it to the foot config.
 """
 
 import difflib
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 from chroma import utils
 from chroma.logger import Logger
@@ -21,39 +21,41 @@ def apply(group, _):
     theme = {
         "foreground": colors["foreground"],
         "background": colors["background"],
-        "selection_foreground": colors["selection_foreground"],
-        "selection_background": colors["selection_background"],
-        "cursor": colors["cursor"],
-        "cursor_text": colors["cursor_text"],
-        "color0": colors["black"],
-        "color1": colors["red"],
-        "color2": colors["green"],
-        "color3": colors["yellow"],
-        "color4": colors["blue"],
-        "color5": colors["magenta"],
-        "color6": colors["cyan"],
-        "color7": colors["white"],
-        "color8": colors["bright_black"],
-        "color9": colors["bright_red"],
-        "color10": colors["bright_green"],
-        "color11": colors["bright_yellow"],
-        "color12": colors["bright_blue"],
-        "color13": colors["bright_magenta"],
-        "color14": colors["bright_cyan"],
-        "color15": colors["bright_white"],
+        # "selection_foreground": colors["selection_foreground"],
+        # "selection_background": colors["selection_background"],
+        # "cursor": colors["cursor"],
+        # "cursor_text": colors["cursor_text"],
+        "regular0": colors["black"],
+        "regular1": colors["red"],
+        "regular2": colors["green"],
+        "regular3": colors["yellow"],
+        "regular4": colors["blue"],
+        "regular5": colors["magenta"],
+        "regular6": colors["cyan"],
+        "regular7": colors["white"],
+        "bright0": colors["bright_black"],
+        "bright1": colors["bright_red"],
+        "bright2": colors["bright_green"],
+        "bright3": colors["bright_yellow"],
+        "bright4": colors["bright_blue"],
+        "bright5": colors["bright_magenta"],
+        "bright6": colors["bright_cyan"],
+        "bright7": colors["bright_white"],
     }
 
     generated_theme = []
+    generated_theme.append("[colors]")
 
     for k, v in theme.items():
         col = utils.color_to("hexvalue", v)
-        generated_theme.append(f"{k} {col};")
+        generated_theme.append(f"{k}={col}")
 
     out_path = Path(group["out"]).expanduser()
 
     # The output file doesn't exist. Create a new file with only colors.
     if not out_path.exists():
         generated_theme = [line + "\n" for line in generated_theme]
+        out_path.parent.mkdir(parents=True, exist_ok=True)
 
         try:
             with open(out_path, "w") as f:
@@ -61,6 +63,7 @@ def apply(group, _):
         except FileNotFoundError as e:
             logger.error(e)
             logger.fatal("Failed to open file. Does the parent directory exist?")
+        logger.info("Successfully applied Foot theme!")
         return
 
     # Otherwise, a config file exists. Create a diff and apply it.
@@ -68,9 +71,9 @@ def apply(group, _):
         current_theme = f.read().splitlines()
 
     diff = list(difflib.unified_diff(current_theme, generated_theme, lineterm=""))
-    diff = "\n".join(diff)
+    diff = "\n".join(diff) + "\n"
 
-    if diff:
+    if diff.strip():
         diff_path = out_path.with_suffix(".diff")
         with open(diff_path, "w") as f:
             f.write(diff)
@@ -78,6 +81,14 @@ def apply(group, _):
         logger.info("No changes detected. Skipping diff generation.")
         return
 
-    subprocess.run(["patch", str(out_path), str(diff_path)])
+    capture = subprocess.run(
+        ["patch", str(out_path), str(diff_path)],
+        capture_output=True,
+        text=True,
+    )
+    if capture.stdout:
+        logger.info(capture.stdout.rstrip())
+    if capture.stderr:
+        logger.error(capture.stderr.rstrip())
 
     logger.info("Successfully applied Foot theme!")

@@ -2,9 +2,8 @@
 Creates a color theme for foot as a diff file and writes it to the foot config.
 """
 
-import difflib
-import subprocess
 from pathlib import Path
+import re
 
 from chroma import utils
 from chroma.logger import Logger
@@ -66,29 +65,56 @@ def apply(group, _):
         logger.info("Successfully applied Foot theme!")
         return
 
-    # Otherwise, a config file exists. Create a diff and apply it.
-    with open(out_path) as f:
-        current_theme = f.read().splitlines()
+    try:
+        # Read the existing file contents
+        with out_path.open('r') as f:
+            lines = f.readlines()
+        
+        in_colors_section = False
+        updated_lines = []
+        
+        # Regular expression to match color lines (e.g., foreground=...)
+        color_line_pattern = re.compile(r'^(foreground|background|regular\d+|bright\d+)\s*=\s*.*$')
 
-    diff = list(difflib.unified_diff(current_theme, generated_theme, lineterm=""))
-    diff = "\n".join(diff) + "\n"
+        for line in lines:
+            # Detect the start of the [colors] section
+            if line.strip() == "[colors]":
+                in_colors_section = True
+                updated_lines.append(line)
+                continue
 
-    if diff.strip():
-        diff_path = out_path.with_suffix(".diff")
-        with open(diff_path, "w") as f:
-            f.write(diff)
-    else:
-        logger.info("No changes detected. Skipping diff generation.")
-        return
+            # Detect the end of the [colors] section
+            if in_colors_section and line.startswith("["):
+                in_colors_section = False
+                updated_lines.append(line)
+                continue
 
-    capture = subprocess.run(
-        ["patch", str(out_path), str(diff_path)],
-        capture_output=True,
-        text=True,
-    )
-    if capture.stdout:
-        logger.info(capture.stdout.rstrip())
-    if capture.stderr:
-        logger.error(capture.stderr.rstrip())
+            # If we are in the [colors] section, try to replace the color lines
+            if in_colors_section:
+                match = color_line_pattern.match(line.strip())
+                if match:
+                    color_key = match.group(1)
+                    if color_key in theme:
+                        # Replace with the new color
+                        col = utils.color_to("hexvalue", theme[color_key])
+                        updated_lines.append(f"{color_key}={col}\n")
+                    else:
+                        # Keep the old line if no new color is provided for this key
+                        updated_lines.append(line)
+                else:
+                    updated_lines.append(line)
+            else:
+                updated_lines.append(line)
+        
+        # Write the updated config back to the file
+        with out_path.open('w') as f:
+            f.writelines(updated_lines)
+        
+        print("Colors updated successfully without touching other sections.")
+    
+    except FileNotFoundError as e:
+        print(f"Config file not found: {e}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
     logger.info("Successfully applied Foot theme!")

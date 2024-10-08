@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="Chroma",
-    version="0.3.1",
+    version="0.3.2",
     author="Aryan Jassal",
     description="Theme any and all apps via a universal interface",
     packages=find_packages(),

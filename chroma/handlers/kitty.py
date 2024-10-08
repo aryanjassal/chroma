@@ -61,7 +61,8 @@ def apply(group, meta):
             generated_file.append(f"## {k}: {v}")
 
     for k, v in theme.items():
-        generated_file.append(f"{k} {v}")
+        col = utils.color_to("hexcode", v)
+        generated_file.append(f"{k} {col}")
 
     # Manually insert newlines to make it play well with file.writelines()
     generated_file = [line + "\n" for line in generated_file]

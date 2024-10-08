@@ -21,6 +21,11 @@ def config_dir() -> Path:
     return path
 
 
+def chroma_dir() -> Path:
+    return Path(chroma.__file__).parent
+
+
+# TODO: prune?
 def chroma_themes_dir() -> Path:
     path = Path(chroma.__file__).parent
     path = path / "builtins"
@@ -37,14 +42,15 @@ def override_theme() -> Path:
     return config_dir() / "overrides.lua"
 
 
+# TODO: prune?
 def default_theme() -> Path:
     return chroma_themes_dir() / "default.lua"
 
 
 def runtime():
     runtime = LuaRuntime(unpack_returned_tuples=True)
+    runtime.execute(f"package.path = package.path .. ';{chroma_dir().parent}/?.lua'")
     runtime.execute(f"package.path = package.path .. ';{cache_dir().parent}/?.lua'")
-    runtime.execute(f"package.path = package.path .. ';{chroma_themes_dir()}/?.lua'")
     return runtime
 
 
@@ -140,6 +146,11 @@ def color_to(format: str, color: str) -> str | None:
     else:
         logger.error(f"Unsupported format: {format}.")
         return
+
+
+def set_exception_hook(func):
+    import sys
+    sys.excepthook = func
 
 
 def inspect_dict(iterable) -> None:

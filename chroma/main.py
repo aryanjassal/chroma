@@ -1,5 +1,6 @@
 import argparse
 import shutil
+import traceback as tb
 from pathlib import Path
 
 from chroma.logger import Logger, LogLevel
@@ -13,21 +14,31 @@ from chroma import theme, utils
 def setup_args():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command")
-
+    # Parse commands for keyword load
     load_parser = subparsers.add_parser("load", help="Loads a theme from a lua file")
     load_parser.add_argument("theme_name", help="Location of the lua theme file")
     load_parser.add_argument("-u", "--override", type=str, help="Override settings")
-
     args = parser.parse_args()
 
     if args.command is None:
         parser.print_help()
         exit(1)
-
     return args
 
 
+def exception_hook(exc_type, value, traceback):
+    _ = value
+    logger.error("An unhandled exception occured. Bailing!")
+    logger.error(f"Raised: {exc_type.__name__}")
+    logger.error("Traceback (most recent call last)")
+    logger.error("".join(tb.format_tb(traceback)).rstrip())
+    logger.error("Report this at https://github.com/aryanjassal/chroma/issues")
+
+
 def main():
+    # Set up custom error handler
+    utils.set_exception_hook(exception_hook)
+
     # Get command-line arguments
     args = setup_args()
 

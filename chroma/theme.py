@@ -59,7 +59,7 @@ def load(_, filename):
         theme = utils.merge(default_config, user_config)
     else:
         logger.warn("Theme table will not be merged with default table.")
-        logger.warn("Some fields may be left unset, which can break Chroma.")
+        logger.warn("Some fields may be left unset, which can break the theme.")
 
     override_file = utils.override_theme()
     if override_file.is_file():
@@ -82,8 +82,8 @@ def load(_, filename):
                     )
             except ImportError:
                 logger.error(f"No handlers found for {group}. Skipping.")
-            except Exception as e:
-                logger.error(e)
-                logger.error(f"An unhandled exception occured. Bailing!")
-                logger.error(f"Traceback:")
-                raise e
+            # except Exception as e:
+            #     logger.error(e)
+            #     logger.error(f"An unhandled exception occured. Bailing!")
+            #     logger.error(f"Traceback:")
+            #     raise e

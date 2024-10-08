@@ -188,8 +188,6 @@ theme.foot = {
 	-- 		background = colors.background,
 	-- 		selection_foreground = colors.foreground,
 	-- 		selection_background = colors.background,
-	-- 		cursor = colors.blue,
-	-- 		cursor_text = colors.red,
 	-- 		black = colors.black,
 	-- 		red = colors.red,
 	-- 		green = colors.green,
@@ -207,7 +205,7 @@ theme.foot = {
 	-- 		bright_cyan = colors.cyan,
 	-- 		bright_white = colors.white,
 	-- 	},
-	out = "~/.config/foot/foot.ini",
+	out = "~/.config/foot/theme.ini",
 }
 
 -- -- Output the colors to a file in a way which can be used by other programs. You

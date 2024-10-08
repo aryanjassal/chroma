@@ -4,7 +4,7 @@ Use a single command to theme your entire system.
 
 ## Installation
 
-I'm still figuring out an elegant way to install this as a system package. For now, just enter `nix develop`.
+To launch Chroma in development mode, simply enter a `nix develop` shell. It will automatically install it locally in edit mode, allowing you to edit the program while retaining access to the command itself.
 
 ```console
 [aryanj@laptop:~]$ git clone https://github.com/aryanjassal/chroma.git
@@ -19,6 +19,16 @@ Resolving deltas: 100% (22/22), done.
 [aryanj@laptop:~]$ cd chroma
 
 [aryanj@laptop:~/chroma]$ nix develop
+```
+
+Currently, you can only install Chroma in Nix. Well, you probably can do it in other distros too, but I don't have the steps for them yet. To install for Nix, update home manager's flake file to have Chroma as an input, and add the following as a package (assuming you have `inputs` and `system` passed through from the flake to the actual module). Currently, a home manager module **does not exist**, but it is planned.
+
+```nix
+home.packages = [
+    ...
+    inputs.chroma.packages.${system}.default
+    ...
+]
 ```
 
 ## Usage
@@ -61,7 +71,7 @@ theme.options = {
   -- By default, the theme generator merges the table with the default table.
   -- This ensures doing something like this:
   -- [[ themes.gtk { colors = { red = "#ff0000", } } ]]
-  -- Would not result in other values, like the default out file, being nil. 
+  -- Would not result in other values, like the default out file, being nil.
   -- To disable this behaviour, set this flag to false.
   merge_tables = true,
 
@@ -155,7 +165,7 @@ theme.gtk = {
   -- update colors on `palette1` to `palette5` to correspond to each of the five
   -- palettes. If left unset, they will not be present in the GTK stylesheet,
   -- and would not render. It is highly recommended to at least create one
-  -- palette, but ideally, create all five. No default values exist for this 
+  -- palette, but ideally, create all five. No default values exist for this
   -- attribute.
   palettes = {
     palette1 = gtk_defaultpalette,
@@ -258,8 +268,8 @@ theme.raw = {
     header = "# {header}"
 
     -- You can also expand all environment variables available to the program
-    -- like in the shell. DO NOT OVERWRITE THE SAME FILE AGAIN! Lua is 
-    -- intrinsically random with table order, so it is undefined behaviour to 
+    -- like in the shell. DO NOT OVERWRITE THE SAME FILE AGAIN! Lua is
+    -- intrinsically random with table order, so it is undefined behaviour to
     -- replace the same file!
     out = "~/cache/chroma/colors.col",
   },
@@ -320,4 +330,4 @@ Of course, this is only for development. If Chroma is installed globally, this c
 
 ## Notes
 
-I have been trying to inject the default theme table into lua's system path, so theme developers can get type hints. Applications like `vim` (kind of) do it, so it should be possible. I just can't figure out how to do it. If anyone does, you're welcome to contribute. Rather, *please* contribute.
+I have been trying to inject the default theme table into lua's system path, so theme developers can get type hints. Applications like `vim` (kind of) do it, so it should be possible. I just can't figure out how to do it. If anyone does, you're welcome to contribute. Rather, _please_ contribute.

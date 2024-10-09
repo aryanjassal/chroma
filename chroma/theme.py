@@ -1,8 +1,11 @@
 import importlib
+import importlib.util
+from os.path import isdir
 
 import chroma
 from chroma import utils
 from chroma.logger import Logger
+from pathlib import Path
 
 logger = Logger.get_logger()
 
@@ -84,8 +87,35 @@ def get_option(opt, user_opts, default_opts):
         return default_opt
     return user_opt
 
+def load_user_handler(handler_path):
+    """Dynamically load a user handler from a file path."""
+    handler_name = Path(handler_path).stem
+    spec = importlib.util.spec_from_file_location(handler_name, handler_path)
+    if spec is not None:
+        module = importlib.util.module_from_spec(spec)
+        if spec.loader is not None:
+            spec.loader.exec_module(module)
+            return module, handler_name
+        else:
+            logger.fatal(f"Could not load user module {handler_name}")
+    else:
+        logger.fatal(f"Could not load user module {handler_name}")
 
-def load(filename):
+def discover_user_handlers():
+    """Discover and load all user-defined handlers from the config directory."""
+    config_dir = Path("~/.config/chroma/handlers").expanduser()
+    handlers = {}
+
+    if Path(config_dir).is_dir():
+        for filename in Path(config_dir).iterdir():
+            if filename.suffix == ".py":  # Load only Python files
+                handler_path = Path(config_dir) / filename
+                handler_module, handler_name = load_user_handler(handler_path)
+                handlers[handler_name] = handler_module
+    return handlers
+
+
+def load(filename, allow_user_handlers=False):
     # Create a blank dict for the theme, then assign themes in such a way that
     # default becomes the base, and we can override defaults with user theme
     # and override user theme from the override file.
@@ -123,9 +153,15 @@ def load(filename):
                         f"Handler does not properly implement `apply()`. Skipping."
                     )
             except ImportError:
+                if allow_user_handlers:
+                    handlers = discover_user_handlers()
+                    handler = handlers.get(group)
+                    if hasattr(handler, "apply") and callable(handler.apply):
+                        handler.apply(config, meta)
+                        continue
+                    else:
+                        logger.error(
+                            f"Handler does not properly implement `apply()`. Skipping."
+                        )
+                        continue
                 logger.error(f"No handlers found for {group}. Skipping.")
-            # except Exception as e:
-            #     logger.error(e)
-            #     logger.error(f"An unhandled exception occured. Bailing!")
-            #     logger.error(f"Traceback:")
-            #     raise e

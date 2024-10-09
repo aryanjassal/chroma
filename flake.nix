@@ -35,7 +35,7 @@
 
         packages.default = python.pkgs.buildPythonPackage {
           pname = "chroma";
-          version = "0.3.6";
+          version = "0.3.7";
           src = ./.;
           propagatedBuildInputs = with python.pkgs; [ lupa pywal ];
           buildInputs = [ python.pkgs.setuptools ]; 

@@ -113,9 +113,9 @@ def write_lua_theme(out_path: Path, enabled_modules: list, indent: int = 2):
             "accent_fg_color": "\"#ffffff\"",
             "accent_bg_color": "colors.color4",
             "window_fg_color": "colors.color7",
-            "window_bg_color": "colors.color1",
+            "window_bg_color": "colors.color0",
             "view_fg_color": "colors.color7",
-            "view_bg_color": "colors.color1",
+            "view_bg_color": "colors.color0",
             "headerbar_fg_color": "colors.color7",
             "headerbar_bg_color": "colors.color0",
             "card_fg_color": "colors.color7",
@@ -127,7 +127,7 @@ def write_lua_theme(out_path: Path, enabled_modules: list, indent: int = 2):
             "sidebar_fg_color": "colors.color7",
             "sidebar_bg_color": "colors.color0",
             "backdrop_fg_color": "colors.color7",
-            "backdrop_bg_color": "colors.color1",
+            "backdrop_bg_color": "colors.color0",
         }
         generated_theme.append("theme.gtk.colors = {")
         for k, v in gtk_colors_map.items():

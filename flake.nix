@@ -25,6 +25,7 @@
           shellHook = ''
             export PIP_PREFIX=$(pwd)/pip_packages
             export PYTHONPATH=$PIP_PREFIX/lib/python${python.pythonVersion}/site-packages:$PYTHONPATH
+            export PYTHONPATH=$(pwd):$PYTHONPATH
             export PATH=$PIP_PREFIX/bin:$PATH
 
             mkdir -p $PIP_PREFIX

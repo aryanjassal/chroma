@@ -8,12 +8,20 @@ from chroma.logger import Logger, LogLevel
 logger = Logger(LogLevel.DEBUG)
 Logger.set_logger(logger)
 
+import chroma
 from chroma import theme, utils
 
 
 def setup_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=f"Chroma {chroma.__version__}",
+    )
     subparsers = parser.add_subparsers(dest="command")
+
     # Parse commands for keyword load
     load_parser = subparsers.add_parser("load", help="Loads a theme from a lua file")
     load_parser.add_argument("theme_name", help="Location of the lua theme file")

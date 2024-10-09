@@ -14,13 +14,13 @@
       in {
         devShells.default = pkgs.mkShell {
           name = "chroma";
-          buildInputs = with python.pkgs; [
+          buildInputs = with pkgs; with python.pkgs; [
             pip
             black
             isort
             lupa
-            pywal
             setuptools
+            imagemagick
           ];
           shellHook = ''
             export PIP_PREFIX=$(pwd)/pip_packages
@@ -38,7 +38,7 @@
           pname = "chroma";
           version = "0.3.7";
           src = ./.;
-          propagatedBuildInputs = with python.pkgs; [ lupa pywal ];
+          propagatedBuildInputs = with pkgs; with python.pkgs; [ lupa imagemagick ];
           buildInputs = [ python.pkgs.setuptools ]; 
         };
       });

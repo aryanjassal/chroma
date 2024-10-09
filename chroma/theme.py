@@ -27,8 +27,14 @@ def parse_file(runtime, filename) -> dict:
 
 
 def match_version(version, meta) -> None:
+    def meta_get(opt):
+        v = meta.get(opt)
+        if v is None:
+            return None
+        return v
+
     if version is None or not version:
-        logger.error(f"Chroma version is unset in theme {meta['name']}!")
+        logger.error(f"Chroma version is unset in theme {meta_get('name')}!")
         exit(1)
 
     t_major, t_minor, _ = version.split(".")
@@ -38,7 +44,7 @@ def match_version(version, meta) -> None:
         logger.error("Major version mismatch!")
         logger.error(
             f"Theme version {version} is incompatible with Chroma version"
-            f" {chroma.__version__} in {meta['name']} theme."
+            f" {chroma.__version__} in {meta_get('name')} theme."
         )
         exit(1)
 
@@ -46,7 +52,7 @@ def match_version(version, meta) -> None:
         logger.warn("Minor version mismatch!")
         logger.warn(
             f"Theme version {version} might be incompatible with Chroma version"
-            f" {chroma.__version__} in {meta['name']} theme."
+            f" {chroma.__version__} in {meta_get('name')} theme."
         )
 
 def parse_meta(meta) -> dict:
@@ -79,7 +85,7 @@ def get_option(opt, user_opts, default_opts):
     return user_opt
 
 
-def load(_, filename):
+def load(filename):
     # Create a blank dict for the theme, then assign themes in such a way that
     # default becomes the base, and we can override defaults with user theme
     # and override user theme from the override file.

@@ -1,8 +1,9 @@
+import colorsys
+import re
 import shutil
 from pathlib import Path
 
 from lupa import LuaRuntime, lua_type
-import re
 
 import chroma
 from chroma.logger import Logger
@@ -150,6 +151,7 @@ def color_to(format: str, color: str) -> str | None:
 
 def set_exception_hook(func):
     import sys
+
     sys.excepthook = func
 
 
@@ -162,3 +164,58 @@ def inspect_dict(iterable) -> None:
                 print(f"{pre}{k} = {v}")
 
     inspect(iterable)
+
+
+## Thanks to Pywal; Need to properly integrate into Chroma
+
+
+def hex_to_rgb(color):
+    """Convert a hex color to rgb."""
+    return tuple(bytes.fromhex(color.strip("#")))
+
+
+def hex_to_xrgba(color):
+    """Convert a hex color to xrdb rgba."""
+    col = color.lower().strip("#")
+    return "%s%s/%s%s/%s%s/ff" % (*col,)
+
+
+def rgb_to_hex(color):
+    """Convert an rgb color to hex."""
+    return "#%02x%02x%02x" % (*color,)
+
+
+def darken_color(color, amount):
+    """Darken a hex color."""
+    color = [int(col * (1 - amount)) for col in hex_to_rgb(color)]
+    return rgb_to_hex(color)
+
+
+def lighten_color(color, amount):
+    """Lighten a hex color."""
+    color = [int(col + (255 - col) * amount) for col in hex_to_rgb(color)]
+    return rgb_to_hex(color)
+
+
+def blend_color(color, color2):
+    """Blend two colors together."""
+    r1, g1, b1 = hex_to_rgb(color)
+    r2, g2, b2 = hex_to_rgb(color2)
+
+    r3 = int(0.5 * r1 + 0.5 * r2)
+    g3 = int(0.5 * g1 + 0.5 * g2)
+    b3 = int(0.5 * b1 + 0.5 * b2)
+
+    return rgb_to_hex((r3, g3, b3))
+
+
+def saturate_color(color, amount):
+    """Saturate a hex color."""
+    r, g, b = hex_to_rgb(color)
+    r, g, b = [x / 255.0 for x in (r, g, b)]
+    h, l, s = colorsys.rgb_to_hls(r, g, b)
+    s = amount
+    r, g, b = colorsys.hls_to_rgb(h, l, s)
+    r, g, b = [x * 255.0 for x in (r, g, b)]
+
+    return rgb_to_hex((int(r), int(g), int(b)))

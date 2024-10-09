@@ -328,6 +328,10 @@ def apply(group, meta):
 
 Of course, this is only for development. If Chroma is installed globally, this can't be done. Work is being done on allowing custom handlers in `~/.config/chroma/handlers`, so you will be able to write up a handler for Chroma and start using it locally.
 
+## Credits
+
+Credit to [pywal](https://github.com/dylanaraps/pywal) for inspiration on implementing dynamic palette generation.
+
 ## Notes
 
 I have been trying to inject the default theme table into lua's system path, so theme developers can get type hints. Applications like `vim` (kind of) do it, so it should be possible. I just can't figure out how to do it. If anyone does, you're welcome to contribute. Rather, _please_ contribute.

@@ -62,8 +62,9 @@ def apply(group, _):
         return
     palettes = []
 
-    theme_palettes = dict(group.get("palettes"))
+    theme_palettes = group.get("palettes")
     if theme_palettes is not None:
+        theme_palettes = dict(theme_palettes)
         for i in range(1, 6):
             palette = theme_palettes.get(f"palette{i}")
             if palette is None:
@@ -80,6 +81,8 @@ def apply(group, _):
                 continue
 
             palettes.append(validated_palette)
+    else:
+        logger.warn("No palettes present. Please have at least one palette for the theme.")
 
     gtk3_valid = utils.validate_header(Path(group["out"]["gtk3"]), GTK_HEADER)
     gtk4_valid = utils.validate_header(Path(group["out"]["gtk4"]), GTK_HEADER)

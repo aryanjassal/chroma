@@ -297,7 +297,7 @@ theme.raw = {
     -- This format will result in the following output:
     -- $white: #ffffff;
     -- $black: #000000;
-    format = "${name}: {hexcode};",
+    format = "${name}: {hex};",
   },
 }
 

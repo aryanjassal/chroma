@@ -9,6 +9,7 @@ logger = Logger.get_logger()
 # TODO: instead of Color.to("fmt") just do Color.to_fmt() to give pyright an
 # easier time.
 
+
 class Color:
     def __init__(self, color, format: str):
         assert format in ["hex", "hexval", "rgb", "hls"]

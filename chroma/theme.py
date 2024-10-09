@@ -6,44 +6,77 @@ from chroma.logger import Logger
 
 logger = Logger.get_logger()
 
+VALID_META_KEYS = [
+    "name",
+    "description",
+    "url",
+    "author",
+    "version"
+]
 
 def parse_file(runtime, filename) -> dict:
     with open(filename, mode="r") as f:
         theme = f.read()
-    return runtime.execute(theme)
+    result = runtime.execute(theme)
+
+    # If multiple tables are being exported, the theme table will be first one.
+    # Otherwise, the only output would be the theme table.
+    if type(result) == tuple:
+        return result[0]
+    return result
 
 
-def parse_meta(meta) -> dict:
-    if meta["chroma_version"] is None or not meta["chroma_version"]:
+def match_version(version, meta) -> None:
+    if version is None or not version:
         logger.error(f"Chroma version is unset in theme {meta['name']}!")
         exit(1)
 
-    t_major, t_minor, _ = meta["chroma_version"].split(".")
+    t_major, t_minor, _ = version.split(".")
     major, minor, _ = chroma.__version__.split(".")
 
     if t_major != major:
         logger.error("Major version mismatch!")
         logger.error(
-            f"Theme version {meta['chroma_version']} is incompatible with "
-            f"Chroma version {chroma.__version__} in {meta['name']} theme."
+            f"Theme version {version} is incompatible with Chroma version"
+            f" {chroma.__version__} in {meta['name']} theme."
         )
         exit(1)
 
     if t_minor != minor:
         logger.warn("Minor version mismatch!")
         logger.warn(
-            f"Theme version {meta['chroma_version']} might be incompatible with"
-            f" Chroma version {chroma.__version__} in {meta['name']} theme."
+            f"Theme version {version} might be incompatible with Chroma version"
+            f" {chroma.__version__} in {meta['name']} theme."
         )
 
+def parse_meta(meta) -> dict:
     parsed_meta = {}
     for k, v in meta.items():
+        if k not in VALID_META_KEYS:
+            logger.warn(f"{k} is not a valid metadata field.")
+
         if v != "" or v is not None:
             parsed_meta[k] = v
             logger.debug(f"{k} = {v}")
         else:
             logger.debug(f"{k} is unset. Skipping.")
     return parsed_meta
+
+def get_option(opt, user_opts, default_opts):
+    if user_opts is None:
+        return
+
+    user_opt = user_opts.get(opt)
+    if user_opt is None:
+        if default_opts is None:
+            return
+
+        default_opt = default_opts.get(opt)
+        if default_opt is None:
+            logger.error(f"Option {opt} does not exist")
+            return
+        return default_opt
+    return user_opt
 
 
 def load(_, filename):
@@ -54,8 +87,10 @@ def load(_, filename):
     default_config = parse_file(utils.runtime(), utils.default_theme())
     user_config = parse_file(utils.runtime(), filename)
 
-    options = user_config["options"]
-    if options is not None and options["merge_tables"] is True:
+    user_opts = dict(user_config["options"])
+    default_opts = dict(default_config["options"])
+    # if options is not None and options["merge_tables"] is True:
+    if get_option("merge_tables", user_opts, default_opts):
         theme = utils.merge(default_config, user_config)
     else:
         logger.warn("Theme table will not be merged with default table.")
@@ -66,6 +101,7 @@ def load(_, filename):
         override_config = parse_file(utils.runtime(), override_file)
         theme = utils.merge(theme, override_config)
 
+    match_version(get_option("chroma_version", user_opts, None), theme["meta"])
     meta = parse_meta(theme["meta"])
 
     special_groups = ["meta", "options"]

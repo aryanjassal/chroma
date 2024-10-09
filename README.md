@@ -68,19 +68,19 @@ local theme, python = require "chroma.builtins.default"
 -- doing before chaging any option here, as you most likely don't want to be
 -- changing anything here.
 theme.options = {
-  -- By default, the theme generator merges the table with the default table.
-  -- This ensures doing something like this:
-  -- [[ themes.gtk { colors = { red = "#ff0000", } } ]]
-  -- Would not result in other values, like the default out file, being nil.
-  -- To disable this behaviour, set this flag to false.
-  merge_tables = true,
-
   -- This specifies the Chroma version for which the theme was written for. If
   -- the theme is designed for a different version of Chroma, then Chroma will
   -- give you a warning. Most likely, older theme versions will just crash while
   -- applying the theme. Must be defined like: "1.0.0" where there are three
   -- numbers separated by two periods. See https://semver.org/.
   chroma_version = "1.0.0",
+
+  -- By default, the theme generator merges the table with the default table.
+  -- This ensures doing something like this:
+  -- [[ themes.gtk { colors = { red = "#ff0000", } } ]]
+  -- Would not result in other values, like the default out file, being nil.
+  -- To disable this behaviour, set this flag to false.
+  merge_tables = true,
 }
 
 -- Of course we need metadata.

@@ -38,13 +38,7 @@
           version = "0.3.6";
           src = ./.;
           propagatedBuildInputs = with python.pkgs; [ lupa pywal ];
-          buildInputs = [ python.pkgs.setuptools ];
-          meta = with pkgs.lib; {
-            description = "Dynamic color scheme updater";
-            license = licenses.gpl3Only;
-            maintainers = ["aryanjassal"];
-            platforms = platforms.linux;
-          };
+          buildInputs = [ python.pkgs.setuptools ]; 
         };
       });
 }

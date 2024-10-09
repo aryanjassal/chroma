@@ -1,0 +1,2 @@
+include chroma/builtins/*.lua
+include chroma/handlers/*.py

@@ -2,13 +2,13 @@
 
 Use a single command to theme your entire system.
 
-Why does this exist, you ask? I wasn't happy with how other theming applications worked. Granted, my "other" applications include [Gradience](https://github.com/GradienceTeam/Gradience), [Pywal](https://github.com/dylanaraps/pywal), and [Chameleon](https://github.com/GideonWolfe/Chameleon). Okay, fine, I know two of those applications are archived, and the third one relies on one of the archived application. But still. I don't like that.
+Why does this exist, you ask? I wasn't happy with how other theming applications worked. Granted, "other" means only three applications: [Gradience](https://github.com/GradienceTeam/Gradience), [Pywal](https://github.com/dylanaraps/pywal), and [Chameleon](https://github.com/GideonWolfe/Chameleon). I know two of those applications are archived, and the third one relies on one of the archived application. But still. I don't like that.
 
 And, what started off as a simple script to take in a lua file theme file and write it to some set applications' configuration became this. It's like you were trying to build a sand castle on the beach, but you somehow end up building Rome within a day. Crazy things.
 
 ## Installation
 
-To launch Chroma in development mode, simply enter a `nix develop` shell. It will automatically install it locally in edit mode, allowing you to edit the program while retaining access to the command itself.
+To launch Chroma in development mode, simply enter a `nix develop` shell. It will automatically install it locally in edit mode, allowing you to test out or edit the program while retaining access to the command itself.
 
 ```console
 [aryanj@laptop:~]$ git clone https://github.com/aryanjassal/chroma.git
@@ -25,7 +25,7 @@ Resolving deltas: 100% (22/22), done.
 [aryanj@laptop:~/chroma]$ nix develop
 ```
 
-Currently, you can only install Chroma in Nix. Well, you probably can do it in other distros too, but I don't have the steps for them yet. To install for Nix, update home manager's flake file to have Chroma as an input, and add the following as a package (assuming you have `inputs` and `system` passed through from the flake to the actual module). Currently, a home manager module **does not exist**, but it is planned.
+Currently, Chroma is well-supported in Nix. To install for Nix, update home manager's flake file to have Chroma as an input, and add the following as a package (assuming you have `inputs` and `system` passed through from the flake to the actual module). Currently, a home manager module **does not exist**, but it is planned.
 
 ```nix
 home.packages = [
@@ -34,6 +34,25 @@ home.packages = [
     ...
 ]
 ```
+
+For other, *normal* distros with mutable filesystem, simply install this into your system-wide `pip` installation after cloning the repository. Almost all distros now disallow directly interacting with the system-wide python environment because you can break things. But I haven't released an actual package to PyPi or other package registries yet, so this is the only way for regular distros to gain access to this command.
+
+```console
+[aryanj@laptop:~]$ git clone https://github.com/aryanjassal/chroma.git
+Cloning into 'chroma'...
+remote: Enumerating objects: 58, done.
+remote: Counting objects: 100% (58/58), done.
+remote: Compressing objects: 100% (35/35), done.
+remote: Total 58 (delta 22), reused 49 (delta 16), pack-reused 0 (from 0)
+Receiving objects: 100% (58/58), 31.91 KiB | 1.68 MiB/s, done.
+Resolving deltas: 100% (22/22), done.
+
+[aryanj@laptop:~]$ cd chroma
+
+[aryanj@laptop:~/chroma]$ pip install .
+```
+
+I personally don't use normal distros, so I can't really test this out myself. If someone has an issue, post it up. Even better if someone has a solution!
 
 ## Usage
 

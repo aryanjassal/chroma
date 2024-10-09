@@ -57,6 +57,9 @@ I will try my best to help with issues regarding dynamic color generation, but e
 
 ## Theming
 
+> [!WARNING]
+> The `hexvalue` and `hexcode` variable formatting for the `raw` handler are deprecated. Instead, use `hexval` and `hex` respectively. Usually, this would be done in a major version, making older themes incompatible. However, expect changes in development. This is one such change.
+
 ```lua
 -- Define a table for storing theme groups. Each group is the application name
 -- with a table assigned to it. It can store tables. The color scheme is one
@@ -261,9 +264,9 @@ theme.raw = {
     -- black #000000
     -- Available variables are:
     -- {name}: Color name (no spaces allowed)
-    -- {hexcode}: Hexadecimal color value (with leading hashtag)
-    -- {hexvalue}: Hexadecimal color value (without leading hashtag)
-    format = "{name} {hexcode}",
+    -- {hex}: Hexadecimal color value (with leading hashtag)
+    -- {hexval}: Hexadecimal color value (without leading hashtag)
+    format = "{name} {hex}",
 
     -- This format works similar to the color definition format, but instead,
     -- this works on the header instead. The header tells Chroma if the file

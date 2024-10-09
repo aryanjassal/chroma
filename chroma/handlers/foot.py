@@ -19,6 +19,7 @@ from pathlib import Path
 import chroma
 from chroma import utils
 from chroma.logger import Logger
+from chroma.colors import Color
 
 logger = Logger.get_logger()
 
@@ -68,7 +69,7 @@ def apply(group, _):
         if v is None:
             logger.info(f"Key {k} is unset.")
             continue
-        col = utils.color_to("hexvalue", v)
+        col = Color(v, "hex").to("hexval")
         generated_theme.append(f"{k}={col}")
 
     # Manually insert newlines to make it play well with file.writelines()

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Never
+
 
 class Term:
     RESET = "\033[0m"
@@ -50,7 +52,7 @@ class Logger:
                 f"{message}{Term.RESET}",
             )
 
-    def fatal(self, message, code=1):
+    def fatal(self, message, code=1) -> Never:
         Logger.out(
             f"{Term.FG_EROR} EROR {Term.RESET}",
             f"{message}{Term.RESET}",

@@ -7,6 +7,7 @@ from pathlib import Path
 import chroma
 from chroma import utils
 from chroma.logger import Logger
+from chroma.colors import Color
 
 logger = Logger.get_logger()
 
@@ -42,10 +43,11 @@ def apply(group, _):
             generated_file.append(header)
 
         for col_name, col_value in attr["colors"].items():
+            col = Color(col_value, "hex")
             variables = {
                 "name": col_name,
-                "hexcode": utils.color_to("hexcode", col_value),
-                "hexvalue": utils.color_to("hexvalue", col_value),
+                "hex": col.to("hex"),
+                "hexval": col.to("hexval"),
             }
             color = generate_colors(attr["format"], variables)
             generated_file.append(color)

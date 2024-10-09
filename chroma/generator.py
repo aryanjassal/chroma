@@ -6,6 +6,7 @@ from pathlib import Path
 import chroma
 from chroma import utils
 from chroma.logger import Logger
+from chroma.colors import Color
 
 logger = Logger.get_logger()
 
@@ -76,11 +77,11 @@ def generate(image_path: Path) -> list:
     raw_colors = colors[:1] + colors[8:16] + colors[8:-1]
 
     if raw_colors[0][1] != "0":
-        raw_colors[0] = utils.darken_color(raw_colors[0], 0.40)
+        raw_colors[0] = Color(raw_colors[0], "hex").darken(0.40)
 
-    raw_colors[7] = utils.blend_color(raw_colors[7], "#eeeeee")
-    raw_colors[8] = utils.darken_color(raw_colors[7], 0.30)
-    raw_colors[15] = utils.blend_color(raw_colors[15], "#eeeeee")
+    raw_colors[7] = Color(raw_colors[7], "hex").blend(Color("#eeeeee", "hex"))
+    raw_colors[8] = Color(raw_colors[7], "hex").darken(0.30)
+    raw_colors[15] = Color(raw_colors[15], "hex").blend(Color("#eeeeee", "hex"))
 
     return raw_colors
 

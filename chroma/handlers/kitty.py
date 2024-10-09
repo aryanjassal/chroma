@@ -7,6 +7,7 @@ from pathlib import Path
 import chroma
 from chroma import utils
 from chroma.logger import Logger
+from chroma.colors import Color
 
 logger = Logger.get_logger()
 
@@ -61,7 +62,7 @@ def apply(group, meta):
             generated_file.append(f"## {k}: {v}")
 
     for k, v in theme.items():
-        col = utils.color_to("hexcode", v)
+        col = Color(v, "hex").to("hex")
         generated_file.append(f"{k} {col}")
 
     # Manually insert newlines to make it play well with file.writelines()

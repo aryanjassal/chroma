@@ -1,5 +1,5 @@
-import colorsys
-import re
+import importlib
+import importlib.util
 import shutil
 from pathlib import Path
 
@@ -26,10 +26,8 @@ def chroma_dir() -> Path:
     return Path(chroma.__file__).parent
 
 
-# TODO: prune?
 def chroma_themes_dir() -> Path:
-    path = Path(chroma.__file__).parent
-    path = path / "builtins"
+    path = chroma_dir() / "builtins"
     return path
 
 
@@ -41,11 +39,6 @@ def themes_dir() -> Path:
 
 def override_theme() -> Path:
     return config_dir() / "overrides.lua"
-
-
-# TODO: prune?
-def default_theme() -> Path:
-    return chroma_themes_dir() / "default.lua"
 
 
 def runtime():
@@ -66,6 +59,7 @@ def backup(path: Path) -> bool:
         return True
 
 
+# TODO: limit functionality to validation and not backup
 def validate_header(path: Path, header, should_backup: bool = True) -> bool:
     path = path.expanduser()
 
@@ -96,18 +90,25 @@ def validate_header(path: Path, header, should_backup: bool = True) -> bool:
     return True
 
 
+def to_dict(table):
+    """Recursively converts lua tables to python dicts"""
+
+    def convert(t):
+        result = dict()
+        for k, v in t.items():
+            if lua_type(v) == "table" or type(v) == dict:
+                v = convert(v)
+            result[k] = v
+        return result
+
+    return convert(table)
+
+
 def merge(*dicts) -> dict:
     def merge_recursive(dict1, dict2):
-        if lua_type(dict1) == "table":
-            dict1 = dict(dict1)
-
         result = dict1.copy()
         for k, v in dict2.items():
-            if (
-                k in result
-                and (lua_type(result[k]) == "table" or isinstance(result[k], dict))
-                and (lua_type(v) == "table" or isinstance(v, dict))
-            ):
+            if k in result and isinstance(result[k], dict) and isinstance(v, dict):
                 result[k] = merge_recursive(result[k], v)
             else:
                 result[k] = v
@@ -129,9 +130,52 @@ def set_exception_hook(func):
 def inspect_dict(iterable) -> None:
     def inspect(d, pre=str()):
         for k, v in d.items():
-            if isinstance(v, dict) or lua_type(v) == "table":
+            if isinstance(v, dict):
                 inspect(v, f"{pre}{k}.")
             else:
                 print(f"{pre}{k} = {v}")
 
     inspect(iterable)
+
+
+def parse_file(runtime, filename) -> dict:
+    with open(filename, mode="r") as f:
+        theme = f.read()
+    result = runtime.execute(theme)
+
+    # If multiple tables are being exported, the theme table will be first one.
+    # Otherwise, the only output would be the theme table.
+    if type(result) == tuple:
+        result = result[0]
+    return to_dict(result)
+
+
+def load_handler(path: str | Path):
+    """Dynamically load a handler from a file path."""
+
+    handler_name = Path(path).stem
+    spec = importlib.util.spec_from_file_location(handler_name, path)
+    if spec is not None:
+        module = importlib.util.module_from_spec(spec)
+        if spec.loader is not None:
+            spec.loader.exec_module(module)
+            return module, handler_name
+        else:
+            logger.fatal(f"Could not load user module {handler_name}")
+    else:
+        logger.fatal(f"Could not load user module {handler_name}")
+
+
+def discover_handlers(path: str | Path):
+    """Discover and load all handlers from a directory."""
+
+    config_dir = Path(path).expanduser()
+    handlers = {}
+
+    if Path(config_dir).is_dir():
+        for filename in Path(config_dir).iterdir():
+            if filename.suffix == ".py":
+                handler_path = Path(config_dir) / filename
+                handler_module, handler_name = load_handler(handler_path)
+                handlers[handler_name] = handler_module
+    return handlers

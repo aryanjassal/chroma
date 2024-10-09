@@ -16,6 +16,8 @@ class LogLevel:
     INFO = 1
     WARN = 2
     ERROR = 3
+    QUIET = 4
+    SILENT = 5
 
 
 class Logger:
@@ -53,10 +55,11 @@ class Logger:
             )
 
     def fatal(self, message, code=1) -> Never:
-        Logger.out(
-            f"{Term.FG_EROR} EROR {Term.RESET}",
-            f"{message}{Term.RESET}",
-        )
+        if self.level != LogLevel.SILENT:
+            Logger.out(
+                f"{Term.FG_EROR} EROR {Term.RESET}",
+                f"{message}{Term.RESET}",
+            )
         exit(code)
 
     @staticmethod

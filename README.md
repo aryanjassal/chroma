@@ -2,6 +2,10 @@
 
 Use a single command to theme your entire system.
 
+Why does this exist, you ask? I wasn't happy with how other theming applications worked. Granted, my "other" applications include [Gradience](https://github.com/GradienceTeam/Gradience), [Pywal](https://github.com/dylanaraps/pywal), and [Chameleon](https://github.com/GideonWolfe/Chameleon). Okay, fine, I know two of those applications are archived, and the third one relies on one of the archived application. But still. I don't like that.
+
+And, what started off as a simple script to take in a lua file theme file and write it to some set applications' configuration became this. It's like you were trying to build a sand castle on the beach, but you somehow end up building Rome within a day. Crazy things.
+
 ## Installation
 
 To launch Chroma in development mode, simply enter a `nix develop` shell. It will automatically install it locally in edit mode, allowing you to edit the program while retaining access to the command itself.
@@ -314,6 +318,8 @@ return theme
 We can create themes, sure. But, what if I have my configuration files saved somewhere else? Or you want particular colors in GTK's palette 5? This is where the overrides come into play. All you need to do is create `~/.config/chroma/overrides.lua` and populate it with the overrides you want. Note that you need to reference the current theme to override its options. This override file, if existing, will make overrides to every loaded theme.
 
 ```lua
+-- ~/.config/chroma/overrides.lua
+
 -- Note the different require clause to import current theme. Python is also
 -- unavailable to be imported here, as this is directly importing the loaded
 -- theme, and it doesn't necessarily export python.
@@ -349,10 +355,14 @@ def apply(group, meta):
 ## Roadmap
 
 * Make palette generation via images stable
+    * Split generators into frontend and backend
+    * Get proper color values from image by doing HSL colorspace magic
 * Make custom handlers stable
 * Provide preset themes for quicker start with system theming
 * Make user's defined themes directory
 * Create a handler registry, mapping each handler to an application implementation
+* Make icon (inspired by Prism Launcher)
+* Allow custom variable substitution for paths (or just use regular path substitution for that)
 
 ## Credits
 

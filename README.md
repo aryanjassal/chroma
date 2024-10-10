@@ -360,7 +360,7 @@ You can make custom integrations by making your own handler. Each handler must b
 
 Of course, this is only for development. To create a local handler which can be discovered, create this handler inside `~/.config/chroma/handlers` as a python file. It needs to provide a function with signature `apply(group, meta)`. Otherwise, the `apply()` function is malformed and will be flagged as such. Take a look at the following minimum example for a handler. Of course, you should make it more featureful and informative, which would eventually come and help you in the future.
 
-> [!NOTICE]
+> [!NOTE]
 > This works, but is still kind of experimental. Expect bugs or changes to the behaviour. Further testing is required. Feel free to provide feedback.
 
 > [!WARNING]

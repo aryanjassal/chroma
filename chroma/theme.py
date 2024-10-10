@@ -64,7 +64,7 @@ def parse_meta(meta) -> dict:
     return parsed_meta
 
 
-def load(filename, allow_user_handlers=False):
+def load(filename):
     # Create a blank dict for the theme, then assign themes in such a way that
     # default becomes the base, and we can override defaults with user theme
     # and override user theme from the override file.
@@ -92,14 +92,11 @@ def load(filename, allow_user_handlers=False):
     meta = parse_meta(theme["meta"])
     theme = utils.to_dict(theme)
 
-    if allow_user_handlers:
-        # Override application's handlers by user's handlers if defined.
-        handlers = {
-            **utils.discover_handlers(utils.chroma_dir() / "handlers"),
-            **utils.discover_handlers(utils.config_dir() / "handlers"),
-        }
-    else:
-        handlers = utils.discover_handlers(utils.chroma_dir() / "handlers")
+    # Override application's handlers by user's handlers if defined.
+    handlers = {
+        **utils.discover_handlers(utils.chroma_dir() / "handlers"),
+        **utils.discover_handlers(utils.config_dir() / "handlers"),
+    }
 
     for group, config in theme.items():
         if group in SPECIAL_GROUPS:

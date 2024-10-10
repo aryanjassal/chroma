@@ -61,7 +61,7 @@ Chroma is a command line tool. This means that you must interact with the _termi
 To load a theme, simply run the following command. It will load a theme at the given location, and print out a bunch of logs. By default, currently, it prints out everything including debug logs. Verbosity flags will be added in the future.
 
 ```console
-[aryanj@laptop:~]$ chroma load path/to/theme.lua [--override path/to/override.lua] [--allow-user-handlers]
+[aryanj@laptop:~]$ chroma load path/to/theme.lua [--override path/to/override.lua]
 ```
 
 > [!WARNING]
@@ -334,7 +334,7 @@ return theme
 
 ## Overrides
 
-We can create themes, sure. But, what if I have my configuration files saved somewhere else? Or you want particular colors in GTK's palette 5? This is where the overrides come into play. All you need to do is create `~/.config/chroma/overrides.lua` and populate it with the overrides you want. Note that you need to reference the current theme to override its options. This override file, if existing, will make overrides to every loaded theme.
+We can create themes, sure. But, what if I have my configuration files saved somewhere else? Or you want particular colors in GTK's palette 5? This is where the overrides come into play. All you need to do is create `~/.config/chroma/overrides.lua` and populate it with the overrides you want. Note that you need to reference the current theme to override its options. This override file, if existing, will apply overrides to every loaded theme.
 
 ```lua
 -- ~/.config/chroma/overrides.lua
@@ -360,8 +360,11 @@ You can make custom integrations by making your own handler. Each handler must b
 
 Of course, this is only for development. To create a local handler which can be discovered, create this handler inside `~/.config/chroma/handlers` as a python file. It needs to provide a function with signature `apply(group, meta)`. Otherwise, the `apply()` function is malformed and will be flagged as such. Take a look at the following minimum example for a handler. Of course, you should make it more featureful and informative, which would eventually come and help you in the future.
 
+> [!NOTICE]
+> This works, but is still kind of experimental. Expect bugs or changes to the behaviour. Further testing is required. Feel free to provide feedback.
+
 > [!WARNING]
-> This is unstable and under heavy development. Use with caution, or preferably not at all until it's stable.
+> Custom handlers are just any regular python scripts. They can do malicious things. Make sure you trust the source of the handler, and that the contents of the handler seem valid.
 
 ```py
 # ~/.config/chroma/handlers/my_handler.py
@@ -376,7 +379,6 @@ def apply(group, meta):
 * Make palette generation via images stable
     * Split generators into frontend and backend
     * Get proper color values from image by doing HSL colorspace magic
-* Make custom handlers stable
 * Provide preset themes for quicker start with system theming
 * Make user's defined themes directory
 * Create a handler registry, mapping each handler to an application implementation

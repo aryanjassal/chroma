@@ -20,12 +20,6 @@ def setup_args():
         action="version",
         version=f"Chroma {chroma.__version__}",
     )
-    parser.add_argument(
-        "--allow-user-handlers", 
-        dest="allow_user_handlers",
-        action="store_true", 
-        help="Allow user-generated handlers to be discovered and executed.",
-    )
     subparsers = parser.add_subparsers(dest="command")
 
     # Parse commands for keyword load
@@ -85,9 +79,9 @@ def main():
         # can just load the overrides, which will automatically compile the current
         # theme for us.
         if args.override:
-            theme.load(args.overide, args.allow_user_handlers)
+            theme.load(args.overide)
         else:
-            theme.load(args.theme_name, args.allow_user_handlers)
+            theme.load(args.theme_name)
         exit(0)
 
     if args.command == "generate":

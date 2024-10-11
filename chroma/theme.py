@@ -12,7 +12,7 @@ VALID_META_KEYS = ["name", "description", "url", "author", "version"]
 
 # Special groups are groups which do not contain theme data. As such, no handler
 # exists for these groups.
-SPECIAL_GROUPS = ["meta", "options"]
+SPECIAL_GROUPS = ["meta", "options", "colors"]
 
 
 def match_version(version, meta) -> None:

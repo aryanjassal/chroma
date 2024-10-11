@@ -85,6 +85,7 @@ I will try my best to help with issues regarding dynamic color generation, but e
 
 > [!IMPORTANT]
 > GTK is known for not being friendly to theming. As such, no formal API for theming is exposed. This means that, while many apps will be themed, many will still remain unthemed or in a broken state. Some cases will be impossible to resolve, but some might be oversights/mistakes. If you see one such issue, then raise an issue for that.
+>
 > Other handlers also might have similar issues, as you might use features which I never use, so I never implemented theming for it. If such cases arise, feel free to raise an issue about it. If you get a custom handler working which fixes an issue you have, make a pull request with your changes. This will ensure everyone else will also be absolved of their frustrations!
 
 ```lua
@@ -391,7 +392,6 @@ This might give a warning that Chroma doesn't exist as a library. Worry not, as 
 - Provide preset themes for quicker start with system theming (in progress)
   - Make user defined themes directory
   - Registry for theme names to parsed theme
-  - Themes are expected to export a `colors` table by default
   - Editing existing theme by requiring theme
     - Change imports
       - Merge namespace for themes (`chroma.themes` will include both user themes and builtin themes)

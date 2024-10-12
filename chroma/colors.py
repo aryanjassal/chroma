@@ -147,3 +147,12 @@ class Color:
 
     def saturate(self, amount: float) -> Color:
         return self.saturated(amount)
+
+    def __str__(self):
+        if self.format in ["hex", "hexval"]:
+            return self.color
+        else:
+            logger.fatal(
+                f"The color format {self.format} isn't supported for "
+                "stringification yet."
+            )

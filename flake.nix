@@ -27,6 +27,7 @@
             export PYTHONPATH=$PIP_PREFIX/lib/python${python.pythonVersion}/site-packages:$PYTHONPATH
             export PYTHONPATH=$(pwd):$PYTHONPATH
             export PATH=$PIP_PREFIX/bin:$PATH
+            export LUA_PATH="$(pwd)/?.lua;;$LUA_PATH"
 
             mkdir -p $PIP_PREFIX
             mkdir -p tmp
@@ -40,6 +41,9 @@
           src = ./.;
           propagatedBuildInputs = with pkgs; with python.pkgs; [ lupa imagemagick ];
           buildInputs = [ python.pkgs.setuptools ]; 
+          postInstall = ''
+            wrapProgram $out/bin/chroma --set LUA_PATH "$(pwd)/?.lua;;$LUA_PATH"
+          '';
         };
       });
 }

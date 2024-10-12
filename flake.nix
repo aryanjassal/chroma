@@ -36,7 +36,7 @@
 
         packages.default = python.pkgs.buildPythonPackage {
           pname = "chroma";
-          version = "0.5.2";
+          version = "0.6.0";
           src = ./.;
           propagatedBuildInputs = with pkgs; with python.pkgs; [ lupa imagemagick ];
           buildInputs = [ python.pkgs.setuptools ]; 

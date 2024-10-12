@@ -1,7 +1,9 @@
 import importlib
 import importlib.util
 import shutil
+import subprocess
 from pathlib import Path
+from typing import Literal, NoReturn, Optional
 
 from lupa import LuaRuntime, lua_type
 
@@ -127,6 +129,13 @@ def set_exception_hook(func):
     sys.excepthook = func
 
 
+def never(message: Optional[str] = None) -> NoReturn:
+    if message:
+        logger.fatal(message)
+    else:
+        logger.fatal("never")
+
+
 def inspect_dict(iterable) -> None:
     def inspect(d, pre=str()):
         for k, v in d.items():
@@ -159,7 +168,7 @@ def load_handler(path: str | Path):
         module = importlib.util.module_from_spec(spec)
         if spec.loader is not None:
             spec.loader.exec_module(module)
-            return module, handler_name
+            return module
         else:
             logger.fatal(f"Could not load user module {handler_name}")
     else:
@@ -170,12 +179,38 @@ def discover_handlers(path: str | Path):
     """Discover and load all handlers from a directory."""
 
     config_dir = Path(path).expanduser()
-    handlers = {}
+    handlers = []
 
     if Path(config_dir).is_dir():
         for filename in Path(config_dir).iterdir():
             if filename.suffix == ".py":
                 handler_path = Path(config_dir) / filename
-                handler_module, handler_name = load_handler(handler_path)
-                handlers[handler_name] = handler_module
+                handler_module = load_handler(handler_path)
+                handlers.append(handler_module)
     return handlers
+
+
+def check_program(
+    program: str,
+    action: Literal["WARN"] | Literal["NOOP"] | Literal["EXIT"] = "WARN",
+) -> bool:
+    result = subprocess.run(
+        ["command", "-v", program],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        text=True,
+        shell=False,
+    )
+    if result.returncode != 0:
+        if action == "WARN":
+            logger.warn(
+                f"{program} was not found on your system. You can disable "
+                "the handler by assigning the table to nil in the overrides."
+            )
+            return False
+        if action == "EXIT":
+            logger.fatal(
+                f"{program} was not found on your system. You must disable "
+                "the handler by assigning the table to nil in the overrides."
+            )
+    return True

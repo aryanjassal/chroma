@@ -1,7 +1,7 @@
 local theme = require "chroma.builtins.default"
 
 theme.options = {
-  chroma_version = "0.4.0",
+  chroma_version = "0.5.4",
 }
 
 theme.meta = {
@@ -9,7 +9,7 @@ theme.meta = {
   description = "A clean theme that celebrates the lights of downtown Tokyo at night.",
   url = "https://github.com/tokyo-night/tokyo-night-vscode-theme",
   author = "Aryan Jassal",
-  version = "0.1.0",
+  version = "0.2.0",
 }
 
 ---@class TokyodarkColors
@@ -58,7 +58,7 @@ theme.colors = {
 }
 
 ---@type table<string, string>
-local colors = theme.colors;
+local colors = theme.colors
 
 local gtk_palette_colors = {
   blue = colors.blue,

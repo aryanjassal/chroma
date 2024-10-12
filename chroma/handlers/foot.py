@@ -18,68 +18,74 @@ from pathlib import Path
 
 import chroma
 from chroma import utils
-from chroma.logger import Logger
 from chroma.colors import Color
+from chroma.handler import Handler
+from chroma.logger import Logger
 
 logger = Logger.get_logger()
 
 FOOT_HEADER = f"# {chroma.CHROMA_GENERATED_HEADER}"
 
 
-def apply(group, _):
-    colors = group.get("colors")
-    if colors is None:
-        logger.info("Colors for Foot group is unset. Skipping handler.")
-        return
+class FootHandler(Handler):
+    def apply(self):
+        colors = self.group.get("colors")
+        if colors is None:
+            logger.info("Colors for Foot group is unset. Skipping handler.")
+            return
 
-    # TODO: actually support all the themable options in foot like this:
-    # https://man.archlinux.org/man/foot.ini.5.en
-    theme = {
-        "foreground": colors.get("foreground"),
-        "background": colors.get("background"),
-        "selection-foreground": colors.get("selection_foreground"),
-        "selection-background": colors.get("selection_background"),
-        "regular0": colors.get("black"),
-        "regular1": colors.get("red"),
-        "regular2": colors.get("green"),
-        "regular3": colors.get("yellow"),
-        "regular4": colors.get("blue"),
-        "regular5": colors.get("magenta"),
-        "regular6": colors.get("cyan"),
-        "regular7": colors.get("white"),
-        "bright0": colors.get("bright_black"),
-        "bright1": colors.get("bright_red"),
-        "bright2": colors.get("bright_green"),
-        "bright3": colors.get("bright_yellow"),
-        "bright4": colors.get("bright_blue"),
-        "bright5": colors.get("bright_magenta"),
-        "bright6": colors.get("bright_cyan"),
-        "bright7": colors.get("bright_white"),
-    }
+        # TODO: actually support all the themable options in foot like this:
+        # https://man.archlinux.org/man/foot.ini.5.en
+        theme = {
+            "foreground": colors.get("foreground"),
+            "background": colors.get("background"),
+            "selection-foreground": colors.get("selection_foreground"),
+            "selection-background": colors.get("selection_background"),
+            "regular0": colors.get("black"),
+            "regular1": colors.get("red"),
+            "regular2": colors.get("green"),
+            "regular3": colors.get("yellow"),
+            "regular4": colors.get("blue"),
+            "regular5": colors.get("magenta"),
+            "regular6": colors.get("cyan"),
+            "regular7": colors.get("white"),
+            "bright0": colors.get("bright_black"),
+            "bright1": colors.get("bright_red"),
+            "bright2": colors.get("bright_green"),
+            "bright3": colors.get("bright_yellow"),
+            "bright4": colors.get("bright_blue"),
+            "bright5": colors.get("bright_magenta"),
+            "bright6": colors.get("bright_cyan"),
+            "bright7": colors.get("bright_white"),
+        }
 
-    if not utils.validate_header(Path(group["out"]), FOOT_HEADER):
-        logger.error("Cannot write configuration for Foot. Skipping handler.")
-        return
+        if not utils.validate_header(Path(self.group["out"]), FOOT_HEADER):
+            logger.error("Cannot write configuration for Foot. Skipping handler.")
+            return
 
-    generated_theme = []
-    generated_theme.append(FOOT_HEADER)
-    generated_theme.append("[colors]")
+        generated_theme = []
+        generated_theme.append(FOOT_HEADER)
+        generated_theme.append("[colors]")
 
-    for k, v in theme.items():
-        if v is None:
-            logger.info(f"Key {k} is unset.")
-            continue
-        col = Color(v, "hex").to("hexval")
-        generated_theme.append(f"{k}={col}")
+        for k, v in theme.items():
+            if v is None:
+                logger.info(f"Key {k} is unset.")
+                continue
+            col = Color(v, "hex").as_format("hexval")
+            generated_theme.append(f"{k}={col}")
 
-    # Manually insert newlines to make it play well with file.writelines()
-    generated_theme = [line + "\n" for line in generated_theme]
+        # Manually insert newlines to make it play well with file.writelines()
+        generated_theme = [line + "\n" for line in generated_theme]
 
-    try:
-        with open(Path(group["out"]).expanduser(), "w") as f:
-            f.writelines(generated_theme)
-    except FileNotFoundError as e:
-        logger.error(e)
-        logger.fatal("Failed to open file. Does the parent directory exist?")
+        try:
+            with open(Path(self.group["out"]).expanduser(), "w") as f:
+                f.writelines(generated_theme)
+        except FileNotFoundError as e:
+            logger.error(e)
+            logger.fatal("Failed to open file. Does the parent directory exist?")
 
-    logger.info("Successfully applied Foot theme!")
+        logger.info("Successfully applied Foot theme!")
+
+
+def register():
+    return {"foot": FootHandler}

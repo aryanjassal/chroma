@@ -2,6 +2,7 @@ import re
 
 import chroma
 from chroma import utils
+from chroma.handler import Handler
 from chroma.logger import Logger
 
 logger = Logger.get_logger()
@@ -13,6 +14,9 @@ VALID_META_KEYS = ["name", "description", "url", "author", "version"]
 # Special groups are groups which do not contain theme data. As such, no handler
 # exists for these groups.
 SPECIAL_GROUPS = ["meta", "options", "colors"]
+
+# A registry for all the handlers and their corresponding constructor classes.
+REGISTRY = {}
 
 
 def match_version(version, meta) -> None:
@@ -92,29 +96,60 @@ def load(filename):
     meta = parse_meta(theme["meta"])
     theme = utils.to_dict(theme)
 
+    # Filter all tables marked as `handle` to be data tables. Sanitize the input
+    # to remove the `handle` field too. This can be done as the following
+    # one-liner, but we won't be able to sanitize the data, so the longer loop
+    # was used.
+    # data = {k: v for k, v in theme.items() if v.get("handle") is not None}
+    data = {}
+    for name, group in theme.items():
+        if not group.get("handle", True):
+            logger.debug(f"Table {name} marked as a data table")
+            data[name] = group
+            del data[name]["handle"]
+
+    for name in data:
+        del theme[name]
+
     # Override application's handlers by user's handlers if defined.
-    handlers = {
-        **utils.discover_handlers(utils.chroma_dir() / "handlers"),
-        **utils.discover_handlers(utils.config_dir() / "handlers"),
-    }
+    handlers = [
+        *utils.discover_handlers(utils.chroma_dir() / "handlers"),
+        *utils.discover_handlers(utils.config_dir() / "handlers"),
+    ]
+
+    for handler in handlers:
+        if hasattr(handler, "register") and callable(getattr(handler, "register")):
+            entry = getattr(handler, "register")()
+            REGISTRY.update(entry)
+            for name in entry:
+                logger.debug(f"Handler {name} registered")
 
     for group, config in theme.items():
         if group in SPECIAL_GROUPS:
             continue
 
         logger.info(f"Applying theme for {group}")
-        handler = handlers.get(group)
+        handler = REGISTRY.get(group)
 
         # If the handler doesn't exist, then skip handling it.
         if handler is None:
             logger.error(f"No handlers found for {group}. Skipping.")
             continue
 
+        # The issubclass() can only throw one error: TypeError when the first
+        # argument isn't a class. In that case, our handler would be
+        # malformed, so we can safely detect and ignore that exception.
+        try:
+            subclass = issubclass(handler, Handler)
+        except TypeError:
+            subclass = None
+
         # Otherwise, check if the required signatures match. If they do,
         # then run the respective handler.
-        if hasattr(handler, "apply") and callable(getattr(handler, "apply")):
-            getattr(handler, "apply")(config, meta)
+        if subclass and callable(handler):
+            handler_class: Handler = handler(config, meta, data)
+            handler_class.apply()
             continue
 
         # If the signatures don't match, then warn the user and skip the handler.
-        logger.error(f"Handler does not properly implement `apply()`. Skipping.")
+        logger.error(f"Handler for {group} is malformed. Skipping.")

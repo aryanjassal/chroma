@@ -6,6 +6,7 @@ from pathlib import Path
 
 import chroma
 from chroma import utils
+from chroma.handler import Handler
 from chroma.logger import Logger
 
 logger = Logger.get_logger()
@@ -56,66 +57,73 @@ def validate_palette(palette: dict, index: int) -> dict | None:
         }
 
 
-def apply(group, _):
-    if group.get("colors") is None:
-        logger.info("Colors for GTK group is unset. Skipping handler.")
-        return
-    palettes = []
+class GTKHandler(Handler):
+    def apply(self):
+        if self.group.get("colors") is None:
+            logger.info("Colors for GTK group is unset. Skipping handler.")
+            return
+        palettes = []
 
-    theme_palettes = group.get("palettes")
-    if theme_palettes is not None:
-        theme_palettes = dict(theme_palettes)
-        for i in range(1, 6):
-            palette = theme_palettes.get(f"palette{i}")
-            if palette is None:
-                logger.warn(f"Palette {i} is unset. Skipping.")
-                continue
+        theme_palettes = self.group.get("palettes")
+        if theme_palettes is not None:
+            theme_palettes = dict(theme_palettes)
+            for i in range(1, 6):
+                palette = theme_palettes.get(f"palette{i}")
+                if palette is None:
+                    logger.warn(f"Palette {i} is unset. Skipping.")
+                    continue
 
-            if not isinstance(palette, dict):
-                palette = dict(palette)
+                if not isinstance(palette, dict):
+                    palette = dict(palette)
 
-            validated_palette = validate_palette(palette, i)
-            if validated_palette is None:
-                logger.warn(f"Palette {i} contains invalid keys. Skipping.")
-                logger.debug(f"Got: {validated_palette}")
-                continue
+                validated_palette = validate_palette(palette, i)
+                if validated_palette is None:
+                    logger.warn(f"Palette {i} contains invalid keys. Skipping.")
+                    logger.debug(f"Got: {validated_palette}")
+                    continue
 
-            palettes.append(validated_palette)
-    else:
-        logger.warn("No palettes present. Please have at least one palette for the theme.")
+                palettes.append(validated_palette)
+        else:
+            logger.warn(
+                "No palettes present. Please have at least one palette for the theme."
+            )
 
-    gtk3_valid = utils.validate_header(Path(group["out"]["gtk3"]), GTK_HEADER)
-    gtk4_valid = utils.validate_header(Path(group["out"]["gtk4"]), GTK_HEADER)
-    if not gtk3_valid or not gtk4_valid:
-        logger.error("Cannot write configuration for GTK. Skipping handler.")
-        return
+        gtk3_valid = utils.validate_header(Path(self.group["out"]["gtk3"]), GTK_HEADER)
+        gtk4_valid = utils.validate_header(Path(self.group["out"]["gtk4"]), GTK_HEADER)
+        if not gtk3_valid or not gtk4_valid:
+            logger.error("Cannot write configuration for GTK. Skipping handler.")
+            return
 
-    generated_file = []
-    generated_file.append(GTK_HEADER)
+        generated_file = []
+        generated_file.append(GTK_HEADER)
 
-    for name, color in group["colors"].items():
-        generated_file.append(f"@define-color {name} {color};")
-    for palette in palettes:
-        for name, color in palette.items():
+        for name, color in self.group["colors"].items():
             generated_file.append(f"@define-color {name} {color};")
+        for palette in palettes:
+            for name, color in palette.items():
+                generated_file.append(f"@define-color {name} {color};")
 
-    generated_file.append(group["sidebar_patch"])
+        generated_file.append(self.group["sidebar_patch"])
 
-    # If the group has a field for extra GTK CSS, then add that to the
-    # output file too.
-    if group.get("extra_css") is not None:
-        generated_file.append(group["extra_css"])
+        # If the group has a field for extra GTK CSS, then add that to the
+        # output file too.
+        if self.group.get("extra_css") is not None:
+            generated_file.append(self.group["extra_css"])
 
-    # Manually insert newlines to make it play well with file.writelines()
-    generated_file = [line + "\n" for line in generated_file]
+        # Manually insert newlines to make it play well with file.writelines()
+        generated_file = [line + "\n" for line in generated_file]
 
-    try:
-        with open(Path(group["out"]["gtk3"]).expanduser(), "w") as f:
-            f.writelines(generated_file)
-        with open(Path(group["out"]["gtk4"]).expanduser(), "w") as f:
-            f.writelines(generated_file)
-    except FileNotFoundError as e:
-        logger.error(e)
-        logger.fatal("Failed to open file. Does the parent directory exist?")
+        try:
+            with open(Path(self.group["out"]["gtk3"]).expanduser(), "w") as f:
+                f.writelines(generated_file)
+            with open(Path(self.group["out"]["gtk4"]).expanduser(), "w") as f:
+                f.writelines(generated_file)
+        except FileNotFoundError as e:
+            logger.error(e)
+            logger.fatal("Failed to open file. Does the parent directory exist?")
 
-    logger.info("Successfully applied GTK theme!")
+        logger.info("Successfully applied GTK theme!")
+
+
+def register():
+    return {"gtk": GTKHandler}

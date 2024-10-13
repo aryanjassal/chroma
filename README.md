@@ -419,6 +419,10 @@ This might give a warning that Chroma doesn't exist as a library. Worry not, as 
       - If not possible, then move user config to `chroma.user` namespace
 - Clean up and update `Colors` to be more streamlined (in progress)
   - Add utility to guess color type using regexes (needed? more testing required)
+  - In place vs returned type transformations for color
+  - Properly implement denormalization for HSL
+  - Custom getter/setter for RGB/HSL fields
+  - Fix linter errors
 - Update handlers to rely on `Color` more heavily
 - Make icon (inspired by Prism Launcher)
 - Allow custom variable substitution for paths (or just use regular path substitution for that)

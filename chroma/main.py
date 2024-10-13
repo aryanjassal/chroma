@@ -34,6 +34,8 @@ def setup_args():
     gen_parser.add_argument("-o", "--output", type=str, help="Output path of generated color scheme")
     gen_parser.add_argument("--experimental", action="store_true", help="Enable experimental command usage")
 
+    subparsers.add_parser("remove", help="Removes the generated palette, allowing theme colors")
+
     known_args, unknown = parser.parse_known_args()
     args = parser.parse_args(unknown, namespace=known_args)
 
@@ -94,9 +96,13 @@ def main():
             out_path = args.output
         else:
             out_path = utils.cache_dir() / "palettes/generated.lua"
-        colors = generator.generate(args.image_path)
-        generator.write_lua_colors(colors, out_path)
-        generator.write_lua_theme(utils.themes_dir() / "generated.lua", ["gtk", "kitty", "foot"])
+        generator.generate("magick", args.image_path, out_path, image_size=768)
+
+    if args.command == "remove":
+        path = Path("~/.cache/chroma/palettes/generated.lua").expanduser()
+        if path.exists():
+            path.unlink()
+
 
 if __name__ == "__main__":
     main()

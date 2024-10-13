@@ -113,8 +113,8 @@ def load(filename):
 
     # Override application's handlers by user's handlers if defined.
     handlers = [
-        *utils.discover_handlers(utils.chroma_dir() / "handlers"),
-        *utils.discover_handlers(utils.config_dir() / "handlers"),
+        *utils.discover_modules(utils.chroma_dir() / "handlers"),
+        *utils.discover_modules(utils.config_dir() / "handlers"),
     ]
 
     for handler in handlers:
@@ -122,7 +122,7 @@ def load(filename):
             entry = getattr(handler, "register")()
             REGISTRY.update(entry)
             for name in entry:
-                logger.debug(f"Handler {name} registered")
+                logger.debug(f"Registered handler {name}")
 
     for group, config in theme.items():
         if group in SPECIAL_GROUPS:

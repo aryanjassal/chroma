@@ -41,10 +41,6 @@
           src = ./.;
           propagatedBuildInputs = with pkgs; with python.pkgs; [ lupa imagemagick ];
           buildInputs = [ python.pkgs.setuptools ]; 
-          postInstall = ''
-            wrapProgram $out/bin/chroma \
-              --set LUA_PATH "${python.sitePackages}/?.lua;;$LUA_PATH"
-          '';
         };
       });
 }

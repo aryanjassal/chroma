@@ -1,4 +1,5 @@
 local theme = require "chroma.builtins.default"
+local lib = require "chroma.builtins.lib"
 
 theme.options = {
   chroma_version = "0.5.4",
@@ -12,27 +13,8 @@ theme.meta = {
   version = "0.2.0",
 }
 
----@class TokyodarkColors
----@field black string
----@field red string
----@field green string
----@field yellow string
----@field blue string
----@field magenta string
----@field cyan string
----@field white string
----@field bright_white string
----@field bright_black string
----@field orange string
----@field brown string
----@field foreground string
----@field background string
----@field background_alt1 string
----@field background_alt2 string
----@field background_alt3 string
----@field background_highlight string
-theme.colors = {
-  -- Classic console colors
+theme.colors = lib.generated_or({
+  -- Classic colors
   black = "#414868",
   red = "#f7768e",
   green = "#73daca",
@@ -41,21 +23,33 @@ theme.colors = {
   magenta = "#bb9af7",
   cyan = "#7dcfff",
   white = "#c0caf5",
-
-  -- Extended colors
-  bright_white = "#ffffff",
-  bright_black = "#000000",
   orange = "#ff9e64",
   brown = "#634f30",
 
+  bright_black = "#000000",
+  bright_red = "#f7768e",
+  bright_green = "#73daca",
+  bright_yellow = "#e0af68",
+  bright_blue = "#7aa2f7",
+  bright_magenta = "#bb9af7",
+  bright_cyan = "#7dcfff",
+  bright_white = "#ffffff",
+  bright_orange = "#ff9e64",
+  bright_brown = "#634f30",
+
   -- Special foreground/background colors
   foreground = "#a9b1d6",
+  foreground_alt = "#ffffff",
+  foreground_unfocus = "#a9b1d6",
   background = "#1a1b26",
-  background_alt1 = "#16161e",
-  background_alt2 = "#1f2335",
-  background_alt3 = "#24283b",
-  background_highlight = "#292e42",
-}
+  background_alt = "#16161e",
+  background_unfocus = "#1f2335",
+
+  -- Accent color
+  accent = "#7aa2f7",
+  accent_bg = "#7aa2f7",
+  accent_fg = "#ffffff",
+})
 
 ---@type table<string, string>
 local colors = theme.colors
@@ -78,9 +72,9 @@ theme.gtk = {
     accent_fg_color = colors.bright_white,
     accent_bg_color = colors.blue,
     window_fg_color = colors.foreground,
-    window_bg_color = colors.background_alt1,
+    window_bg_color = colors.background_alt,
     view_fg_color = colors.foreground,
-    view_bg_color = colors.background_alt1,
+    view_bg_color = colors.background_alt,
     headerbar_fg_color = colors.foreground,
     headerbar_bg_color = colors.background,
     card_fg_color = colors.foreground,
@@ -88,11 +82,11 @@ theme.gtk = {
     dialog_fg_color = colors.foreground,
     dialog_bg_color = colors.background,
     popover_fg_color = colors.bright_white,
-    popover_bg_color = colors.background_alt2,
+    popover_bg_color = colors.background_nofocus,
     sidebar_fg_color = colors.foreground,
     sidebar_bg_color = colors.background,
     backdrop_fg_color = colors.foreground,
-    backdrop_bg_color = colors.background_alt1,
+    backdrop_bg_color = colors.background_alt,
   },
 
   palettes = {

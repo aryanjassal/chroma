@@ -150,44 +150,38 @@ def inspect_dict(iterable) -> None:
 def parse_file(runtime, filename) -> dict:
     with open(filename, mode="r") as f:
         theme = f.read()
-    result = runtime.execute(theme)
-
-    # If multiple tables are being exported, the theme table will be first one.
-    # Otherwise, the only output would be the theme table.
-    if type(result) == tuple:
-        result = result[0]
-    return to_dict(result)
+    return to_dict(runtime.execute(theme))
 
 
-def load_handler(path: str | Path):
+def load_module(path: str | Path):
     """Dynamically load a handler from a file path."""
 
-    handler_name = Path(path).stem
-    spec = importlib.util.spec_from_file_location(handler_name, path)
+    module_name = Path(path).stem
+    spec = importlib.util.spec_from_file_location(module_name, path)
     if spec is not None:
         module = importlib.util.module_from_spec(spec)
         if spec.loader is not None:
             spec.loader.exec_module(module)
             return module
         else:
-            logger.fatal(f"Could not load user module {handler_name}")
+            logger.fatal(f"Could not load module {module_name}")
     else:
-        logger.fatal(f"Could not load user module {handler_name}")
+        logger.fatal(f"Could not load module {module_name}")
 
 
-def discover_handlers(path: str | Path):
+def discover_modules(path: str | Path):
     """Discover and load all handlers from a directory."""
 
     config_dir = Path(path).expanduser()
-    handlers = []
+    modules = []
 
     if Path(config_dir).is_dir():
         for filename in Path(config_dir).iterdir():
             if filename.suffix == ".py":
-                handler_path = Path(config_dir) / filename
-                handler_module = load_handler(handler_path)
-                handlers.append(handler_module)
-    return handlers
+                module_path = Path(config_dir) / filename
+                module = load_module(module_path)
+                modules.append(module)
+    return modules
 
 
 def check_program(
@@ -214,3 +208,12 @@ def check_program(
                 "the handler by assigning the table to nil in the overrides."
             )
     return True
+
+
+def write_lua_colors(path: Path, colors: dict, indent: int = 2):
+    contents = []
+    contents.append("return {\n")
+    for name, color in colors.items():
+        contents.append(f"{' ' * indent}{name} = \"{color}\",\n")
+    contents.append("}")
+    path.write_text(''.join(contents))

@@ -2,7 +2,7 @@ local theme = require "chroma.builtins.default"
 local lib = require "chroma.builtins.lib"
 
 theme.options = {
-  chroma_version = "0.5.4",
+  chroma_version = "0.7.0",
 }
 
 theme.meta = {
@@ -10,7 +10,7 @@ theme.meta = {
   description = "A clean theme that celebrates the lights of downtown Tokyo at night.",
   url = "https://github.com/tokyo-night/tokyo-night-vscode-theme",
   author = "Aryan Jassal",
-  version = "0.2.0",
+  version = "0.3.0",
 }
 
 theme.colors = lib.generated_or({
@@ -68,9 +68,9 @@ local gtk_palette_colors = {
 
 theme.gtk = {
   colors = {
-    accent_color = colors.blue,
-    accent_fg_color = colors.bright_white,
-    accent_bg_color = colors.blue,
+    accent_color = colors.accent,
+    accent_fg_color = colors.accent_fg,
+    accent_bg_color = colors.accent_bg,
     window_fg_color = colors.foreground,
     window_bg_color = colors.background_alt,
     view_fg_color = colors.foreground,
@@ -81,8 +81,8 @@ theme.gtk = {
     card_bg_color = colors.background,
     dialog_fg_color = colors.foreground,
     dialog_bg_color = colors.background,
-    popover_fg_color = colors.bright_white,
-    popover_bg_color = colors.background_nofocus,
+    popover_fg_color = colors.foreground_alt,
+    popover_bg_color = colors.background_unfocus,
     sidebar_fg_color = colors.foreground,
     sidebar_bg_color = colors.background,
     backdrop_fg_color = colors.foreground,

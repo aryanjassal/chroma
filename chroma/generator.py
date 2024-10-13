@@ -10,7 +10,6 @@ BACKENDS = {}
 
 def prepare():
     backends = utils.discover_modules(utils.chroma_dir() / "backends")
-    logger.debug(f"Discovering backends in {utils.chroma_dir() / 'backends'}")
 
     for backend in backends:
         if hasattr(backend, "register") and callable(getattr(backend, "register")):

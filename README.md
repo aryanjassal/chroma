@@ -437,6 +437,7 @@ TODO
   - Properly implement denormalization for HSL
   - Custom getter/setter for RGB/HSL fields
   - Fix linter errors
+  - Set saturation/luminosity
 - Update handlers to rely on `Color` more heavily
 - Make icon (inspired by Prism Launcher)
 - Allow custom variable substitution for paths (or just use regular path substitution for that)

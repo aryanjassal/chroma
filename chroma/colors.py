@@ -117,8 +117,10 @@ class Color:
             return self
         else:
             color = self.color
-            logger.error("Colors are malformed and don't have the same type.")
-            logger.fatal(f"{type(color[0])}, {type(color[1])}, {type(color[2])}")
+            raise ValueError(
+                "Colors are malformed and don't have the same type. "
+                f"{type(color[0])}, {type(color[1])}, {type(color[2])}"
+            )
 
     def normalize(self) -> Color:
         return self.normalized()
@@ -132,27 +134,37 @@ class Color:
             return self
         else:
             color = self.color
-            logger.error("Colors are malformed and don't have the same type.")
-            logger.fatal(f"{type(color[0])}, {type(color[1])}, {type(color[2])}")
+            raise ValueError(
+                "Colors are malformed and don't have the same type. "
+                f"{type(color[0])}, {type(color[1])}, {type(color[2])}"
+            )
 
     def denormalize(self) -> Color:
         return self.denormalized()
 
-    def darkened(self, amount: float) -> Color:
+    def darkened(self, amount: float, absolute: bool = False) -> Color:
         h, s, l = self.as_hsl().color
-        l = max(0, l - amount)
+        if absolute:
+            l = amount
+        else:
+            l -= amount
+        l = utils.clamp(l, 0, 1)
         return Color((h, s, l), "hsl").as_format(self.format)
 
-    def darken(self, amount: float) -> Color:
-        return self.darkened(amount)
+    def darken(self, amount: float, absolute: bool = False) -> Color:
+        return self.darkened(amount, absolute)
 
-    def lightened(self, amount: float) -> Color:
+    def lightened(self, amount: float, absolute: bool = False) -> Color:
         h, s, l = self.as_hsl().color
-        l = min(1, l + amount)
+        if absolute:
+            l = amount
+        else:
+            l += amount
+        l = utils.clamp(l, 0, 1)
         return Color((h, s, l), "hsl").as_format(self.format)
 
-    def lighten(self, amount: float) -> Color:
-        return self.lightened(amount)
+    def lighten(self, amount: float, absolute: bool = False) -> Color:
+        return self.lightened(amount, absolute)
 
     def blended(self, color: Color, ratio: float = 0.5) -> Color:
         rgb1 = self.as_rgb().color
@@ -169,19 +181,25 @@ class Color:
     def blend(self, color: Color, ratio: float = 0.5):
         return self.blended(color, ratio)
 
-    def saturated(self, amount: float) -> Color:
+    def saturated(self, amount: float, absolute: bool = False) -> Color:
         h, s, l = self.as_hsl().color
-        s = min(1, s + amount)
+        if absolute:
+            s = amount
+        else:
+            s += amount
+        s = utils.clamp(s, 0, 1)
         return Color((h, s, l), "hsl").as_format(self.format)
 
-    def saturate(self, amount: float) -> Color:
-        return self.saturated(amount)
+    def saturate(self, amount: float, absolute: bool = False) -> Color:
+        return self.saturated(amount, absolute)
 
     def __str__(self):
         if self.format in ["hex", "hexval"]:
-            return self.color
-        else:
-            logger.fatal(
-                f"The color format {self.format} isn't supported for "
-                "stringification yet."
-            )
+            return self.color.lower()
+        elif self.format == "rgb":
+            r, g, b = self.denormalized().color
+            return f"rgb({r}, {g}, {b})"
+        elif self.format == "hsl":
+            h, s, l = self.color
+            return f"hsl({h}, {s}, {l})"
+        utils.never()

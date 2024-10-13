@@ -13,6 +13,9 @@ from chroma.logger import Logger
 logger = Logger.get_logger()
 
 
+Number = int | float
+
+
 def cache_dir() -> Path:
     path = Path("~/.cache/chroma").expanduser()
     path.mkdir(parents=True, exist_ok=True)
@@ -216,4 +219,8 @@ def write_lua_colors(path: Path, colors: dict, indent: int = 2):
     for name, color in colors.items():
         contents.append(f"{' ' * indent}{name} = \"{color}\",\n")
     contents.append("}")
-    path.write_text(''.join(contents))
+    path.write_text("".join(contents))
+
+
+def clamp(x: Number, _min: Number, _max: Number):
+    return max(_min, min(x, _max))

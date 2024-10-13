@@ -1,2 +1,3 @@
 include chroma/builtins/*.lua
 include chroma/handlers/*.py
+include chroma/backends/*.py

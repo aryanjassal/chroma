@@ -28,20 +28,27 @@ def setup_args():
     load_parser.add_argument("-u", "--override", type=str, help="Override settings")
 
     # Parse commands for keyword generate
-    gen_parser = subparsers.add_parser("generate", aliases=["gen"], help="Generates a theme from an image")
-    gen_parser.add_argument("image_path", help="Path to the image to extract colors from")
+    gen_parser = subparsers.add_parser(
+        "generate", aliases=["gen"], help="Generates a theme from an image"
+    )
+    gen_parser.add_argument(
+        "image_path", help="Path to the image to extract colors from"
+    )
     gen_parser.add_argument("-u", "--override", type=str, help="Override settings")
-    gen_parser.add_argument("-o", "--output", type=str, help="Output path of generated color scheme")
-    gen_parser.add_argument("--experimental", action="store_true", help="Enable experimental command usage")
+    gen_parser.add_argument(
+        "-o", "--output", type=str, help="Output path of generated color scheme"
+    )
 
-    subparsers.add_parser("remove", help="Removes the generated palette, allowing theme colors")
+    subparsers.add_parser(
+        "remove", help="Removes the generated palette, allowing theme colors"
+    )
 
     known_args, unknown = parser.parse_known_args()
     args = parser.parse_args(unknown, namespace=known_args)
 
     # Map particular commands to other commands. Useful to map aliases to
     # original parser name.
-    command_map = { "gen": "generate" }
+    command_map = {"gen": "generate"}
 
     if args.command in command_map:
         args.command = command_map[args.command]
@@ -87,16 +94,17 @@ def main():
         exit(0)
 
     if args.command == "generate":
-        if not args.experimental:
-            logger.warn("This is an experimental setting. Enable the experimental flag to continue:")
-            logger.warn("  `chroma generate --experimental ...`")
-            exit(1)
-
         if args.output:
             out_path = args.output
         else:
             out_path = utils.cache_dir() / "palettes/generated.lua"
         generator.generate("magick", args.image_path, out_path, image_size=768)
+
+        if args.output:
+            shutil.copy(
+                utils.cache_dir() / "palettes/generated.lua",
+                Path(args.output).expanduser(),
+            )
 
     if args.command == "remove":
         path = Path("~/.cache/chroma/palettes/generated.lua").expanduser()

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Never
+from typing import Never, Optional
 
 
 class Term:
@@ -17,61 +17,58 @@ class LogLevel:
     WARN = 2
     ERROR = 3
     QUIET = 4
-    SILENT = 5
+    SILENT = 9
 
 
 class Logger:
-    __logger: Logger = None
+    __logger: Optional[Logger] = None
 
     def __init__(self, log_level):
-        self.level = log_level
+        self.__level = log_level
 
-    def debug(self, message):
-        if self.level <= LogLevel.DEBUG:
-            Logger.out(
+    def debug(self, message) -> None:
+        if self.__level <= LogLevel.DEBUG:
+            Logger.__out(
                 f"{Term.FG_MUTE} DBUG {Term.RESET}",
                 f"{Term.FG_MUTE}{message}{Term.RESET}",
             )
 
-    def info(self, message):
-        if self.level <= LogLevel.INFO:
-            Logger.out(
+    def info(self, message) -> None:
+        if self.__level <= LogLevel.INFO:
+            Logger.__out(
                 f"{Term.FG_INFO} INFO {Term.RESET}",
                 f"{Term.FG_MUTE}{message}{Term.RESET}",
             )
 
-    def warn(self, message):
-        if self.level <= LogLevel.WARN:
-            Logger.out(
+    def warn(self, message) -> None:
+        if self.__level <= LogLevel.WARN:
+            Logger.__out(
                 f"{Term.FG_WARN} WARN {Term.RESET}",
                 f"{message}{Term.RESET}",
             )
 
-    def error(self, message):
-        if self.level <= LogLevel.ERROR:
-            Logger.out(
+    def error(self, message) -> None:
+        if self.__level <= LogLevel.ERROR:
+            Logger.__out(
                 f"{Term.FG_EROR} EROR {Term.RESET}",
                 f"{message}{Term.RESET}",
             )
 
-    def fatal(self, message, code=1) -> Never:
-        if self.level != LogLevel.SILENT:
-            Logger.out(
-                f"{Term.FG_EROR} EROR {Term.RESET}",
-                f"{message}{Term.RESET}",
-            )
-        exit(code)
+    def fatal(self, message) -> Never:
+        raise RuntimeError(message)
 
     @staticmethod
-    def set_logger(logger: Logger):
+    def set_logger(logger: Logger) -> None:
         Logger.__logger = logger
 
     @staticmethod
     def get_logger() -> Logger:
-        return Logger.__logger
+        if Logger.__logger is not None:
+            return Logger.__logger
+        raise RuntimeError("Attempt to get logger without setting it")
 
     @staticmethod
-    def out(prefix: str, message: str) -> None:
+    def __out(prefix: str, message: str) -> None:
         lines = message.split("\n")
         for line in lines:
             print(f"{prefix} {line}")

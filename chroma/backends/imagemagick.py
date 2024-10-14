@@ -26,38 +26,38 @@ REQUIRED_COLORS = {
     "accent": None,
     "black": None,
     "white": None,
-    "bright_black": lambda x: x["black"].lighten(0.1),
-    "bright_white": lambda x: x["white"].lighten(0.25),
-    "accent_bg": lambda x: x["accent"].saturate(-0.1).darken(0.1),
-    "accent_fg": lambda x: x["white"].lighten(0.2),
-    "foreground": lambda x: x["white"].lighten(0.85, True) if x["white"].as_hsl().color[2] < 0.9 else x["white"],
-    "foreground_alt": lambda x: x["white"].lighten(0.7, True) if x["white"].as_hsl().color[2] < 0.9 else x["white"].lighten(0.1),
-    "foreground_unfocus": lambda x: x["white"].lighten(0.75, True) if x["white"].as_hsl().color[2] < 0.9 else x["white"].lighten(0.15),
-    "background": lambda x: x["black"].saturate(0.5, True).darken(0.1, True) if x["black"].as_hsl().color[2] > 0.15 or x["black"].as_hsl().color[1] > 0.5 else x["black"],
-    "background_alt": lambda x: x["black"].saturate(0.35, True).darken(0.15, True) if x["black"].as_hsl().color[2] > 0.15 or x["black"].as_hsl().color[1] > 0.5 else x["black"].darken(0.1), 
-    "background_unfocus": lambda x: x["black"].saturate(0.2, True).darken(0.2, True) if x["black"].as_hsl().color[2] > 0.2 or x["black"].as_hsl().color[1] > 0.5 else x["black"].darken(0.15),
-    "red": lambda x: x["white"].blend(Color("#ff0000", "hex").darken(0.1)).blend(x["accent"], 0.1).saturate(0.6, True), 
-    "orange": lambda x: x["white"].blend(Color("#ff8800", "hex").darken(0.1)).blend(x["accent"], 0.1).saturate(0.6, True),
-    "brown": lambda x: x["white"].blend(Color("#884400", "hex").darken(0.1)).blend(x["accent"], 0.1).saturate(0.6, True),
-    "yellow": lambda x: x["white"].blend(Color("#ffff00", "hex").darken(0.1)).blend(x["accent"], 0.1).saturate(0.6, True),
-    "green": lambda x: x["white"].blend(Color("#00ff00", "hex").darken(0.1)).blend(x["accent"], 0.1).saturate(0.6, True),
-    "blue": lambda x: x["white"].blend(Color("#0000ff", "hex").darken(0.1)).blend(x["accent"], 0.1).saturate(0.6, True),
-    "cyan": lambda x: x["white"].blend(Color("#00ffff", "hex").darken(0.1)).blend(x["accent"], 0.1).saturate(0.6, True),
-    "magenta": lambda x: x["white"].blend(Color("#00ff00", "hex").darken(0.1)).blend(x["accent"], 0.1).saturate(0.6, True),
-    "bright_red": lambda x: x["white"].blend(Color("#ff0000", "hex")).lighten(0.15).blend(x["accent"], 0.1), 
-    "bright_orange": lambda x: x["white"].blend(Color("#ff8800", "hex")).lighten(0.15).blend(x["accent"], 0.1),
-    "bright_brown": lambda x: x["white"].blend(Color("#884400", "hex")).lighten(0.15).blend(x["accent"], 0.1),
-    "bright_yellow": lambda x: x["white"].blend(Color("#ffff00", "hex")).lighten(0.15).blend(x["accent"], 0.1),
-    "bright_green": lambda x: x["white"].blend(Color("#00ff00", "hex")).lighten(0.15).blend(x["accent"], 0.1),
-    "bright_blue": lambda x: x["white"].blend(Color("#0000ff", "hex")).lighten(0.15).blend(x["accent"], 0.1),
-    "bright_cyan": lambda x: x["white"].blend(Color("#00ffff", "hex")).lighten(0.15).blend(x["accent"], 0.1),
-    "bright_magenta": lambda x: x["white"].blend(Color("#00ff00", "hex")).lighten(0.15).blend(x["accent"], 0.1),
+    "bright_black": lambda x: x["black"].lightened(0.1),
+    "bright_white": lambda x: x["white"].lightened(0.25),
+    "accent_bg": lambda x: x["accent"].saturated(-0.1).darkened(0.1),
+    "accent_fg": lambda x: x["white"].lightened(0.2),
+    "foreground": lambda x: x["white"].lightened(0.85, True) if x["white"].as_hsl().color[2] < 0.9 else x["white"],
+    "foreground_alt": lambda x: x["white"].lightened(0.7, True) if x["white"].as_hsl().color[2] < 0.9 else x["white"].lightened(0.1),
+    "foreground_unfocus": lambda x: x["white"].lightened(0.75, True) if x["white"].as_hsl().color[2] < 0.9 else x["white"].lightened(0.15),
+    "background": lambda x: x["black"].saturated(0.5, True).darkened(0.1, True) if x["black"].as_hsl().color[2] > 0.15 or x["black"].as_hsl().color[1] > 0.5 else x["black"],
+    "background_alt": lambda x: x["black"].saturated(0.35, True).darkened(0.15, True) if x["black"].as_hsl().color[2] > 0.15 or x["black"].as_hsl().color[1] > 0.5 else x["black"].darkened(0.1), 
+    "background_unfocus": lambda x: x["black"].saturated(0.2, True).darkened(0.2, True) if x["black"].as_hsl().color[2] > 0.2 or x["black"].as_hsl().color[1] > 0.5 else x["black"].darkened(0.15),
+    "red": lambda x: x["white"].blended(Color("#ff0000", "hex").darkened(0.1)).blended(x["accent"], 0.1).saturated(0.6, True), 
+    "orange": lambda x: x["white"].blended(Color("#ff8800", "hex").darkened(0.1)).blended(x["accent"], 0.1).saturated(0.6, True),
+    "brown": lambda x: x["white"].blended(Color("#884400", "hex").darkened(0.1)).blended(x["accent"], 0.1).saturated(0.6, True),
+    "yellow": lambda x: x["white"].blended(Color("#ffff00", "hex").darkened(0.1)).blended(x["accent"], 0.1).saturated(0.6, True),
+    "green": lambda x: x["white"].blended(Color("#00ff00", "hex").darkened(0.1)).blended(x["accent"], 0.1).saturated(0.6, True),
+    "blue": lambda x: x["white"].blended(Color("#0000ff", "hex").darkened(0.1)).blended(x["accent"], 0.1).saturated(0.6, True),
+    "cyan": lambda x: x["white"].blended(Color("#00ffff", "hex").darkened(0.1)).blended(x["accent"], 0.1).saturated(0.6, True),
+    "magenta": lambda x: x["white"].blended(Color("#00ff00", "hex").darkened(0.1)).blended(x["accent"], 0.1).saturated(0.6, True),
+    "bright_red": lambda x: x["white"].blended(Color("#ff0000", "hex")).lightened(0.15).blended(x["accent"], 0.1), 
+    "bright_orange": lambda x: x["white"].blended(Color("#ff8800", "hex")).lightened(0.15).blended(x["accent"], 0.1),
+    "bright_brown": lambda x: x["white"].blended(Color("#884400", "hex")).lightened(0.15).blended(x["accent"], 0.1),
+    "bright_yellow": lambda x: x["white"].blended(Color("#ffff00", "hex")).lightened(0.15).blended(x["accent"], 0.1),
+    "bright_green": lambda x: x["white"].blended(Color("#00ff00", "hex")).lightened(0.15).blended(x["accent"], 0.1),
+    "bright_blue": lambda x: x["white"].blended(Color("#0000ff", "hex")).lightened(0.15).blended(x["accent"], 0.1),
+    "bright_cyan": lambda x: x["white"].blended(Color("#00ffff", "hex")).lightened(0.15).blended(x["accent"], 0.1),
+    "bright_magenta": lambda x: x["white"].blended(Color("#00ff00", "hex")).lightened(0.15).blended(x["accent"], 0.1),
 }
 
 REQUIRED_ESTIMATIONS = {
-    "accent": lambda x: x.saturate(0.1),
-    "black": lambda x: x.darken(0.4).blend(x, 0.4).lighten(0.4).blend(x, 0.1).darken(0.3 if x.as_hsl().color[2] > 25 else 0.1),
-    "white": lambda x: x.lighten(0.4).blend(x, 0.4).darken(0.4).blend(x, 0.1).lighten(0.3 if x.as_hsl().color[2] < 75 else 0.1),
+    "accent": lambda x: x.saturated(0.1),
+    "black": lambda x: x.darkened(0.4).blended(x, 0.4).lightened(0.4).blended(x, 0.1).darkened(0.3 if x.as_hsl().color[2] > 25 else 0.1),
+    "white": lambda x: x.lightened(0.4).blended(x, 0.4).darkened(0.4).blended(x, 0.1).lightened(0.3 if x.as_hsl().color[2] < 75 else 0.1),
 }
 # fmt: on
 
@@ -96,7 +96,7 @@ def hsl_match(color: Color, map: dict = HSL_MAP, omit=[]):
                 continue
 
             color_regular = color.as_hex()
-            color_bright = color.lighten(0.1).as_hex()
+            color_bright = color.lightened(0.1).as_hex()
 
             logger.debug(f"Found color {name} to be {color_regular}")
             logger.debug(f"Calculated color bright_{name} to be {color_bright}")

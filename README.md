@@ -433,7 +433,6 @@ TODO
       - If not possible, then move user config to `chroma.user` namespace
 - Clean up and update `Colors` to be more streamlined (in progress)
   - Add utility to guess color type using regexes (needed? more testing required)
-  - In place vs returned type transformations for color
   - Properly implement denormalization for HSL
   - Custom getter/setter for RGB/HSL fields
   - Fix linter errors
@@ -464,3 +463,5 @@ Credit to [pywal](https://github.com/dylanaraps/pywal) for inspiration on implem
 I have been trying to inject the default theme table into lua's system path, so theme developers can get type hints. Applications like `vim` (kind of) do it, so it should be possible. I just can't figure out how to do it. If anyone does, you're welcome to contribute. Rather, _please_ contribute.
 
 I want to add a GUI to go with Chroma, but I don't have time to make the whole thing by myself in a reasonable time frame. If anyone wants to contribute, then feel free to step up and take over the development.
+
+I need opinions on the type system of my code. It is a _hot mess_. I'm coming from a TypeScript/C++ background where we have stricter typing. In ways, Python is liberating. In other ways, it is a nightmare. This is one such way of being a nightmare. Litearlly no type safety. This alone is making me want to switch languages to something like TypeScript, but I want to keep this beginner-friendly, so I will try my best to keep the code free of unneeded jargon. Still, however, I still need inputs on handling typing in my code base, especially under `chroma.colors` as that is the hottest of messes so far.

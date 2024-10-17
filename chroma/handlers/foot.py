@@ -18,7 +18,7 @@ from pathlib import Path
 
 import chroma
 from chroma import utils
-from chroma.colors import Color
+from chroma.colors import ColorHex
 from chroma.handler import Handler
 from chroma.logger import Logger
 
@@ -71,7 +71,7 @@ class FootHandler(Handler):
             if v is None:
                 logger.info(f"Key {k} is unset.")
                 continue
-            col = Color(v, "hex").as_format("hexval")
+            col = ColorHex(v).value
             generated_theme.append(f"{k}={col}")
 
         # Manually insert newlines to make it play well with file.writelines()

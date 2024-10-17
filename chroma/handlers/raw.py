@@ -6,7 +6,7 @@ from pathlib import Path
 
 import chroma
 from chroma import utils
-from chroma.colors import Color
+from chroma.colors import ColorHex
 from chroma.handler import Handler
 from chroma.logger import Logger
 
@@ -41,11 +41,11 @@ class RawHandler(Handler):
                 generated_file.append(header)
 
             for col_name, col_value in attr["colors"].items():
-                col = Color(col_value, "hex")
+                col = ColorHex(col_value)
                 variables = {
                     "name": col_name,
-                    "hex": col.as_format("hex"),
-                    "hexval": col.as_format("hexval"),
+                    "hex": col.color,
+                    "hexval": col.value,
                 }
                 color = generate_colors(attr["format"], variables)
                 generated_file.append(color)

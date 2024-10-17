@@ -19,6 +19,7 @@
             black
             isort
             lupa
+            pytest
             setuptools
             imagemagick
           ];

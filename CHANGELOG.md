@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.7.1 (in progress)
+
+Massive changes to the internal structure of the code. What this means to the users? Nothing. Not much change happening here. What does it mean for themers? Some changes will be necessary to ensure your custom handler remains working. What does it mean for developers and maintainers? Well, you have a headache and a half coming your way!
+
+
+### Key changes
+
+- Changed `chroma.colors` from a file to a module. The old colors file is now deprecated, but still available under `chroma._colors`. Please use the new module. Usage guide can be found in the README.
+
 ## v0.7.0
 
 Did a lot of work to get autogenerator working.

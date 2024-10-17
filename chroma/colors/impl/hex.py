@@ -28,24 +28,24 @@ class ColorHex(Color):
     def value(self) -> ColorTypeHex:
         return self.__color[1:]
 
-    def cast(self, target_type: Type[T]) -> T:
+    def cast(self, _type: Type[T]) -> T:
         # Delayed imports to avoid circular imports
         from chroma.colors.impl import ColorHSL, ColorRGB
 
         # We know that the type we are returning is correct, but the linter
         # doesn't. So, we use cast() to tell it that.
-        if target_type == ColorRGB:
+        if _type == ColorRGB:
             r = int(self.value[0:2], 16)
             g = int(self.value[2:4], 16)
             b = int(self.value[4:6], 16)
             return cast(T, ColorRGB(r, g, b))
-        elif target_type == ColorHSL:
+        elif _type == ColorHSL:
             color = self.cast(ColorRGB).cast(ColorHSL)
             return cast(T, color)
-        elif target_type == ColorHex:
+        elif _type == ColorHex:
             return cast(T, self)
         else:
-            raise TypeError(f"Cannot convert to type {target_type}")
+            raise TypeError(f"Cannot convert to type {_type}")
 
     def normalize(self):
         raise NotImplementedError("Cannot normalize ColorHex")

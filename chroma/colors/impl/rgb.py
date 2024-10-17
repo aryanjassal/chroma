@@ -39,22 +39,22 @@ class ColorRGB(Color):
     def color(self) -> ColorTypeRGB:
         return (self.__r, self.__g, self.__b)
 
-    def cast(self, target_type: Type[T]) -> T:
+    def cast(self, _type: Type[T]) -> T:
         # Delayed imports to avoid circular imports
         from chroma.colors.impl import ColorHex, ColorHSL
 
         # We know that the type we are returning is correct, but the linter
         # doesn't. So, we use cast() to tell it that.
-        if target_type == ColorHSL:
+        if _type == ColorHSL:
             h, l, s = colorsys.rgb_to_hls(*self.color)
             return cast(T, ColorHSL(h, s, l))
-        elif target_type == ColorHex:
+        elif _type == ColorHex:
             color = f"{self.r:02x}{self.g:02x}{self.b:02x}"
             return cast(T, ColorHex(color))
-        elif target_type == ColorRGB:
+        elif _type == ColorRGB:
             return cast(T, self)
         else:
-            raise TypeError(f"Cannot convert to type {target_type}")
+            raise TypeError(f"Cannot convert to type {_type}")
 
     def __update(self, r: Number, g: Number, b: Number):
         if not check_types((r, g, b), int) and not check_types((r, g, b), float):

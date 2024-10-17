@@ -65,8 +65,11 @@ class Logger:
     def get_logger() -> Logger:
         if Logger.__logger is not None:
             return Logger.__logger
-        raise RuntimeError("Attempt to get logger without setting it")
-
+        Logger.__logger = Logger(0)
+        Logger.__logger.warn("Attempt to get logger None!")
+        Logger.__logger.warn("Setting default loger with level DEBUG")
+        return Logger.__logger
+        
     @staticmethod
     def __out(prefix: str, message: str) -> None:
         lines = message.split("\n")

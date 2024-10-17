@@ -1,27 +1,18 @@
-from __future__ import annotations
+from typing import Generic, Type, TypeVar
 
-from abc import ABC, abstractmethod
-from typing import Type, TypeVar
+from chroma.colors.impl.hex import ColorHex, ColorTypeHex
+from chroma.colors.impl.hsl import ColorHSL, ColorTypeHSL
+from chroma.colors.impl.rgb import ColorRGB, ColorTypeRGB
 
-T = TypeVar("T", bound="_ColorImpl")
+T = TypeVar("T", ColorTypeHex, ColorTypeHSL, ColorTypeRGB)
+# VT = TypeVar("VT", )
 
 
-class _ColorImpl(ABC):
-    @abstractmethod
-    def cast(self, target_type: Type[T]) -> T:
-        """Returns this color converted to another color type.
+class Color(Generic[T]):
+    def __init__(self, color: Type[T]):
+        if type(color) == ColorTypeHex:
+            self.color = ColorHex(color)
 
-        Args:
-            target_type: The target color to convert to.
-
-        Returns:
-            The converted color.
-
-        Raises:
-            TypeError: If the target type doesn't have a conversion method.
-        """
-        pass
-
-    @abstractmethod
-    def __str__(self) -> str:
-        pass
+    @property
+    def color(self):
+        return self.__color

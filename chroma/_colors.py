@@ -1,8 +1,16 @@
+"""
+WARNING: THIS IS NOW DEPRECATED AND WILL BE REMOVED IN THE NEXT RELEASE
+DO NOT USE
+
+Instead, use the new `Chroma.colors` module, which supplies `ColorHex`, `ColorHSL`,
+and `ColorRGB`.
+"""
+
 from __future__ import annotations
 
 import colorsys
 import re
-from typing import Literal, Optional, cast, overload
+from typing import Optional, cast
 
 from chroma import utils
 from chroma.logger import Logger

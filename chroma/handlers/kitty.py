@@ -6,7 +6,6 @@ from pathlib import Path
 
 import chroma
 from chroma import utils
-from chroma.colors import Color
 from chroma.handler import Handler
 from chroma.logger import Logger
 
@@ -61,13 +60,12 @@ class KittyHandler(Handler):
         # Only write the metadata if the option is set to allow it.
         if self.group.get("write_meta"):
             generated_file.append("# vim:ft=kitty")
-            for k, v in metadata.items():
-                if v is not None:
-                    generated_file.append(f"## {k}: {v}")
+            for field, data in metadata.items():
+                if data is not None:
+                    generated_file.append(f"## {field}: {name}")
 
-        for k, v in theme.items():
-            col = Color(v, "hex").as_format("hex")
-            generated_file.append(f"{k} {col}")
+        for name, col in theme.items():
+            generated_file.append(f"{name} {col}")
 
         # Manually insert newlines to make it play well with file.writelines()
         generated_file = [line + "\n" for line in generated_file]

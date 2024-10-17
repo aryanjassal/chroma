@@ -1,14 +1,14 @@
 from . import utils
-from .impl.hex import ColorHex, ColorTypeHex
-from .impl.hsl import ColorHSL, ColorTypeHSL
-from .impl.rgb import ColorRGB, ColorTypeRGB
+from .impl import ColorHex, ColorHSL, ColorRGB, ColorTypeHex, ColorTypeHSL, ColorTypeRGB
+from .base import Color
 
 __all__ = [
-    "ColorRGB",
-    "ColorHSL",
+    "Color",
     "ColorHex",
+    "ColorHSL",
+    "ColorRGB",
+    "ColorTypeHex",
     "ColorTypeHSL",
     "ColorTypeRGB",
-    "ColorTypeHex",
     "utils",
 ]

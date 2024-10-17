@@ -3,15 +3,15 @@ from __future__ import annotations
 import colorsys
 from typing import Type, cast
 
-from chroma.colors.base import T, _ColorImpl
+from chroma.colors.base import Color, T
 from chroma.colors.utils import check_types
 from chroma.types import Number
-from chroma.utils import clamp
+from chroma.utils import clamp, never
 
 ColorTypeHSL = tuple[float, float, float] | tuple[int, int, int]
 
 
-class ColorHSL(_ColorImpl):
+class ColorHSL(Color):
     def __init__(self, h: Number, s: Number, l: Number):
         if not check_types((h, s, l), int) and not check_types((h, s, l), float):
             raise TypeError("The color components have different types.")
@@ -39,24 +39,22 @@ class ColorHSL(_ColorImpl):
     def color(self) -> ColorTypeHSL:
         return (self.__h, self.__s, self.__l)
 
-    def cast(self, target_type: Type[T]) -> T:
+    def cast(self, _type: Type[T]) -> T:
         # Delayed imports to avoid circular imports
-        from chroma.colors.impl.hex import ColorHex
-        from chroma.colors.impl.rgb import ColorRGB
+        from chroma.colors.impl import ColorHex, ColorRGB
 
         # We know that the type we are returning is correct, but the linter
         # doesn't. So, we use cast() to tell it that.
-        if target_type == ColorRGB:
-            from chroma.colors.impl.rgb import ColorRGB
+        if _type == ColorRGB:
             h, s, l = self.color
             color = ColorRGB(*colorsys.hls_to_rgb(h, l, s))
             return cast(T, color)
-        elif target_type == ColorHex:
+        elif _type == ColorHex:
             return cast(T, self.cast(ColorRGB).cast(ColorHex))
-        elif target_type == ColorHSL:
-            return cast(T, self)
+        elif _type == ColorHSL:
+            return cast(T, ColorHSL(*self.color))
         else:
-            raise TypeError(f"Cannot convert to type {target_type}")
+            raise TypeError(f"Cannot convert to type {_type}")
 
     def __update(self, h: Number, s: Number, l: Number):
         if not check_types((h, s, l), int) and not check_types((h, s, l), float):
@@ -131,6 +129,69 @@ class ColorHSL(_ColorImpl):
     def desaturate(self, amount: float) -> ColorHSL:
         self.__update(*self.desaturated(amount).color)
         return self
+
+    def blended(self, color: Color, ratio: float = 0.5) -> ColorHSL:
+        from chroma.colors.impl import ColorRGB
+
+        return self.cast(ColorRGB).blend(color, ratio).cast(ColorHSL)
+
+    def blend(self, color: Color, ratio: float = 0.5) -> ColorHSL:
+        self.__update(*self.blended(color, ratio).color)
+        return self
+
+    def set_h(self, h: Number) -> ColorHSL:
+        is_normal = self.color == self.normalized().color
+
+        if is_normal:
+            if type(h) == float:
+                self.__h = clamp(h, 0.0, 1.0)
+                return self
+            elif type(h) == int:
+                self.__h = clamp(h / 360.0, 0.0, 1.0)
+            never()
+        else:
+            if type(h) == float:
+                self.__h = clamp(h * 360, 0, 360)
+                return self
+            elif type(h) == int:
+                self.__h = clamp(h, 0, 360)
+            never()
+
+    def set_s(self, s: Number) -> ColorHSL:
+        is_normal = self.color == self.normalized().color
+
+        if is_normal:
+            if type(s) == float:
+                self.__s = clamp(s, 0.0, 1.0)
+                return self
+            elif type(s) == int:
+                self.__s = clamp(s / 360.0, 0.0, 1.0)
+            never()
+        else:
+            if type(s) == float:
+                self.__s = clamp(s * 360, 0, 360)
+                return self
+            elif type(s) == int:
+                self.__s = clamp(s, 0, 360)
+            never()
+
+    def set_l(self, l: Number) -> ColorHSL:
+        is_normal = self.color == self.normalized().color
+
+        if is_normal:
+            if type(l) == float:
+                self.__l = clamp(l, 0.0, 1.0)
+                return self
+            elif type(l) == int:
+                self.__l = clamp(l / 360.0, 0.0, 1.0)
+            never()
+        else:
+            if type(l) == float:
+                self.__l = clamp(l * 360, 0, 360)
+                return self
+            elif type(l) == int:
+                self.__l = clamp(l, 0, 360)
+            never()
 
     def __str__(self):
         return f"hsl({self.h}, {self.s}, {self.l})"

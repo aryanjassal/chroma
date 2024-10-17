@@ -2,8 +2,9 @@ import re
 import subprocess
 from pathlib import Path
 
-from chroma.colors import Color
+from chroma.colors import Color, ColorHex, ColorHSL
 from chroma.logger import Logger
+from chroma.types import Number
 
 logger = Logger.get_logger()
 
@@ -21,45 +22,85 @@ HSL_MAP = {
     "magenta": ((280, 320), (70, 100), (40, 60)),
 }
 
-# fmt: off
+
+def generator_fg(white: Color, min_light: Number, change_light: Number) -> Color:
+    white = white.cast(ColorHSL)
+    if white.l < 0.9:
+        return white.set_l(min_light)
+    else:
+        return white.lightened(change_light)
+
+
+def generator_bg(
+    black: Color,
+    thresh: float,
+    min_sat: Number,
+    min_dark: Number,
+    change_dark: Number,
+) -> Color:
+    black = black.cast(ColorHSL)
+    if black.l > thresh or black.s > 0.5:
+        return black.set_s(min_sat).set_l(min_dark)
+    else:
+        return black.darkened(change_dark)
+
+
+def generator_norm(white: Color, accent: Color, mix_hex: str) -> Color:
+    mix = ColorHex(mix_hex)
+    white = white.blended(mix.darkened(0.1))
+    return white.blended(accent, 0.1).cast(ColorHSL).set_s(0.6)
+
+
+def generator_bright(white: Color, accent: Color, mix_hex: str) -> Color:
+    mix = ColorHex(mix_hex)
+    return white.blended(mix.lightened(0.15)).blended(accent, 0.1)
+
+
 REQUIRED_COLORS = {
     "accent": None,
     "black": None,
     "white": None,
     "bright_black": lambda x: x["black"].lightened(0.1),
     "bright_white": lambda x: x["white"].lightened(0.25),
-    "accent_bg": lambda x: x["accent"].saturated(-0.1).darkened(0.1),
+    "accent_bg": lambda x: x["accent"].desaturated(0.1).darkened(0.1),
     "accent_fg": lambda x: x["white"].lightened(0.2),
-    "foreground": lambda x: x["white"].lightened(0.85, True) if x["white"].as_hsl().color[2] < 0.9 else x["white"],
-    "foreground_alt": lambda x: x["white"].lightened(0.7, True) if x["white"].as_hsl().color[2] < 0.9 else x["white"].lightened(0.1),
-    "foreground_unfocus": lambda x: x["white"].lightened(0.75, True) if x["white"].as_hsl().color[2] < 0.9 else x["white"].lightened(0.15),
-    "background": lambda x: x["black"].saturated(0.5, True).darkened(0.1, True) if x["black"].as_hsl().color[2] > 0.15 or x["black"].as_hsl().color[1] > 0.5 else x["black"],
-    "background_alt": lambda x: x["black"].saturated(0.35, True).darkened(0.15, True) if x["black"].as_hsl().color[2] > 0.15 or x["black"].as_hsl().color[1] > 0.5 else x["black"].darkened(0.1), 
-    "background_unfocus": lambda x: x["black"].saturated(0.2, True).darkened(0.2, True) if x["black"].as_hsl().color[2] > 0.2 or x["black"].as_hsl().color[1] > 0.5 else x["black"].darkened(0.15),
-    "red": lambda x: x["white"].blended(Color("#ff0000", "hex").darkened(0.1)).blended(x["accent"], 0.1).saturated(0.6, True), 
-    "orange": lambda x: x["white"].blended(Color("#ff8800", "hex").darkened(0.1)).blended(x["accent"], 0.1).saturated(0.6, True),
-    "brown": lambda x: x["white"].blended(Color("#884400", "hex").darkened(0.1)).blended(x["accent"], 0.1).saturated(0.6, True),
-    "yellow": lambda x: x["white"].blended(Color("#ffff00", "hex").darkened(0.1)).blended(x["accent"], 0.1).saturated(0.6, True),
-    "green": lambda x: x["white"].blended(Color("#00ff00", "hex").darkened(0.1)).blended(x["accent"], 0.1).saturated(0.6, True),
-    "blue": lambda x: x["white"].blended(Color("#0000ff", "hex").darkened(0.1)).blended(x["accent"], 0.1).saturated(0.6, True),
-    "cyan": lambda x: x["white"].blended(Color("#00ffff", "hex").darkened(0.1)).blended(x["accent"], 0.1).saturated(0.6, True),
-    "magenta": lambda x: x["white"].blended(Color("#00ff00", "hex").darkened(0.1)).blended(x["accent"], 0.1).saturated(0.6, True),
-    "bright_red": lambda x: x["white"].blended(Color("#ff0000", "hex")).lightened(0.15).blended(x["accent"], 0.1), 
-    "bright_orange": lambda x: x["white"].blended(Color("#ff8800", "hex")).lightened(0.15).blended(x["accent"], 0.1),
-    "bright_brown": lambda x: x["white"].blended(Color("#884400", "hex")).lightened(0.15).blended(x["accent"], 0.1),
-    "bright_yellow": lambda x: x["white"].blended(Color("#ffff00", "hex")).lightened(0.15).blended(x["accent"], 0.1),
-    "bright_green": lambda x: x["white"].blended(Color("#00ff00", "hex")).lightened(0.15).blended(x["accent"], 0.1),
-    "bright_blue": lambda x: x["white"].blended(Color("#0000ff", "hex")).lightened(0.15).blended(x["accent"], 0.1),
-    "bright_cyan": lambda x: x["white"].blended(Color("#00ffff", "hex")).lightened(0.15).blended(x["accent"], 0.1),
-    "bright_magenta": lambda x: x["white"].blended(Color("#00ff00", "hex")).lightened(0.15).blended(x["accent"], 0.1),
+    "foreground": lambda x: generator_fg(x["white"], 0.85, 0.0),
+    "foreground_alt": lambda x: generator_fg(x["white"], 0.7, 0.1),
+    "foreground_unfocus": lambda x: generator_fg(x["white"], 0.75, 0.15),
+    "background": lambda x: generator_bg(x["black"], 0.15, 0.5, 0.1, 0.0),
+    "background_alt": lambda x: generator_bg(x["black"], 0.15, 0.35, 0.15, 0.1),
+    "background_unfocus": lambda x: generator_bg(x["black"], 0.2, 0.2, 0.2, 0.15),
+    "red": lambda x: generator_norm(x["white"], x["accent"], "#ff0000"),
+    "orange": lambda x: generator_norm(x["white"], x["accent"], "#884400"),
+    "brown": lambda x: generator_norm(x["white"], x["accent"], "#ffff00"),
+    "yellow": lambda x: generator_norm(x["white"], x["accent"], "#00ff00"),
+    "green": lambda x: generator_norm(x["white"], x["accent"], "#0000ff"),
+    "blue": lambda x: generator_norm(x["white"], x["accent"], "#00ffff"),
+    "cyan": lambda x: generator_norm(x["white"], x["accent"], "#00ff00"),
+    "magenta": lambda x: generator_norm(x["white"], x["accent"], "#ff000ff"),
+    "bright_red": lambda x: generator_bright(x["white"], x["accent"], "#ff0000"),
+    "bright_orange": lambda x: generator_bright(x["white"], x["accent"], "#884400"),
+    "bright_brown": lambda x: generator_bright(x["white"], x["accent"], "#ffff00"),
+    "bright_yellow": lambda x: generator_bright(x["white"], x["accent"], "#00ff00"),
+    "bright_green": lambda x: generator_bright(x["white"], x["accent"], "#0000ff"),
+    "bright_blue": lambda x: generator_bright(x["white"], x["accent"], "#00ffff"),
+    "bright_cyan": lambda x: generator_bright(x["white"], x["accent"], "#00ff00"),
+    "bright_magenta": lambda x: generator_bright(x["white"], x["accent"], "#ff000ff"),
 }
 
 REQUIRED_ESTIMATIONS = {
     "accent": lambda x: x.saturated(0.1),
-    "black": lambda x: x.darkened(0.4).blended(x, 0.4).lightened(0.4).blended(x, 0.1).darkened(0.3 if x.as_hsl().color[2] > 25 else 0.1),
-    "white": lambda x: x.lightened(0.4).blended(x, 0.4).darkened(0.4).blended(x, 0.1).lightened(0.3 if x.as_hsl().color[2] < 75 else 0.1),
+    "black": lambda x: x.darkened(0.4)
+    .blended(x, 0.4)
+    .lightened(0.4)
+    .blended(x, 0.1)
+    .darkened(0.3 if x.as_hsl().color[2] > 25 else 0.1),
+    "white": lambda x: x.lightened(0.4)
+    .blended(x, 0.4)
+    .darkened(0.4)
+    .blended(x, 0.1)
+    .lightened(0.3 if x.as_hsl().color[2] < 75 else 0.1),
 }
-# fmt: on
 
 
 def hsl_match(color: Color, map: dict = HSL_MAP, omit=[]):
@@ -85,7 +126,7 @@ def hsl_match(color: Color, map: dict = HSL_MAP, omit=[]):
             return True
         return False
 
-    h, s, l = hsl_denormal(*color.as_hsl().color)
+    h, s, l = hsl_denormal(*color.cast(ColorHSL).color)
     for name, requirement in map.items():
         if (
             check_part(h, requirement[0])
@@ -95,8 +136,8 @@ def hsl_match(color: Color, map: dict = HSL_MAP, omit=[]):
             if name in omit:
                 continue
 
-            color_regular = color.as_hex()
-            color_bright = color.lightened(0.1).as_hex()
+            color_regular = color.cast(ColorHex)
+            color_bright = color.lightened(0.1).cast(ColorHex)
 
             logger.debug(f"Found color {name} to be {color_regular}")
             logger.debug(f"Calculated color bright_{name} to be {color_bright}")
@@ -154,21 +195,21 @@ def generate(
 
         prominent_color = None
         for color in colors:
-            color = Color(color, "hex").as_hsl()
+            color = ColorHex(color).cast(ColorHSL)
             if color.color[1] > 0.4 and color.color[2] > 0.25:
-                prominent_color = color.as_hex()
+                prominent_color = color.cast(ColorHex)
                 logger.debug(f"Detected prominent color {prominent_color}")
                 break
 
         if prominent_color is None:
-            prominent_color = Color(colors[0], "hex")
+            prominent_color = ColorHex(colors[0])
             logger.debug(
-                f"Could not detect a suitable prominent color. Using {prominent_color.as_hex()}"
+                f"Could not detect a suitable prominent color. Using {prominent_color.cast(ColorHex)}"
             )
 
         mapped_colors = {}
         for color in colors:
-            color = Color(color, "hex")
+            color = ColorHex(color)
             mapped = hsl_match(color, hsl_map, mapped_colors.keys())
             if mapped:
                 mapped_colors = {**mapped, **mapped_colors}
@@ -180,8 +221,7 @@ def generate(
                     logger.debug(f"Estimating {name} to be {mapped_colors[name]}")
 
         colors = {
-            k: Color(v, "hex") if type(v) != Color else v
-            for k, v, in mapped_colors.items()
+            k: ColorHex(v) if type(v) != Color else v for k, v, in mapped_colors.items()
         }
 
         iterate = False
@@ -209,7 +249,7 @@ def generate(
         mapped_colors.pop("bright_accent", None)
 
         mapped_colors = {
-            k: v.color if type(v) == Color else v for k, v, in mapped_colors.items()
+            k: v.color if isinstance(v, Color) else v for k, v, in mapped_colors.items()
         }
 
         return mapped_colors

@@ -1,12 +1,12 @@
 from chroma.colors import ColorRGB
+from chroma.colors.base import Color
 from chroma.colors.utils import check_types
-from chroma.colors.base import _ColorImpl
 
 
 def test_create_color():
     color = ColorRGB(0, 0, 0)
     assert type(color) == ColorRGB
-    assert isinstance(color, _ColorImpl)
+    assert isinstance(color, Color)
 
     try:
         color = ColorRGB(999, 0, 0)

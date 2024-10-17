@@ -3,14 +3,15 @@ from __future__ import annotations
 import colorsys
 from typing import Type, cast
 
-from chroma.colors.base import T, _ColorImpl
+from chroma.colors.base import Color, T
 from chroma.colors.utils import check_types
 from chroma.types import Number
+from chroma.utils import clamp, never
 
 ColorTypeRGB = tuple[float, float, float] | tuple[int, int, int]
 
 
-class ColorRGB(_ColorImpl):
+class ColorRGB(Color):
     def __init__(self, r: Number, g: Number, b: Number):
         if not check_types((r, g, b), int) and not check_types((r, g, b), float):
             raise TypeError("The color components have different types.")
@@ -40,8 +41,7 @@ class ColorRGB(_ColorImpl):
 
     def cast(self, target_type: Type[T]) -> T:
         # Delayed imports to avoid circular imports
-        from chroma.colors.impl.hex import ColorHex
-        from chroma.colors.impl.hsl import ColorHSL
+        from chroma.colors.impl import ColorHex, ColorHSL
 
         # We know that the type we are returning is correct, but the linter
         # doesn't. So, we use cast() to tell it that.
@@ -64,7 +64,7 @@ class ColorRGB(_ColorImpl):
         self.__b = b
         return self
 
-    def blended(self, color: _ColorImpl, ratio: float) -> ColorRGB:
+    def blended(self, color: Color, ratio: float = 0.5) -> ColorRGB:
         r1, g1, b1 = self.color
         r2, g2, b2 = color.cast(ColorRGB).color
         a1 = 1 - ratio
@@ -74,7 +74,7 @@ class ColorRGB(_ColorImpl):
         b3 = a1 * b1 + a2 * b2
         return ColorRGB(r3, g3, b3)
 
-    def blend(self, color: _ColorImpl, ratio: float) -> ColorRGB:
+    def blend(self, color: Color, ratio: float = 0.5) -> ColorRGB:
         self.__update(*self.blended(color, ratio).color)
         return self
 
@@ -103,6 +103,116 @@ class ColorRGB(_ColorImpl):
             return ColorRGB(*self.color)
         else:
             raise TypeError(f"The color components have different types {self.color}")
+
+    def denormalize(self) -> ColorRGB:
+        self.__update(*self.denormalized().color)
+        return self
+
+    def set_r(self, r: Number) -> ColorRGB:
+        is_normal = self.color == self.normalized().color
+
+        if is_normal:
+            if type(r) == float:
+                self.__r = clamp(r, 0.0, 1.0)
+                return self
+            elif type(r) == int:
+                self.__r = clamp(r / 360.0, 0.0, 1.0)
+            never()
+        else:
+            if type(r) == float:
+                self.__r = clamp(r * 360, 0, 360)
+                return self
+            elif type(r) == int:
+                self.__r = clamp(r, 0, 360)
+            never()
+
+    def set_g(self, g: Number) -> ColorRGB:
+        ig_normal = self.color == self.normalized().color
+
+        if ig_normal:
+            if type(g) == float:
+                self.__g = clamp(g, 0.0, 1.0)
+                return self
+            elif type(g) == int:
+                self.__g = clamp(g / 360.0, 0.0, 1.0)
+            never()
+        else:
+            if type(g) == float:
+                self.__g = clamp(g * 360, 0, 360)
+                return self
+            elif type(g) == int:
+                self.__g = clamp(g, 0, 360)
+            never()
+
+    def set_b(self, b: Number) -> ColorRGB:
+        is_normal = self.color == self.normalized().color
+
+        if is_normal:
+            if type(b) == float:
+                self.__b = clamp(b, 0.0, 1.0)
+                return self
+            elif type(b) == int:
+                self.__b = clamp(b / 360.0, 0.0, 1.0)
+            never()
+        else:
+            if type(b) == float:
+                self.__b = clamp(b * 360, 0, 360)
+                return self
+            elif type(b) == int:
+                self.__b = clamp(b, 0, 360)
+            never()
+
+    # TEST: Do we really need to do it this way? Why can't the user cast to HSL
+    # to access these particular functions? I guess I will keep them here for
+    # the time being, but usage is discouraged.
+
+    def darkened(self, amount: float) -> ColorRGB:
+        """Usage discouraged. Cast to ColorHSL to use these methods."""
+        from chroma.colors.impl import ColorHSL
+
+        return self.cast(ColorHSL).darkened(amount).cast(ColorRGB)
+
+    def darken(self, amount: float) -> ColorRGB:
+        """Usage discouraged. Cast to ColorHSL to use these methods."""
+        from chroma.colors.impl import ColorHSL
+
+        return self.cast(ColorHSL).darken(amount).cast(ColorRGB)
+
+    def lightened(self, amount: float) -> ColorRGB:
+        """Usage discouraged. Cast to ColorHSL to use these methods."""
+        from chroma.colors.impl import ColorHSL
+
+        return self.cast(ColorHSL).lightened(amount).cast(ColorRGB)
+
+    def lighten(self, amount: float) -> ColorRGB:
+        """Usage discouraged. Cast to ColorHSL to use these methods."""
+        from chroma.colors.impl import ColorHSL
+
+        return self.cast(ColorHSL).lighten(amount).cast(ColorRGB)
+
+    def saturated(self, amount: float) -> ColorRGB:
+        """Usage discouraged. Cast to ColorHSL to use these methods."""
+        from chroma.colors.impl import ColorHSL
+
+        return self.cast(ColorHSL).saturated(amount).cast(ColorRGB)
+
+    def saturate(self, amount: float) -> ColorRGB:
+        """Usage discouraged. Cast to ColorHSL to use these methods."""
+        from chroma.colors.impl import ColorHSL
+
+        return self.cast(ColorHSL).saturate(amount).cast(ColorRGB)
+
+    def desaturated(self, amount: float) -> ColorRGB:
+        """Usage discouraged. Cast to ColorHSL to use these methods."""
+        from chroma.colors.impl import ColorHSL
+
+        return self.cast(ColorHSL).desaturated(amount).cast(ColorRGB)
+
+    def desaturate(self, amount: float) -> ColorRGB:
+        """Usage discouraged. Cast to ColorHSL to use these methods."""
+        from chroma.colors.impl import ColorHSL
+
+        return self.cast(ColorHSL).desaturate(amount).cast(ColorRGB)
 
     def __str__(self):
         return f"hsl({self.r}, {self.g}, {self.b})"

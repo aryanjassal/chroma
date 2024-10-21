@@ -134,9 +134,8 @@ def set_exception_hook(func):
 
 def never(message: Optional[str] = None) -> NoReturn:
     if message:
-        logger.fatal(message)
-    else:
-        logger.fatal("never")
+        raise RuntimeError(message)
+    raise RuntimeError
 
 
 def inspect_dict(iterable) -> None:

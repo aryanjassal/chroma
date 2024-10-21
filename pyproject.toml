@@ -1,0 +1,5 @@
+[tool.pyright]
+include = ["chroma"]
+exclude = ["**/__pycache__"]
+pythonVersion = "3.11"
+pythonPlatform = "Linux"

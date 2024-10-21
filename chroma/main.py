@@ -29,19 +29,52 @@ def setup_args():
 
     # Parse commands for keyword generate
     gen_parser = subparsers.add_parser(
-        "generate", aliases=["gen"], help="Generates a theme from an image"
+        "generate",
+        aliases=["gen"],
+        help="Generates a palette from an image",
     )
     gen_parser.add_argument(
-        "image_path", help="Path to the image to extract colors from"
+        "image_path",
+        help="Path to the image to extract colors from",
     )
-    gen_parser.add_argument("-u", "--override", type=str, help="Override settings")
     gen_parser.add_argument(
-        "-o", "--output", type=str, help="Output path of generated color scheme"
+        "-u",
+        "--override",
+        type=str,
+        help="Override settings",
+    )
+    gen_parser.add_argument(
+        "-o",
+        "--output",
+        type=str,
+        help="Output path of generated color scheme",
+    )
+    gen_parser.add_argument(
+        "--max-colors",
+        type=int,
+        help="Get top n colors by prominency for generation",
+        default=1024,
+    )
+    gen_parser.add_argument(
+        "--max-iterations",
+        type=int,
+        help="If can't estimate and failed to generate all colors, try again",
+        default=5,
+    )
+    gen_parser.add_argument(
+        "--image-size",
+        type=int,
+        help="Image size in NxN pixels to downscale to",
+        default=256,
+    )
+    gen_parser.add_argument(
+        "--estimate",
+        action="store_true",
+        help="Should estimate colors if they couldn't be generated?",
+        default=True,
     )
 
-    subparsers.add_parser(
-        "remove", help="Removes the generated palette, allowing theme colors"
-    )
+    subparsers.add_parser("remove", help="Removes the generated palette")
 
     known_args, unknown = parser.parse_known_args()
     args = parser.parse_args(unknown, namespace=known_args)
@@ -94,11 +127,16 @@ def main():
         exit(0)
 
     if args.command == "generate":
-        if args.output:
-            out_path = args.output
-        else:
-            out_path = utils.cache_dir() / "palettes/generated.lua"
-        generator.generate("magick", args.image_path, out_path, image_size=768)
+        out_path = utils.cache_dir() / "palettes/generated.lua"
+        generator.generate(
+            "magick",
+            args.image_path,
+            out_path,
+            image_size=args.image_size,
+            max_colors=args.max_colors,
+            max_iterations=args.max_iterations,
+            estimate_missing=args.estimate,
+        )
 
         if args.output:
             shutil.copy(

@@ -80,6 +80,9 @@ Do note that there are way more options available. Take a look at the help menu 
 
 To keep using the default theme palette and remove the auto-generated palette, run this command. You will need to regenerate the palette if you have already run this command.
 
+> [!IMPORTANT]
+> The colors generated are heavily opinionated and might not work perfectly for all images. Please understand this, and raise any issues with the image palette generation along with an image on which we see that behaviour. Of course, we fix one image, we break another.
+
 ```console
 [aryanj@laptop:~]$ chroma remove
 ```
@@ -523,6 +526,8 @@ print(color_hex.value)  # Outputs "ffffff"
 > [!NOTE]
 > For an exhaustive changelog, refer to the [Changelog](https://github.com/aryanjassal/chroma/blob/main/CHANGELOG.md)
 
+- Update `imagemagick` backend
+  - Instead of relying on color autogeneration for a good color, use hsl maps to clamp the color to good values. This should fix issues of some colors being insanely bright in some images, or some colors being too dark in some images.
 - Add default themes, as colors are now static
 - Provide preset themes for quicker start with system theming (in progress)
   - Make user defined themes directory

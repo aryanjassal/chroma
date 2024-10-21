@@ -124,4 +124,4 @@ class ColorHex(Color):
         return self.cast(ColorRGB).blended(color, ratio).cast(ColorHex)
 
     def __str__(self):
-        return self.color
+        return self.color.lower()

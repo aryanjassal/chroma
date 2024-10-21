@@ -46,10 +46,11 @@ class ColorRGB(Color):
         # We know that the type we are returning is correct, but the linter
         # doesn't. So, we use cast() to tell it that.
         if _type == ColorHSL:
-            h, l, s = colorsys.rgb_to_hls(*self.color)
+            h, l, s = colorsys.rgb_to_hls(*self.normalized().color)
             return cast(T, ColorHSL(h, s, l))
         elif _type == ColorHex:
-            color = f"{self.r:02x}{self.g:02x}{self.b:02x}"
+            r, g, b = self.denormalized().color
+            color = f"{r:02x}{g:02x}{b:02x}"
             return cast(T, ColorHex(color))
         elif _type == ColorRGB:
             return cast(T, self)
@@ -65,14 +66,18 @@ class ColorRGB(Color):
         return self
 
     def blended(self, color: Color, ratio: float = 0.5) -> ColorRGB:
-        r1, g1, b1 = self.color
-        r2, g2, b2 = color.cast(ColorRGB).color
+        is_normalized = self.color == self.normalized().color
+        r1, g1, b1 = self.normalized().color
+        r2, g2, b2 = color.cast(ColorRGB).normalized().color
         a1 = 1 - ratio
         a2 = ratio
-        r3 = a1 * r1 + a2 * r2
-        g3 = a1 * g1 + a2 * g2
-        b3 = a1 * b1 + a2 * b2
-        return ColorRGB(r3, g3, b3)
+        r3 = clamp(a1 * r1 + a2 * r2, 0.0, 1.0)
+        g3 = clamp(a1 * g1 + a2 * g2, 0.0, 1.0)
+        b3 = clamp(a1 * b1 + a2 * b2, 0.0, 1.0)
+        color = ColorRGB(r3, g3, b3)
+        if is_normalized:
+            return color.normalized()
+        return color
 
     def blend(self, color: Color, ratio: float = 0.5) -> ColorRGB:
         self.__update(*self.blended(color, ratio).color)
@@ -214,5 +219,7 @@ class ColorRGB(Color):
 
         return self.cast(ColorHSL).desaturate(amount).cast(ColorRGB)
 
+    # WARN: __str__ is only supported by hex for now
     def __str__(self):
-        return f"hsl({self.r}, {self.g}, {self.b})"
+        from chroma.colors.impl import ColorHex
+        return self.cast(ColorHex).__str__()

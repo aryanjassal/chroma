@@ -16,8 +16,9 @@ class ColorHSL(Color):
         if not check_types((h, s, l), int) and not check_types((h, s, l), float):
             raise TypeError("The color components have different types.")
         if (type(h) == float and (max(h, s, l) > 1.0 or min(h, s, l) < 0.0)) or (
-            type(h) == int and (max(h, s, l) > 255 or min(h, s, l) < 0)
+            type(h) == int and (h > 360 or max(s, l) > 100 or min(h, s, l) < 0)
         ):
+            print(h, s, l)
             raise ValueError("The color components have invalid values.")
         self.__h = h
         self.__s = s
@@ -46,7 +47,7 @@ class ColorHSL(Color):
         # We know that the type we are returning is correct, but the linter
         # doesn't. So, we use cast() to tell it that.
         if _type == ColorRGB:
-            h, s, l = self.color
+            h, s, l = self.normalized().color
             color = ColorRGB(*colorsys.hls_to_rgb(h, l, s))
             return cast(T, color)
         elif _type == ColorHex:
@@ -193,5 +194,7 @@ class ColorHSL(Color):
                 self.__l = clamp(l, 0, 360)
             never()
 
+    # WARN: __str__ is only supported by hex for now
     def __str__(self):
-        return f"hsl({self.h}, {self.s}, {self.l})"
+        from chroma.colors.impl import ColorHex
+        return self.cast(ColorHex).__str__()

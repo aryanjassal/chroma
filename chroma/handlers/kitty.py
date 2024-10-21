@@ -62,7 +62,7 @@ class KittyHandler(Handler):
             generated_file.append("# vim:ft=kitty")
             for field, data in metadata.items():
                 if data is not None:
-                    generated_file.append(f"## {field}: {name}")
+                    generated_file.append(f"## {field}: {data}")
 
         for name, col in theme.items():
             generated_file.append(f"{name} {col}")

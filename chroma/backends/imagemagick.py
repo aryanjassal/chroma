@@ -5,62 +5,26 @@ from pathlib import Path
 from chroma import utils
 from chroma.colors import Color, ColorHex, ColorHSL
 from chroma.logger import Logger
-from chroma.types import HSLMap, HSLMapValue, Number
+from chroma.types import HSLMap, HSLMapValue
 
 logger = Logger.get_logger()
 
 HSL_MAP: HSLMap = {
     "accent": (None, (60, 100), (50, 90)),
-    "black": (None, None, (5, 25)),
-    "white": (None, None, (75, 95)),
+    "black": (None, None, (5, 20)),
+    "white": (None, None, (80, 95)),
+    "background": (None, (0, 20), (5, 10)),
+    "foreground": (None, (0, 20), (90, 95)),
     "red": ([(0, 35), (325, 360)], (40, 90), (30, 90)),
     "orange": ((35, 75), (30, 90), (40, 80)),
     "brown": ((35, 75), (30, 70), (20, 70)),
     "yellow": ((65, 105), (40, 90), (30, 90)),
     "green": ((100, 160), (40, 90), (30, 90)),
-    "blue": ((180, 240), (40, 90), (40, 90)),
-    "cyan": ((165, 195), (40, 90), (40, 90)),
-    "magenta": ((280, 320), (45, 70), (35, 50)),
+    "blue": ((200, 230), (40, 50), (40, 60)),
+    "cyan": ((170, 200), (40, 90), (40, 90)),
+    "magenta": ((280, 310), (30, 50), (30, 50)),
 }
 
-
-# def hsl_match(color: Color, map: HSLMap = HSL_MAP, omit=[]):
-#     def check_part(field, cond):
-#         if type(cond) == list:
-#             all_cond = []
-#             for c in cond:
-#                 all_cond.append(check(field, c))
-#             return all(all_cond)
-#         else:
-#             return check(field, cond)
-#
-#     def check(f, c):
-#         if c is None:
-#             return True
-#         if f >= c[0] and f <= c[1]:
-#             return True
-#         return False
-#
-#     h, s, l = color.cast(ColorHSL).denormalized().color
-#     for name, requirement in map.items():
-#         if (
-#             check_part(h, requirement[0])
-#             and check_part(s, requirement[1])
-#             and check_part(l, requirement[2])
-#         ):
-#             if name in omit:
-#                 continue
-#
-#             color_regular = color.cast(ColorHex)
-#             color_bright = color.lightened(0.1).cast(ColorHex)
-#
-#             logger.debug(f"Found color {name} to be {color_regular}")
-#             logger.debug(f"Calculated color bright_{name} to be {color_bright}")
-#
-#             return {
-#                 name: color_regular.color,
-#                 f"bright_{name}": color_bright.color,
-#             }
 
 # NOTE: These generators are used when the corresponding color cannot be inferred
 # from the image.
@@ -114,8 +78,11 @@ def generator_norm(
     else:
         mix = mix.darkened(0.25)
     color = white.blended(mix, 0.75)
-    color = color.blended(accent, 0.05)
+    color = color.blended(accent, 0.15)
     color = color.saturated(0.2)
+    color = color.darkened(0.2)
+    color = color.blend(mix, 0.15)
+    color = color.lighten(0.25)
     return utils.clamp_color_to_hslrules(color, condition)
 
 
@@ -161,12 +128,12 @@ REQUIRED_COLORS = {
     "bright_white": lambda x: x["white"].lightened(0.1),
     "accent_bg": lambda x: x["accent"].desaturated(0.2).darkened(0.1),
     "accent_fg": lambda x: x["white"].lightened(0.15),
-    "foreground": lambda x: generator_fg(x["white"], x["accent"], 0.5, 0.08, HSL_MAP["white"]),
-    "foreground_alt": lambda x: generator_fg(x["white"], x["accent"], 0.5, 0.1, HSL_MAP["white"]),
-    "foreground_unfocus": lambda x: generator_fg(x["white"], x["accent"], 0.5, 0.12, HSL_MAP["white"]),
-    "background": lambda x: generator_bg(x["black"], x["accent"], 0.5, 0.08, HSL_MAP["black"]),
-    "background_alt": lambda x: generator_bg(x["black"], x["accent"], 0.5, 0.1, HSL_MAP["black"]),
-    "background_unfocus": lambda x: generator_bg(x["black"], x["accent"], 0.5, 0.12, HSL_MAP["black"]),
+    "foreground": lambda x: generator_fg(x["white"], x["accent"], 0.5, 0.08, HSL_MAP["foreground"]),
+    "foreground_alt": lambda x: generator_fg(x["white"], x["accent"], 0.5, 0.1, HSL_MAP["foreground"]),
+    "foreground_unfocus": lambda x: generator_fg(x["white"], x["accent"], 0.5, 0.12, HSL_MAP["foreground"]),
+    "background": lambda x: generator_bg(x["black"], x["accent"], 0.5, 0.08, HSL_MAP["background"]),
+    "background_alt": lambda x: generator_bg(x["black"], x["accent"], 0.5, 0.1, HSL_MAP["background"]),
+    "background_unfocus": lambda x: generator_bg(x["black"], x["accent"], 0.5, 0.12, HSL_MAP["background"]),
     "red": lambda x: generator_norm(x["white"],x["accent"], "#ff0000", HSL_MAP["red"]),
     "orange": lambda x: generator_norm(x["white"], x["accent"], "#ff8800", HSL_MAP["orange"]),
     "brown": lambda x: generator_norm(x["white"], x["accent"], "#884400", HSL_MAP["brown"]),

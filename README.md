@@ -527,7 +527,8 @@ print(color_hex.value)  # Outputs "ffffff"
 > For an exhaustive changelog, refer to the [Changelog](https://github.com/aryanjassal/chroma/blob/main/CHANGELOG.md)
 
 - Update `imagemagick` backend
-  - Instead of relying on color autogeneration for a good color, use hsl maps to clamp the color to good values. This should fix issues of some colors being insanely bright in some images, or some colors being too dark in some images.
+  - Use "generated.lua" theme as base instead, unless specified otherwise
+    - Something like '-t --theme "theme_name"' could be used for theme overriding
 - Add default themes, as colors are now static
 - Provide preset themes for quicker start with system theming (in progress)
   - Make user defined themes directory
@@ -542,6 +543,9 @@ print(color_hex.value)  # Outputs "ffffff"
   - Allow themes to be updated by a command, replacing local with remote content
 - Add a `config.lua` file which the users can configure the default integrations in
   - Add enabled modules config option
+  - Add config for backends
+    - HSL_MAP for imagemagick backend
+      - Can be set via both the theme and options. if unset in opts, theme setting would take precedence
 - Rename 'handlers' to 'integrations'
 - Add `chroma.lib` for utility functions within lua
   - Add `Color` class and conversion utilities for lua
@@ -550,6 +554,7 @@ print(color_hex.value)  # Outputs "ffffff"
   - Add pre and post inserts for the files
   - Add support for template files
 - Add tests
+- QT SUPPORT [HIGH PRIORITY] (probably via kvantum)
 - Separate backup to validity check in utils
 
 ## Credits

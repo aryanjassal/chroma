@@ -5,10 +5,13 @@ from typing import Type, cast
 
 from chroma.colors.base import Color, T
 from chroma.colors.utils import check_types
+from chroma.logger import Logger
 from chroma.types import Number
 from chroma.utils import clamp, never
 
 ColorTypeHSL = tuple[float, float, float] | tuple[int, int, int]
+
+logger = Logger.get_logger()
 
 
 class ColorHSL(Color):
@@ -57,14 +60,6 @@ class ColorHSL(Color):
         else:
             raise TypeError(f"Cannot convert to type {_type}")
 
-    def __update(self, h: Number, s: Number, l: Number):
-        if not check_types((h, s, l), int) and not check_types((h, s, l), float):
-            raise TypeError("The color components have different types.")
-        self.__h = h
-        self.__s = s
-        self.__l = l
-        return self
-
     def normalized(self) -> ColorHSL:
         if check_types(self.color, int):
             h = self.h / 360.0
@@ -77,8 +72,7 @@ class ColorHSL(Color):
             raise TypeError("The color components have different types.")
 
     def normalize(self) -> ColorHSL:
-        self.__update(*self.normalized().color)
-        return self
+        return self.normalized()
 
     def denormalized(self) -> ColorHSL:
         if check_types(self.color, float):
@@ -92,8 +86,7 @@ class ColorHSL(Color):
             raise TypeError("The color components have different types.")
 
     def denormalize(self) -> ColorHSL:
-        self.__update(*self.denormalized().color)
-        return self
+        return self.denormalized()
 
     def darkened(self, amount: float) -> ColorHSL:
         h, s, l = self.normalized().color
@@ -101,8 +94,7 @@ class ColorHSL(Color):
         return ColorHSL(h, s, l)
 
     def darken(self, amount: float) -> ColorHSL:
-        self.__update(*self.darkened(amount).color)
-        return self
+        return self.darkened(amount)
 
     def lightened(self, amount: float) -> ColorHSL:
         h, s, l = self.normalized().color
@@ -110,8 +102,7 @@ class ColorHSL(Color):
         return ColorHSL(h, s, l)
 
     def lighten(self, amount: float) -> ColorHSL:
-        self.__update(*self.lightened(amount).color)
-        return self
+        return self.lightened(amount)
 
     def saturated(self, amount: float) -> ColorHSL:
         h, s, l = self.normalized().color
@@ -119,8 +110,7 @@ class ColorHSL(Color):
         return ColorHSL(h, s, l)
 
     def saturate(self, amount: float) -> ColorHSL:
-        self.__update(*self.saturated(amount).color)
-        return self
+        return self.saturated(amount)
 
     def desaturated(self, amount: float) -> ColorHSL:
         h, s, l = self.normalized().color
@@ -128,8 +118,7 @@ class ColorHSL(Color):
         return ColorHSL(h, s, l)
 
     def desaturate(self, amount: float) -> ColorHSL:
-        self.__update(*self.desaturated(amount).color)
-        return self
+        return self.desaturated(amount)
 
     def blended(self, color: Color, ratio: float = 0.5) -> ColorHSL:
         from chroma.colors.impl import ColorRGB
@@ -137,8 +126,7 @@ class ColorHSL(Color):
         return self.cast(ColorRGB).blend(color, ratio).cast(ColorHSL)
 
     def blend(self, color: Color, ratio: float = 0.5) -> ColorHSL:
-        self.__update(*self.blended(color, ratio).color)
-        return self
+        return self.blended(color, ratio)
 
     def set_h(self, h: Number) -> ColorHSL:
         is_normal = self.color == self.normalized().color
@@ -194,7 +182,9 @@ class ColorHSL(Color):
                 self.__l = clamp(l, 0, 360)
             never()
 
-    # WARN: __str__ is only supported by hex for now
     def __str__(self):
         from chroma.colors.impl import ColorHex
+
+        logger.warn(f"{self.__class__.__name__}: __str__ is only supported by ColorHex.")
+        logger.warn("Defaulting to __str__ of ColorHex")
         return self.cast(ColorHex).__str__()

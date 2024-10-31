@@ -5,10 +5,13 @@ from typing import Type, cast
 
 from chroma.colors.base import Color, T
 from chroma.colors.utils import check_types
+from chroma.logger import Logger
 from chroma.types import Number
 from chroma.utils import clamp, never
 
 ColorTypeRGB = tuple[float, float, float] | tuple[int, int, int]
+
+logger = Logger.get_logger()
 
 
 class ColorRGB(Color):
@@ -57,14 +60,6 @@ class ColorRGB(Color):
         else:
             raise TypeError(f"Cannot convert to type {_type}")
 
-    def __update(self, r: Number, g: Number, b: Number):
-        if not check_types((r, g, b), int) and not check_types((r, g, b), float):
-            raise TypeError("The color components have different types.")
-        self.__r = r
-        self.__g = g
-        self.__b = b
-        return self
-
     def blended(self, color: Color, ratio: float = 0.5) -> ColorRGB:
         is_normalized = self.color == self.normalized().color
         r1, g1, b1 = self.normalized().color
@@ -80,8 +75,7 @@ class ColorRGB(Color):
         return color
 
     def blend(self, color: Color, ratio: float = 0.5) -> ColorRGB:
-        self.__update(*self.blended(color, ratio).color)
-        return self
+        return self.blended(color, ratio)
 
     def normalized(self) -> ColorRGB:
         if check_types(self.color, int):
@@ -95,8 +89,7 @@ class ColorRGB(Color):
             raise TypeError(f"The color components have different types {self.color}")
 
     def normalize(self) -> ColorRGB:
-        self.__update(*self.normalized().color)
-        return self
+        return self.normalized()
 
     def denormalized(self) -> ColorRGB:
         if check_types(self.color, float):
@@ -110,8 +103,7 @@ class ColorRGB(Color):
             raise TypeError(f"The color components have different types {self.color}")
 
     def denormalize(self) -> ColorRGB:
-        self.__update(*self.denormalized().color)
-        return self
+        return self.denormalized()
 
     def set_r(self, r: Number) -> ColorRGB:
         is_normal = self.color == self.normalized().color
@@ -219,7 +211,9 @@ class ColorRGB(Color):
 
         return self.cast(ColorHSL).desaturate(amount).cast(ColorRGB)
 
-    # WARN: __str__ is only supported by hex for now
     def __str__(self):
         from chroma.colors.impl import ColorHex
+
+        logger.warn(f"{self.__class__.__name__}: __str__ is only supported by ColorHex.")
+        logger.warn("Defaulting to __str__ of ColorHex")
         return self.cast(ColorHex).__str__()

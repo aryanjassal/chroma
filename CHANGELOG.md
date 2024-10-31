@@ -8,6 +8,21 @@ Massive changes to the internal structure of the code. What this means to the us
 ### Key changes
 
 - Changed `chroma.colors` from a file to a module. The old colors file is now deprecated, but still available under `chroma._colors`. Please use the new module. Usage guide can be found in the README.
+- The new API has removed in-place modifying of variables. Now, all methods will return a copy with the modified values. This makes the usage more pythonic.
+- `chroma.utils` has now been split into its own module. It works exactly as before, but with better splitting, and easier way to avoid circular imports. However, this makes finding name clashes challenging. If a name clash happens, the later imported module will override the functinality of the older module.
+
+## Additions
+
+- Added newer and more robust `chroma.colors` module.
+
+## Changes
+
+- Deprecated old `chroma.colors` module. It now exists under `chroma._colors`. Don't use it.
+- Changed `chroma.utils` from a file to a module.
+
+## Removals
+
+- Removed in-place changing. All operations return the modified object.
 
 ## v0.7.0
 

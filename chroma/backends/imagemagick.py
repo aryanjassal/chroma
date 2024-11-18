@@ -1,6 +1,7 @@
 import re
 import subprocess
 from pathlib import Path
+from typing import Callable
 
 from chroma import utils
 from chroma.colors import Color, ColorHex, ColorHSL
@@ -28,6 +29,7 @@ HSL_MAP: HSLMap = {
 
 # NOTE: These generators are used when the corresponding color cannot be inferred
 # from the image.
+# NOTE: Each generator must return a ColorHex object.
 
 
 def generator_fg(
@@ -36,7 +38,7 @@ def generator_fg(
     blend_ratio: float,
     light_ratio: float,
     condition: HSLMapValue,
-) -> Color:
+) -> ColorHex:
     white = white.cast(ColorHSL).normalize()
     accent = accent.cast(ColorHSL).normalize()
     l1 = white.color[0]
@@ -45,7 +47,7 @@ def generator_fg(
     white.set_l(utils.clamp(hue, 0.0, 1.0))
     white = white.lighten(light_ratio)
     color = utils.clamp_color_to_hslrules(white, condition)
-    return color.cast(ColorHex)  # To stringify as a Hex color
+    return color.cast(ColorHex)
 
 
 def generator_bg(
@@ -54,7 +56,7 @@ def generator_bg(
     blend_ratio: float,
     dark_ratio: float,
     condition: HSLMapValue,
-) -> Color:
+) -> ColorHex:
     black = black.cast(ColorHSL).normalize()
     accent = accent.cast(ColorHSL).normalize()
     l1 = black.color[0]
@@ -63,7 +65,7 @@ def generator_bg(
     black.set_l(utils.clamp(hue, 0.0, 1.0))
     black = black.darken(dark_ratio)
     color = utils.clamp_color_to_hslrules(black, condition)
-    return color.cast(ColorHex)  # To stringify as a Hex color
+    return color.cast(ColorHex)
 
 
 def generator_norm(
@@ -71,7 +73,7 @@ def generator_norm(
     accent: Color,
     mix_hex: str,
     condition: HSLMapValue,
-) -> Color:
+) -> ColorHex:
     mix = ColorHex(mix_hex)
     if mix.cast(ColorHSL).l < 0.3:
         mix = mix.cast(ColorHSL).set_l(0.45)
@@ -84,7 +86,7 @@ def generator_norm(
     color = color.blend(mix, 0.15)
     color = color.lighten(0.25)
     color = utils.clamp_color_to_hslrules(color, condition)
-    return color.cast(ColorHex)  # To stringify as a Hex color
+    return color.cast(ColorHex)
 
 
 def generator_bright(
@@ -92,11 +94,11 @@ def generator_bright(
     accent: Color,
     mix_hex: str,
     condition: HSLMapValue,
-) -> Color:
+) -> ColorHex:
     return generator_norm(white, accent, mix_hex, condition).lightened(0.15)
 
 
-def generator_black(prominent: Color, condition: HSLMapValue) -> Color:
+def generator_black(prominent: Color, condition: HSLMapValue) -> ColorHex:
     color = (
         prominent.darkened(0.4)
         .blended(prominent, 0.2)
@@ -104,10 +106,10 @@ def generator_black(prominent: Color, condition: HSLMapValue) -> Color:
         .blended(prominent, 0.1)
     )
     color = utils.clamp_color_to_hslrules(color, condition)
-    return color.cast(ColorHex)  # To stringify as a Hex color
+    return color.cast(ColorHex)
 
 
-def generator_white(prominent: Color, condition: HSLMapValue) -> Color:
+def generator_white(prominent: Color, condition: HSLMapValue) -> ColorHex:
     color = (
         prominent.lightened(0.4)
         .blended(prominent, 0.2)
@@ -115,16 +117,16 @@ def generator_white(prominent: Color, condition: HSLMapValue) -> Color:
         .blended(prominent, 0.1)
     )
     color = utils.clamp_color_to_hslrules(color, condition)
-    return color.cast(ColorHex)  # To stringify as a Hex color
+    return color.cast(ColorHex)
 
 
-def generator_accent(prominent: Color, condition: HSLMapValue) -> Color:
+def generator_accent(prominent: Color, condition: HSLMapValue) -> ColorHex:
     color = utils.clamp_color_to_hslrules(prominent.saturated(0.1), condition)
-    return color.cast(ColorHex)  # To stringify as a Hex color
+    return color.cast(ColorHex)
 
 
 # fmt: off
-REQUIRED_COLORS = {
+REQUIRED_COLORS: dict[str, Callable[[dict], ColorHex]] = {
     "accent": lambda x: generator_accent(x["prominent"], HSL_MAP["accent"]),
     "black": lambda x: generator_black(x["prominent"], HSL_MAP["black"]),
     "white": lambda x: generator_white(x["prominent"], HSL_MAP["white"]),
@@ -202,6 +204,7 @@ def generate(
     prominent_color = None
     for color in raw_colors:
         color = ColorHex(color).cast(ColorHSL)
+        # TODO: use hslmap
         if color.color[1] > 0.4 and color.color[2] > 0.25:
             prominent_color = color.cast(ColorHex)
             logger.debug(f"Detected prominent color {prominent_color}")
@@ -210,7 +213,8 @@ def generate(
     if prominent_color is None:
         prominent_color = ColorHex(raw_colors[0])
         logger.debug(
-            f"Could not detect a suitable prominent color. Using {prominent_color.cast(ColorHex)}"
+            f"Could not detect a suitable prominent color. "
+            f"Using {prominent_color.cast(ColorHex)}"
         )
 
     colors = {}
@@ -224,21 +228,11 @@ def generate(
             logger.debug(f"Found color {name} to be {color_regular}")
             colors[name] = color_regular
 
+            # TODO: use requiredmap to generate, and use hslmap to clamp
             if name != "accent":
                 color_bright = color.lightened(0.1).cast(ColorHex)
                 logger.debug(f"Calculated color bright_{name} to be {color_bright}")
                 colors[f"bright_{name}"] = color_bright
-
-    mcolors = {}
-    for name, color in colors.items():
-        if not isinstance(color, Color):
-            mcolors[name] = ColorHex(color)
-        elif not isinstance(color, ColorHex):
-            mcolors[name] = color.cast(ColorHex)
-        else:
-            mcolors[name] = color
-
-    colors = mcolors
 
     for name, generator in required_colors.items():
         if colors.get(name) is None:
@@ -248,19 +242,6 @@ def generate(
             else:
                 colors[name] = generator({"prominent": prominent_color, **colors})
                 logger.debug(f"Color {name} doesn't exist. Generated to {colors[name]}")
-
-    colors.pop("bright_accent", None)
-
-    # Because generators can return non-hex values, explicitly convert it all to hex
-    # I KNOW ITS SHIT, ILL MAKE IT BETTER LATER TRUST ME
-    # I MEAN LOOK AT HISTORY OF theme.py
-    for name, color in colors.items():
-        if not isinstance(color, Color):
-            colors[name] = ColorHex(color)
-        elif not isinstance(color, ColorHex):
-            colors[name] = color.cast(ColorHex)
-        else:
-            colors[name] = color
 
     return colors
 

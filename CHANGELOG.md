@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.7.1 (in progress)
+## v0.8.0 (in progress)
 
 Massive changes to the internal structure of the code. What this means to the users? Nothing. Not much change happening here. What does it mean for themers? Some changes will be necessary to ensure your custom handler remains working. What does it mean for developers and maintainers? Well, you have a headache and a half coming your way!
 
@@ -23,6 +23,10 @@ Massive changes to the internal structure of the code. What this means to the us
 ## Removals
 
 - Removed in-place changing. All operations return the modified object.
+- Removed `estimate_missing` parameter from `magick` generator.
+- Removed `iterations` parameter from `magick` generator.
+- Removed `--estimate` flag from the program. This is the default behaviour.
+- Removed `--iterations` flag from the program. This is now redundant.
 
 ## v0.7.0
 

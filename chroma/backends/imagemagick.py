@@ -165,126 +165,104 @@ def generate(
     hsl_map: dict = HSL_MAP,
     max_colors: int = 1024,
     required_colors: dict = REQUIRED_COLORS,
-    max_iterations: int = 5,
 ):
-    for _ in range(max_iterations):
-        command = [
-            "magick",
-            str(image_path),
-            "-resize",
-            f"{image_size}x{image_size}^",
-            "-gravity",
-            "center",
-            "-extent",
-            f"{image_size}x{image_size}",
-            "-format",
-            "%c",
-            "-depth",
-            str(depth),
-            "histogram:info:-",
-        ]
-        proc_io = subprocess.run(command, capture_output=True, check=True)
+    command = [
+        "magick",
+        str(image_path),
+        "-resize",
+        f"{image_size}x{image_size}^",
+        "-gravity",
+        "center",
+        "-extent",
+        f"{image_size}x{image_size}",
+        "-format",
+        "%c",
+        "-depth",
+        str(depth),
+        "histogram:info:-",
+    ]
+    proc_io = subprocess.run(command, capture_output=True, check=True)
 
-        # If anything went wrong, inform the user.
-        if proc_io.stderr:
-            logger.error(proc_io.stderr)
+    # If anything went wrong, inform the user.
+    if proc_io.stderr:
+        logger.error(proc_io.stderr)
 
-        stdout = proc_io.stdout.decode("utf-8").splitlines()
-        stdout = [l.strip() for l in stdout]
-        stdout.sort(key=lambda x: x.split(":", 1)[0], reverse=True)
+    stdout = proc_io.stdout.decode("utf-8").splitlines()
+    stdout = [l.strip() for l in stdout]
+    stdout.sort(key=lambda x: x.split(":", 1)[0], reverse=True)
 
-        raw_colors = []
-        for line in stdout[:max_colors]:
-            match = re.search("#.{6}", str(line).strip())
-            if match:
-                raw_colors.append(match.group(0))
-            else:
-                logger.error(f"Color extraction with regex failed for line {line}")
+    raw_colors = []
+    for line in stdout[:max_colors]:
+        match = re.search("#.{6}", str(line).strip())
+        if match:
+            raw_colors.append(match.group(0))
+        else:
+            logger.error(f"Color extraction with regex failed for line {line}")
 
-        prominent_color = None
-        for color in raw_colors:
-            color = ColorHex(color).cast(ColorHSL)
-            if color.color[1] > 0.4 and color.color[2] > 0.25:
-                prominent_color = color.cast(ColorHex)
-                logger.debug(f"Detected prominent color {prominent_color}")
+    prominent_color = None
+    for color in raw_colors:
+        color = ColorHex(color).cast(ColorHSL)
+        if color.color[1] > 0.4 and color.color[2] > 0.25:
+            prominent_color = color.cast(ColorHex)
+            logger.debug(f"Detected prominent color {prominent_color}")
+            break
+
+    if prominent_color is None:
+        prominent_color = ColorHex(raw_colors[0])
+        logger.debug(
+            f"Could not detect a suitable prominent color. Using {prominent_color.cast(ColorHex)}"
+        )
+
+    colors = {}
+    for color in raw_colors:
+        color = ColorHex(color)
+        name = utils.match_color_from_hslmap(color, hsl_map, list(colors.keys()))
+
+        if name is not None:
+            color_regular = color.cast(ColorHex)
+
+            logger.debug(f"Found color {name} to be {color_regular}")
+            colors[name] = color_regular
+
+            if name != "accent":
+                color_bright = color.lightened(0.1).cast(ColorHex)
+                logger.debug(f"Calculated color bright_{name} to be {color_bright}")
+                colors[f"bright_{name}"] = color_bright
+
+    mcolors = {}
+    for name, color in colors.items():
+        if not isinstance(color, Color):
+            mcolors[name] = ColorHex(color)
+        elif not isinstance(color, ColorHex):
+            mcolors[name] = color.cast(ColorHex)
+        else:
+            mcolors[name] = color
+
+    colors = mcolors
+
+    for name, generator in required_colors.items():
+        if colors.get(name) is None:
+            if generator is None:
+                logger.error(f"Color {name} doesn't exist when it is expected to.")
                 break
-
-        if prominent_color is None:
-            prominent_color = ColorHex(raw_colors[0])
-            logger.debug(
-                f"Could not detect a suitable prominent color. Using {prominent_color.cast(ColorHex)}"
-            )
-
-        colors = {}
-        for color in raw_colors:
-            color = ColorHex(color)
-            name = utils.match_color_from_hslmap(color, hsl_map, list(colors.keys()))
-
-            if name is not None:
-                color_regular = color.cast(ColorHex)
-
-                logger.debug(f"Found color {name} to be {color_regular}")
-                colors[name] = color_regular
-
-                if name != "accent":
-                    color_bright = color.lightened(0.1).cast(ColorHex)
-                    logger.debug(f"Calculated color bright_{name} to be {color_bright}")
-                    colors[f"bright_{name}"] = color_bright
-
-        # if estimate_missing:
-        #     for name, generator in required_estimations.items():
-        #         if colors.get(name) is None:
-        #             colors[name] = generator(prominent_color)
-        #             logger.debug(f"Estimating {name} to be {colors[name]}")
-
-        mcolors = {}
-        for name, color in colors.items():
-            if not isinstance(color, Color):
-                mcolors[name] = ColorHex(color)
-            elif not isinstance(color, ColorHex):
-                mcolors[name] = color.cast(ColorHex)
             else:
-                mcolors[name] = color
+                colors[name] = generator({"prominent": prominent_color, **colors})
+                logger.debug(f"Color {name} doesn't exist. Generated to {colors[name]}")
 
-        colors = mcolors
+    colors.pop("bright_accent", None)
 
-        iterate = False
-        for name, generator in required_colors.items():
-            if colors.get(name) is None:
-                if generator is None:
-                    logger.error(f"Color {name} doesn't exist when it is expected to.")
-                    iterate = True
-                    break
-                else:
-                    colors[name] = generator({"prominent": prominent_color, **colors})
-                    logger.debug(
-                        f"Color {name} doesn't exist. Generated to {colors[name]}"
-                    )
+    # Because generators can return non-hex values, explicitly convert it all to hex
+    # I KNOW ITS SHIT, ILL MAKE IT BETTER LATER TRUST ME
+    # I MEAN LOOK AT HISTORY OF theme.py
+    for name, color in colors.items():
+        if not isinstance(color, Color):
+            colors[name] = ColorHex(color)
+        elif not isinstance(color, ColorHex):
+            colors[name] = color.cast(ColorHex)
+        else:
+            colors[name] = color
 
-        if iterate:
-            image_size = int(image_size * 1.1)
-            max_colors = int(max_colors * 1.5)
-            logger.error("Could not generate color palette.")
-            logger.error(
-                f"Trying larger image size {image_size}, extracted colors {max_colors}"
-            )
-            continue
-
-        colors.pop("bright_accent", None)
-
-        # Because generators can return non-hex values, explicitly convert it all to hex
-        # I KNOW ITS SHIT, ILL MAKE IT BETTER LATER TRUST ME
-        # I MEAN LOOK AT HISTORY OF theme.py
-        for name, color in colors.items():
-            if not isinstance(color, Color):
-                colors[name] = ColorHex(color)
-            elif not isinstance(color, ColorHex):
-                colors[name] = color.cast(ColorHex)
-            else:
-                colors[name] = color
-
-        return colors
-    logger.fatal("Could not generate a suitable color palette.")
+    return colors
 
 
 def register():

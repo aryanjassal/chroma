@@ -56,12 +56,6 @@ def setup_args():
         default=1024,
     )
     gen_parser.add_argument(
-        "--max-iterations",
-        type=int,
-        help="If can't estimate and failed to generate all colors, try again",
-        default=5,
-    )
-    gen_parser.add_argument(
         "--image-size",
         type=int,
         help="Image size in NxN pixels to downscale to",
@@ -128,7 +122,6 @@ def main():
             out_path,
             image_size=args.image_size,
             max_colors=args.max_colors,
-            max_iterations=args.max_iterations,
         )
 
         if args.output:

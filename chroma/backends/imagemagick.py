@@ -29,8 +29,6 @@ HSL_MAP: HSLMap = {
 # NOTE: These generators are used when the corresponding color cannot be inferred
 # from the image.
 
-# TODO: Restrict the values to the HSL map
-
 
 def generator_fg(
     white: Color,
@@ -46,7 +44,8 @@ def generator_fg(
     hue = l1 * blend_ratio + l2 * blend_ratio
     white.set_l(utils.clamp(hue, 0.0, 1.0))
     white = white.lighten(light_ratio)
-    return utils.clamp_color_to_hslrules(white, condition)
+    color = utils.clamp_color_to_hslrules(white, condition)
+    return color.cast(ColorHex)  # To stringify as a Hex color
 
 
 def generator_bg(
@@ -63,7 +62,8 @@ def generator_bg(
     hue = l1 * blend_ratio + l2 * blend_ratio
     black.set_l(utils.clamp(hue, 0.0, 1.0))
     black = black.darken(dark_ratio)
-    return utils.clamp_color_to_hslrules(black, condition)
+    color = utils.clamp_color_to_hslrules(black, condition)
+    return color.cast(ColorHex)  # To stringify as a Hex color
 
 
 def generator_norm(
@@ -83,7 +83,8 @@ def generator_norm(
     color = color.darkened(0.2)
     color = color.blend(mix, 0.15)
     color = color.lighten(0.25)
-    return utils.clamp_color_to_hslrules(color, condition)
+    color = utils.clamp_color_to_hslrules(color, condition)
+    return color.cast(ColorHex)  # To stringify as a Hex color
 
 
 def generator_bright(
@@ -102,7 +103,8 @@ def generator_black(prominent: Color, condition: HSLMapValue) -> Color:
         .lightened(0.4)
         .blended(prominent, 0.1)
     )
-    return utils.clamp_color_to_hslrules(color, condition)
+    color = utils.clamp_color_to_hslrules(color, condition)
+    return color.cast(ColorHex)  # To stringify as a Hex color
 
 
 def generator_white(prominent: Color, condition: HSLMapValue) -> Color:
@@ -112,11 +114,13 @@ def generator_white(prominent: Color, condition: HSLMapValue) -> Color:
         .darkened(0.4)
         .blended(prominent, 0.1)
     )
-    return utils.clamp_color_to_hslrules(color, condition)
+    color = utils.clamp_color_to_hslrules(color, condition)
+    return color.cast(ColorHex)  # To stringify as a Hex color
 
 
 def generator_accent(prominent: Color, condition: HSLMapValue) -> Color:
-    return utils.clamp_color_to_hslrules(prominent.saturated(0.1), condition)
+    color = utils.clamp_color_to_hslrules(prominent.saturated(0.1), condition)
+    return color.cast(ColorHex)  # To stringify as a Hex color
 
 
 # fmt: off
@@ -162,7 +166,6 @@ def generate(
     max_colors: int = 1024,
     required_colors: dict = REQUIRED_COLORS,
     max_iterations: int = 5,
-    estimate_missing: bool = True,
 ):
     for _ in range(max_iterations):
         command = [

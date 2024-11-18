@@ -67,12 +67,6 @@ def setup_args():
         help="Image size in NxN pixels to downscale to",
         default=256,
     )
-    gen_parser.add_argument(
-        "--estimate",
-        action="store_true",
-        help="Should estimate colors if they couldn't be generated?",
-        default=True,
-    )
 
     subparsers.add_parser("remove", help="Removes the generated palette")
 
@@ -135,7 +129,6 @@ def main():
             image_size=args.image_size,
             max_colors=args.max_colors,
             max_iterations=args.max_iterations,
-            estimate_missing=args.estimate,
         )
 
         if args.output:

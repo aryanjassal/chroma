@@ -1,5 +1,7 @@
 name: Chroma
 
+# TODO: Add a Nix build job on main/staging
+
 on:
   push:
     branches:

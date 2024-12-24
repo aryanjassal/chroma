@@ -9,18 +9,22 @@ Massive changes to the internal structure of the code. Themers would need to mak
 - Renamed `handlers` to `integrations`. The code otherwise works the same. Make sure to update your integrations to the new names for the classes. This is a breaking change.
 - Changed `chroma.colors` from a file to a module. The old colors file is now deprecated under `chroma._colors`. Usage guide can be found in the README.
 - The new API has removed in-place modifying of variables. Now, all methods will return a copy with the modified values, making the usage more pythonic.
-- `chroma.utils` has now been split into its own module. It works exactly as before, but with better splitting, and less circular imports.
+- `chroma.utils` has now been split into its own module. You need to use the relevant file to import the utility function now.
+- Added CI for linting and basic testing
 
 ## Additions
 
 - Added newer and more robust `chroma.colors` module.
 - Added `exceptions.py` file to provide application-specific exceptions
+- Added linting and testing to CI
 
 ## Changes
 
 - Deprecated old `chroma.colors` module. It now exists under `chroma._colors` and will be removed soon. Don't use it.
-- Changed `chroma.utils` from a file to a module.
+- Changed `chroma.utils` from a file to a module. Check the files and import relevant functions as needed.
 - Changed `handlers` to `integrations`. This affects the directory names and class names.
+- If `output_path` is `None` for any generator, it's output is returned as a dict instead
+- `chroma.theme.load` can now optionally take raw lua instead of a file path for theme data to parse
 
 ## Removals
 

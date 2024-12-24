@@ -52,3 +52,7 @@ def parse_file(runtime, filename) -> dict:
     with open(filename, mode="r") as f:
         theme = f.read()
     return to_dict(runtime.execute(theme))
+
+
+def parse_lua(runtime, lua) -> dict:
+    return to_dict(runtime.execute(lua))

@@ -64,7 +64,7 @@ class RawIntegration(Integration):
                 logger.error("Failed to open file. Does the parent directory exist?")
                 continue
 
-        if applied_count > 0:
+        if applied_count > 0 or len(self.group) == 0:
             logger.info("Successfully generated raw themes!")
         else:
             logger.error("Failed to apply one or more raw themes")

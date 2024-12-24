@@ -4,7 +4,7 @@ local python = require "chroma.builtins.python"
 -- Setting this field to false will make the application treat this table as a
 -- data table. Data tables can not be handled by an integration. All data tables
 -- will be sent to each integration.
----@field handle boolean|nil
+---@field integration boolean|nil
 ---@field [string] any
 
 ---@class Theme

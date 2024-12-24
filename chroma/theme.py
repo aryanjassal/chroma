@@ -6,7 +6,7 @@ from chroma.integration import Integration
 from chroma.logger import Logger
 from chroma.utils.dynamic import discover_modules
 from chroma.utils.paths import chroma_dir, chroma_themes_dir, config_dir, override_theme
-from chroma.utils.theme import parse_file, runtime
+from chroma.utils.theme import parse_file, parse_lua, runtime
 from chroma.utils.tools import merge, to_dict
 
 logger = Logger.get_logger()
@@ -71,12 +71,15 @@ def parse_meta(meta) -> dict:
     return parsed_meta
 
 
-def load(filename):
+def load(filename=None, lua=None):
     # Create a blank dict for the theme, then assign themes in such a way that
     # default becomes the base, and we can override defaults with user theme
     # and override user theme from the override file.
     theme = {}
-    user_config = parse_file(runtime(), filename)
+    if lua is None:
+        user_config = parse_file(runtime(), filename)
+    else:
+        user_config = parse_lua(runtime(), lua)
     default_config = parse_file(runtime(), chroma_themes_dir() / "default.lua")
 
     options = merge(user_config["options"], default_config["options"])
@@ -97,17 +100,14 @@ def load(filename):
     meta = parse_meta(theme["meta"])
     theme = to_dict(theme)
 
-    # Filter all tables marked as `handle` to be data tables. Sanitize the input
-    # to remove the `handle` field too. This can be done as the following
-    # one-liner, but we won't be able to sanitize the data, so the longer loop
-    # was used.
-    # data = {k: v for k, v in theme.items() if v.get("handle") is not None}
+    # Filter all tables not marked as `integration` to be data tables. Sanitize
+    # the input to remove the `integration` field too.
     data = {}
     for name, group in theme.items():
-        if not group.get("handle", True):
+        if not group.get("integration", True):
             logger.debug(f"Table {name} marked as a data table")
             data[name] = group
-            del data[name]["handle"]
+            del data[name]["integration"]
 
     for name in data:
         del theme[name]
@@ -132,7 +132,7 @@ def load(filename):
             # first argument isn't a class. In that case, our integration would
             # be malformed, so we can safely detect and ignore that exception.
             # TEST: testing is required for this
-            for key, sub_int in entry:
+            for key, sub_int in entry.items():
                 try:
                     subclass = isinstance(sub_int, Integration)
                     if subclass:

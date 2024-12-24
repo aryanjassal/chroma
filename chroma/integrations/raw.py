@@ -7,7 +7,7 @@ from pathlib import Path
 import chroma
 from chroma import utils
 from chroma.colors import ColorHex
-from chroma.handler import Handler
+from chroma.integration import Integration
 from chroma.logger import Logger
 
 logger = Logger.get_logger()
@@ -22,8 +22,9 @@ def generate_colors(template, variables) -> str:
     return template.format(**variables)
 
 
-class RawHandler(Handler):
+class RawIntegration(Integration):
     def apply(self):
+        applied_count = 0
         for name, attr in self.group.items():
             header_template = attr.get("header")
             header = None
@@ -57,13 +58,17 @@ class RawHandler(Handler):
                 with open(Path(attr["out"]).expanduser(), "w") as f:
                     f.writelines(generated_file)
                 logger.info(f"Successfully generated theme for {name}!")
+                applied_count += 1
             except FileNotFoundError as e:
                 logger.error(e)
                 logger.error("Failed to open file. Does the parent directory exist?")
                 continue
 
-        logger.info("Successfully generated raw themes!")
+        if applied_count > 0:
+            logger.info("Successfully generated raw themes!")
+        else:
+            logger.error("Failed to apply one or more raw themes")
 
 
 def register():
-    return {"raw": RawHandler}
+    return {"raw": RawIntegration}

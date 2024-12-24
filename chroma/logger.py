@@ -54,8 +54,8 @@ class Logger:
                 f"{message}{Term.RESET}",
             )
 
-    def fatal(self, message) -> Never:
-        raise RuntimeError(message)
+    # def fatal(self, message) -> Never:
+    #     raise RuntimeError(message)
 
     @staticmethod
     def set_logger(logger: Logger) -> None:

@@ -2,23 +2,25 @@
 
 ## v0.8.0 (in progress)
 
-Massive changes to the internal structure of the code. What this means to the users? Nothing. Not much change happening here. What does it mean for themers? Some changes will be necessary to ensure your custom handler remains working. What does it mean for developers and maintainers? Well, you have a headache and a half coming your way!
-
+Massive changes to the internal structure of the code. Themers would need to make a lot of changes to ensure their integration remains compatible. Please note that during development (before major version 1), the API will fluctuate a lot.
 
 ### Key changes
 
-- Changed `chroma.colors` from a file to a module. The old colors file is now deprecated, but still available under `chroma._colors`. Please use the new module. Usage guide can be found in the README.
-- The new API has removed in-place modifying of variables. Now, all methods will return a copy with the modified values. This makes the usage more pythonic.
-- `chroma.utils` has now been split into its own module. It works exactly as before, but with better splitting, and easier way to avoid circular imports. However, this makes finding name clashes challenging. If a name clash happens, the later imported module will override the functinality of the older module.
+- Renamed `handlers` to `integrations`. The code otherwise works the same. Make sure to update your integrations to the new names for the classes. This is a breaking change.
+- Changed `chroma.colors` from a file to a module. The old colors file is now deprecated under `chroma._colors`. Usage guide can be found in the README.
+- The new API has removed in-place modifying of variables. Now, all methods will return a copy with the modified values, making the usage more pythonic.
+- `chroma.utils` has now been split into its own module. It works exactly as before, but with better splitting, and less circular imports.
 
 ## Additions
 
 - Added newer and more robust `chroma.colors` module.
+- Added `exceptions.py` file to provide application-specific exceptions
 
 ## Changes
 
-- Deprecated old `chroma.colors` module. It now exists under `chroma._colors`. Don't use it.
+- Deprecated old `chroma.colors` module. It now exists under `chroma._colors` and will be removed soon. Don't use it.
 - Changed `chroma.utils` from a file to a module.
+- Changed `handlers` to `integrations`. This affects the directory names and class names.
 
 ## Removals
 
@@ -27,6 +29,7 @@ Massive changes to the internal structure of the code. What this means to the us
 - Removed `iterations` parameter from `magick` generator.
 - Removed `--estimate` flag from the program. This is the default behaviour.
 - Removed `--iterations` flag from the program. This is now redundant.
+- Removed `Chroma.logger.Logger.fatal()`. Logger should not exit the application.
 
 ## v0.7.0
 

@@ -126,7 +126,8 @@ def generator_accent(prominent: Color, condition: HSLMapValue) -> ColorHex:
 
 
 # fmt: off
-REQUIRED_COLORS: dict[str, Callable[[dict], ColorHex]] = {
+# TODO: enable customisation of the generators
+GENERATORS: dict[str, Callable[[dict], ColorHex]] = {
     "accent": lambda x: generator_accent(x["prominent"], HSL_MAP["accent"]),
     "black": lambda x: generator_black(x["prominent"], HSL_MAP["black"]),
     "white": lambda x: generator_white(x["prominent"], HSL_MAP["white"]),
@@ -166,7 +167,7 @@ def generate(
     image_size: int = 256,
     hsl_map: dict = HSL_MAP,
     max_colors: int = 1024,
-    required_colors: dict = REQUIRED_COLORS,
+    required_colors: dict = GENERATORS,
 ):
     command = [
         "magick",
@@ -223,25 +224,14 @@ def generate(
         name = utils.match_color_from_hslmap(color, hsl_map, list(colors.keys()))
 
         if name is not None:
-            color_regular = color.cast(ColorHex)
-
-            logger.debug(f"Found color {name} to be {color_regular}")
-            colors[name] = color_regular
-
-            # TODO: use requiredmap to generate, and use hslmap to clamp
-            if name != "accent":
-                color_bright = color.lightened(0.1).cast(ColorHex)
-                logger.debug(f"Calculated color bright_{name} to be {color_bright}")
-                colors[f"bright_{name}"] = color_bright
+            color = color.cast(ColorHex)
+            colors[name] = color
+            logger.debug(f"Found color {name} to be {color}")
 
     for name, generator in required_colors.items():
         if colors.get(name) is None:
-            if generator is None:
-                logger.error(f"Color {name} doesn't exist when it is expected to.")
-                break
-            else:
-                colors[name] = generator({"prominent": prominent_color, **colors})
-                logger.debug(f"Color {name} doesn't exist. Generated to {colors[name]}")
+            colors[name] = generator({"prominent": prominent_color, **colors})
+            logger.debug(f"Color {name} doesn't exist. Generated to {colors[name]}")
 
     return colors
 

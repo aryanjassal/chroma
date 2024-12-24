@@ -19,7 +19,8 @@ from pathlib import Path
 import chroma
 from chroma import utils
 from chroma.colors import ColorHex
-from chroma.handler import Handler
+from chroma.exceptions import *
+from chroma.integration import Integration
 from chroma.logger import Logger
 
 logger = Logger.get_logger()
@@ -27,7 +28,7 @@ logger = Logger.get_logger()
 FOOT_HEADER = f"# {chroma.CHROMA_GENERATED_HEADER}"
 
 
-class FootHandler(Handler):
+class FootIntegration(Integration):
     def apply(self):
         colors = self.group.get("colors")
         if colors is None:
@@ -60,7 +61,7 @@ class FootHandler(Handler):
         }
 
         if not utils.validate_header(Path(self.group["out"]), FOOT_HEADER):
-            logger.error("Cannot write configuration for Foot. Skipping handler.")
+            logger.error("Cannot write configuration for Foot. Skipping integration.")
             return
 
         generated_theme = []
@@ -81,11 +82,12 @@ class FootHandler(Handler):
             with open(Path(self.group["out"]).expanduser(), "w") as f:
                 f.writelines(generated_theme)
         except FileNotFoundError as e:
-            logger.error(e)
-            logger.fatal("Failed to open file. Does the parent directory exist?")
-
+            ParentDirectoryException(
+                f"{e.__str__()}\n"
+                "Failed to open file. Does the parent directory exist?"
+            )
         logger.info("Successfully applied Foot theme!")
 
 
 def register():
-    return {"foot": FootHandler}
+    return {"foot": FootIntegration}

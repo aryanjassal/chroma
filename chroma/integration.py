@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class Handler(ABC):
+class Integration(ABC):
     def __init__(self, group, meta, data):
         super().__init__()
         self.group = group

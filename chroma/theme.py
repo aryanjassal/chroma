@@ -2,24 +2,25 @@ import re
 
 import chroma
 from chroma import utils
-from chroma.handler import Handler
+from chroma.exceptions import *
+from chroma.integration import Integration
 from chroma.logger import Logger
 
 logger = Logger.get_logger()
 
 # Default metadata fields. Other fields are unsupported and shouldn't be relied
-# upon by handlers.
+# upon by integrations.
 VALID_META_KEYS = ["name", "description", "url", "author", "version"]
 
-# Special groups are groups which do not contain theme data. As such, no handler
-# exists for these groups.
+# Special groups are groups which do not contain theme data. As such, no 
+# integrations exists for these groups.
 SPECIAL_GROUPS = ["meta", "options", "colors"]
 
-# A registry for all the handlers and their corresponding constructor classes.
-REGISTRY = {}
+# A registry for all the integrations and their corresponding constructor classes.
+INTEGRATION_REGISTRY: dict[str, Integration] = {}
 
 
-def match_version(version, meta) -> None:
+def assert_version(version, meta) -> None:
     def meta_get(opt):
         v = meta.get(opt)
         if v is None:
@@ -27,12 +28,11 @@ def match_version(version, meta) -> None:
         return v
 
     if version is None:
-        logger.fatal(f"Chroma version is unset in {meta_get('name')} theme")
+        InvalidFieldException(f"Chroma version is unset in '{meta_get('name')}'.")
 
     if not re.match("^[0-9]+\\.[0-9]+\\.[0-9]+$", version):
-        logger.fatal(
-            f"Chroma version is incorrectly set in {meta_get('name')} theme: "
-            f"{version}"
+        InvalidFieldException(
+            f"Chroma version is incorrectly set in '{meta_get('name')}': " f"{version}"
         )
 
     # Patches signify no changes in the actual API. As such, we don't care if
@@ -41,17 +41,17 @@ def match_version(version, meta) -> None:
     chroma_major, chroma_minor, _ = chroma.__version__.split(".")
 
     if theme_major != chroma_major:
-        logger.error("Major version mismatch")
-        logger.fatal(
+        raise VersionMismatchException(
+            "Major version mismatch!\n"
             f"Theme version {version} is incompatible with Chroma version"
-            f" {chroma.__version__} in {meta_get('name')} theme."
+            f" {chroma.__version__} in '{meta_get('name')}'."
         )
 
     if theme_minor != chroma_minor:
-        logger.warn("Minor version mismatch")
         logger.warn(
+            "Minor version mismatch!\n"
             f"Theme version {version} might be incompatible with Chroma version"
-            f" {chroma.__version__} in {meta_get('name')} theme."
+            f" {chroma.__version__} in '{meta_get('name')}'."
         )
 
 
@@ -92,7 +92,7 @@ def load(filename):
         override_config = utils.parse_file(utils.runtime(), override_file)
         theme = utils.merge(theme, override_config)
 
-    match_version(options["chroma_version"], theme["meta"])
+    assert_version(options["chroma_version"], theme["meta"])
     meta = parse_meta(theme["meta"])
     theme = utils.to_dict(theme)
 
@@ -111,45 +111,60 @@ def load(filename):
     for name in data:
         del theme[name]
 
-    # Override application's handlers by user's handlers if defined.
-    handlers = [
-        *utils.discover_modules(utils.chroma_dir() / "handlers"),
-        *utils.discover_modules(utils.config_dir() / "handlers"),
+    # Override application's integraions by user's integrations if defined.
+    # TODO: Warn users if they are overriding a local integration, in case the
+    # action was unintentional.
+    integrations = [
+        *utils.discover_modules(utils.chroma_dir() / "integrations"),
+        *utils.discover_modules(utils.config_dir() / "integrations"),
     ]
 
-    for handler in handlers:
-        if hasattr(handler, "register") and callable(getattr(handler, "register")):
-            entry = getattr(handler, "register")()
-            REGISTRY.update(entry)
+    for integration in integrations:
+        if hasattr(integration, "register") and callable(
+            getattr(integration, "register")
+        ):
+            # Get the key-value pairs for the registry
+            entry = getattr(integration, "register")()
+
+            # Validate each pair before adding them to the registry.
+            # The issubclass() can only throw one error: TypeError when the
+            # first argument isn't a class. In that case, our integration would
+            # be malformed, so we can safely detect and ignore that exception.
+            # TEST: testing is required for this
+            for key, sub_int in entry:
+                try:
+                    subclass = isinstance(sub_int, Integration)
+                    if subclass:
+                        INTEGRATION_REGISTRY[key] = sub_int
+                    else:
+                        raise TypeError
+                except TypeError:
+                    logger.error(f"Integration {key} is malformed. Skipping.")
+
+            # Finally update the registry with the correct pairs
+            INTEGRATION_REGISTRY.update(entry)
             for name in entry:
-                logger.debug(f"Registered handler {name}")
+                logger.debug(f"Registered integration {name}")
 
     for group, config in theme.items():
         if group in SPECIAL_GROUPS:
             continue
 
         logger.info(f"Applying theme for {group}")
-        handler = REGISTRY.get(group)
+        integration = INTEGRATION_REGISTRY.get(group)
 
-        # If the handler doesn't exist, then skip handling it.
-        if handler is None:
-            logger.error(f"No handlers found for {group}. Skipping.")
+        # If the integration doesn't exist, then skip it.
+        if integration is None:
+            logger.error(f"No integrations found for {group}. Skipping.")
             continue
-
-        # The issubclass() can only throw one error: TypeError when the first
-        # argument isn't a class. In that case, our handler would be
-        # malformed, so we can safely detect and ignore that exception.
-        try:
-            subclass = issubclass(handler, Handler)
-        except TypeError:
-            subclass = None
 
         # Otherwise, check if the required signatures match. If they do,
-        # then run the respective handler.
-        if subclass and callable(handler):
-            handler_class: Handler = handler(config, meta, data)
-            handler_class.apply()
+        # then run the respective integration.
+        if callable(integration):
+            integration_class: Integration = integration(config, meta, data)
+            integration_class.apply()
             continue
 
-        # If the signatures don't match, then warn the user and skip the handler.
-        logger.error(f"Handler for {group} is malformed. Skipping.")
+        # If the signatures don't match, then warn the user and skip the
+        # integration.
+        logger.error(f"Integration for {group} is malformed. Skipping.")

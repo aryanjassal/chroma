@@ -154,9 +154,9 @@ def clamp_color_to_hslrules(
 def check_value(value: int, condition: HSLMapField):
     # Get a list of checks to perform on the color
     checks = []
-    if type(condition) == tuple:
+    if type(condition) is tuple:
         checks = [condition]
-    elif type(condition) == list:
+    elif type(condition) is list:
         checks = condition
     else:
         checks = [None]

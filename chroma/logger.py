@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Never, Optional
+from typing import Optional
 
 
 class Term:
@@ -54,9 +54,6 @@ class Logger:
                 f"{message}{Term.RESET}",
             )
 
-    # def fatal(self, message) -> Never:
-    #     raise RuntimeError(message)
-
     @staticmethod
     def set_logger(logger: Logger) -> None:
         Logger.__logger = logger
@@ -69,7 +66,7 @@ class Logger:
         Logger.__logger.warn("Attempt to get logger None!")
         Logger.__logger.warn("Setting default loger with level DEBUG")
         return Logger.__logger
-        
+
     @staticmethod
     def __out(prefix: str, message: str) -> None:
         lines = message.split("\n")

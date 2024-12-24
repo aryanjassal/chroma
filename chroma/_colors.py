@@ -25,7 +25,7 @@ HEXVAL_REGEX = r"^([A-Fa-f0-9]{6})$"
 class Color:
     def __init__(self, color: ColorType, format: Optional[ColorFormat]):
         def _infer_type(col: ColorType) -> ColorFormat:
-            if type(col) == str:
+            if type(col) is str:
                 if re.match(HEX_REGEX, col):
                     return "hex"
                 if re.match(HEXVAL_REGEX, col):
@@ -37,17 +37,17 @@ class Color:
             self.__format = _infer_type(color)
         else:
             if format in ["hex", "hexval"]:
-                assert type(color) == str, f"Expected type str, got {type(color)}"
+                assert type(color) is str, f"Expected type str, got {type(color)}"
                 assert (
                     re.match(HEX_REGEX, color) is not None
                     and re.match(HEXVAL_REGEX, color) is not None
-                ), f"Color is not in the correct format"
+                ), "Color is not in the correct format"
 
             elif format in ["rgb", "hsl"]:
-                assert type(color) == tuple, f"Expected type tuple, got {type(color)}"
+                assert type(color) is tuple, f"Expected type tuple, got {type(color)}"
                 assert len(color) == 3, f"Expected len 3, got {type(color)}"
                 for c in color:
-                    assert type(c) == Number, f"Expected type number, got {type(c)}"
+                    assert type(c) is Number, f"Expected type number, got {type(c)}"
 
             else:
                 logger.error(f"Invalid format {format}")
@@ -106,7 +106,7 @@ class Color:
 
     def as_rgb(self) -> Color:
         def hexval_to_rgb(hexval):
-            vals = [int(hexval[i : i + 2], 16) / 255.0 for i in (0, 2, 4)]
+            vals = [int(hexval[i:i + 2], 16) / 255.0 for i in (0, 2, 4)]
             return (vals[0], vals[1], vals[2])
 
         if self.format == "hex":
@@ -150,10 +150,10 @@ class Color:
 
     def normalized(self) -> Color:
         assert self.format in ["rgb"]
-        if all([type(x) == int for x in self.color]):
+        if all([type(x) is int for x in self.color]):
             converted = tuple([col / 255.0 for col in cast(ColorTuple, self.color)])
             return Color(cast(ColorTuple, converted), self.format)
-        elif all([type(x) == float for x in self.color]):
+        elif all([type(x) is float for x in self.color]):
             return self
         else:
             color = self.color
@@ -167,10 +167,10 @@ class Color:
 
     def denormalized(self) -> Color:
         assert self.format in ["rgb"]
-        if all([type(x) == float for x in self.color]):
+        if all([type(x) is float for x in self.color]):
             converted = tuple([int(col * 255.0) for col in cast(ColorTuple, self.color)])
             return Color(cast(ColorTuple, converted), self.format)
-        elif all([type(x) == int for x in self.color]):
+        elif all([type(x) is int for x in self.color]):
             return self
         else:
             color = self.color

@@ -2,7 +2,7 @@ import re
 
 import chroma
 from chroma import utils
-from chroma.exceptions import *
+from chroma.exceptions import InvalidFieldException, VersionMismatchException
 from chroma.integration import Integration
 from chroma.logger import Logger
 
@@ -12,7 +12,7 @@ logger = Logger.get_logger()
 # upon by integrations.
 VALID_META_KEYS = ["name", "description", "url", "author", "version"]
 
-# Special groups are groups which do not contain theme data. As such, no 
+# Special groups are groups which do not contain theme data. As such, no
 # integrations exists for these groups.
 SPECIAL_GROUPS = ["meta", "options", "colors"]
 

@@ -141,7 +141,7 @@ GENERATORS: dict[str, Callable[[dict], ColorHex]] = {
     "background": lambda x: generator_bg(x["black"], x["accent"], 0.5, 0.08, HSL_MAP["background"]),
     "background_alt": lambda x: generator_bg(x["black"], x["accent"], 0.5, 0.1, HSL_MAP["background"]),
     "background_unfocus": lambda x: generator_bg(x["black"], x["accent"], 0.5, 0.12, HSL_MAP["background"]),
-    "red": lambda x: generator_norm(x["white"],x["accent"], "#ff0000", HSL_MAP["red"]),
+    "red": lambda x: generator_norm(x["white"], x["accent"], "#ff0000", HSL_MAP["red"]),
     "orange": lambda x: generator_norm(x["white"], x["accent"], "#ff8800", HSL_MAP["orange"]),
     "brown": lambda x: generator_norm(x["white"], x["accent"], "#884400", HSL_MAP["brown"]),
     "yellow": lambda x: generator_norm(x["white"], x["accent"], "#ffff00", HSL_MAP["yellow"]),
@@ -191,7 +191,7 @@ def generate(
         logger.error(proc_io.stderr)
 
     stdout = proc_io.stdout.decode("utf-8").splitlines()
-    stdout = [l.strip() for l in stdout]
+    stdout = [line.strip() for line in stdout]
     stdout.sort(key=lambda x: x.split(":", 1)[0], reverse=True)
 
     raw_colors = []

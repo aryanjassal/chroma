@@ -5,7 +5,7 @@ from chroma.colors.utils import check_types
 
 def test_create_color():
     color = ColorRGB(0, 0, 0)
-    assert type(color) == ColorRGB
+    assert type(color) is ColorRGB
     assert isinstance(color, Color)
 
     try:

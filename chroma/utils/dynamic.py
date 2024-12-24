@@ -1,7 +1,7 @@
 import importlib.util
 from pathlib import Path
 
-from chroma.exceptions import *
+from chroma.exceptions import InvalidModuleException
 from chroma.logger import Logger
 
 logger = Logger.get_logger()

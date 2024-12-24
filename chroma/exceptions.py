@@ -36,7 +36,7 @@ class ProgramNotFoundException(Exception):
 # TODO: Similar error probably exists somewhere. If it does, use that.
 class InvalidModuleException(Exception):
     """
-    Thrown when a module failed to load. This means that the module doesn't 
+    Thrown when a module failed to load. This means that the module doesn't
     contain valid Python code or isn't designed to be importable. Fix the
-    file which failed to imoprt.
+    file which failed to import.
     """

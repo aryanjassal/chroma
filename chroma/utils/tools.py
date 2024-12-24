@@ -8,7 +8,7 @@ from lupa import lua_type
 
 from chroma.logger import Logger
 from chroma.types import Number
-from chroma.exceptions import *
+from chroma.exceptions import ProgramNotFoundException
 
 logger = Logger.get_logger()
 
@@ -19,7 +19,7 @@ def to_dict(table):
     def convert(t):
         result = dict()
         for k, v in t.items():
-            if lua_type(v) == "table" or type(v) == dict:
+            if lua_type(v) == "table" or type(v) is dict:
                 v = convert(v)
             result[k] = v
         return result

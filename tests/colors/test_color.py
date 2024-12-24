@@ -16,14 +16,14 @@ def test_check_hex_casting():
     color = ColorHex("#000000")
 
     rgb = color.cast(ColorRGB)
-    assert type(rgb) == ColorRGB
+    assert type(rgb) is ColorRGB
     assert rgb.color == (0, 0, 0)
     assert rgb.r == 0
     assert rgb.g == 0
     assert rgb.b == 0
 
     hsl = color.cast(ColorHSL)
-    assert type(hsl) == ColorHSL
+    assert type(hsl) is ColorHSL
     assert hsl.color == (0, 0, 0)
     assert hsl.h == 0
     assert hsl.s == 0
@@ -34,11 +34,11 @@ def test_check_rgb_casting():
     color = ColorRGB(0, 0, 0)
 
     hex = color.cast(ColorHex)
-    assert type(hex) == ColorHex
+    assert type(hex) is ColorHex
     assert hex.color == "#000000"
 
     hsl = color.cast(ColorHSL)
-    assert type(hsl) == ColorHSL
+    assert type(hsl) is ColorHSL
     assert hsl.color == (0, 0, 0)
     assert hsl.h == 0
     assert hsl.s == 0
@@ -49,11 +49,11 @@ def test_check_hsl_casting():
     color = ColorHSL(0, 0, 0)
 
     hex = color.cast(ColorHex)
-    assert type(hex) == ColorHex
+    assert type(hex) is ColorHex
     assert hex.color == "#000000"
 
     rgb = color.cast(ColorRGB)
-    assert type(rgb) == ColorRGB
+    assert type(rgb) is ColorRGB
     assert rgb.color == (0, 0, 0)
     assert rgb.r == 0
     assert rgb.g == 0

@@ -18,8 +18,8 @@ class ColorHSL(Color):
     def __init__(self, h: Number, s: Number, l: Number):
         if not check_types((h, s, l), int) and not check_types((h, s, l), float):
             raise TypeError("The color components have different types.")
-        if (type(h) == float and (max(h, s, l) > 1.0 or min(h, s, l) < 0.0)) or (
-            type(h) == int and (h > 360 or max(s, l) > 100 or min(h, s, l) < 0)
+        if (type(h) is float and (max(h, s, l) > 1.0 or min(h, s, l) < 0.0)) or (
+            type(h) is int and (h > 360 or max(s, l) > 100 or min(h, s, l) < 0)
         ):
             print(h, s, l)
             raise ValueError("The color components have invalid values.")
@@ -49,13 +49,13 @@ class ColorHSL(Color):
 
         # We know that the type we are returning is correct, but the linter
         # doesn't. So, we use cast() to tell it that.
-        if _type == ColorRGB:
+        if _type is ColorRGB:
             h, s, l = self.normalized().color
             color = ColorRGB(*colorsys.hls_to_rgb(h, l, s))
             return cast(T, color)
-        elif _type == ColorHex:
+        elif _type is ColorHex:
             return cast(T, self.cast(ColorRGB).cast(ColorHex))
-        elif _type == ColorHSL:
+        elif _type is ColorHSL:
             return cast(T, ColorHSL(*self.color))
         else:
             raise TypeError(f"Cannot convert to type {_type}")
@@ -132,17 +132,17 @@ class ColorHSL(Color):
         is_normal = self.color == self.normalized().color
 
         if is_normal:
-            if type(h) == float:
+            if type(h) is float:
                 self.__h = clamp(h, 0.0, 1.0)
                 return self
-            elif type(h) == int:
+            elif type(h) is int:
                 self.__h = clamp(h / 360.0, 0.0, 1.0)
             never()
         else:
-            if type(h) == float:
+            if type(h) is float:
                 self.__h = clamp(h * 360, 0, 360)
                 return self
-            elif type(h) == int:
+            elif type(h) is int:
                 self.__h = clamp(h, 0, 360)
             never()
 
@@ -150,17 +150,17 @@ class ColorHSL(Color):
         is_normal = self.color == self.normalized().color
 
         if is_normal:
-            if type(s) == float:
+            if type(s) is float:
                 self.__s = clamp(s, 0.0, 1.0)
                 return self
-            elif type(s) == int:
+            elif type(s) is int:
                 self.__s = clamp(s / 360.0, 0.0, 1.0)
             never()
         else:
-            if type(s) == float:
+            if type(s) is float:
                 self.__s = clamp(s * 360, 0, 360)
                 return self
-            elif type(s) == int:
+            elif type(s) is int:
                 self.__s = clamp(s, 0, 360)
             never()
 
@@ -168,17 +168,17 @@ class ColorHSL(Color):
         is_normal = self.color == self.normalized().color
 
         if is_normal:
-            if type(l) == float:
+            if type(l) is float:
                 self.__l = clamp(l, 0.0, 1.0)
                 return self
-            elif type(l) == int:
+            elif type(l) is int:
                 self.__l = clamp(l / 360.0, 0.0, 1.0)
             never()
         else:
-            if type(l) == float:
+            if type(l) is float:
                 self.__l = clamp(l * 360, 0, 360)
                 return self
-            elif type(l) == int:
+            elif type(l) is int:
                 self.__l = clamp(l, 0, 360)
             never()
 

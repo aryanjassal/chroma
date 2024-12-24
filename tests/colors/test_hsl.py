@@ -5,7 +5,7 @@ from chroma.colors.utils import check_types
 
 def test_create_color():
     color = ColorHSL(0, 0, 0)
-    assert type(color) == ColorHSL
+    assert type(color) is ColorHSL
     assert isinstance(color, Color)
 
     try:

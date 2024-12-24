@@ -3,13 +3,11 @@ import shutil
 import traceback as tb
 from pathlib import Path
 
-from chroma.logger import Logger, LogLevel
-
-logger = Logger(LogLevel.DEBUG)
-Logger.set_logger(logger)
-
 import chroma
 from chroma import generator, theme, utils
+from chroma.logger import Logger
+
+logger = Logger.get_logger()
 
 
 def setup_args():

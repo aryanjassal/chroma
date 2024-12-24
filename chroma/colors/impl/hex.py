@@ -34,15 +34,15 @@ class ColorHex(Color):
 
         # We know that the type we are returning is correct, but the linter
         # doesn't. So, we use cast() to tell it that.
-        if _type == ColorRGB:
+        if _type is ColorRGB:
             r = int(self.value[0:2], 16)
             g = int(self.value[2:4], 16)
             b = int(self.value[4:6], 16)
             return cast(T, ColorRGB(r, g, b))
-        elif _type == ColorHSL:
+        elif _type is ColorHSL:
             color = self.cast(ColorRGB).cast(ColorHSL)
             return cast(T, color)
-        elif _type == ColorHex:
+        elif _type is ColorHex:
             return cast(T, self)
         else:
             raise TypeError(f"Cannot convert to type {_type}")

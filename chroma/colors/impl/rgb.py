@@ -18,8 +18,8 @@ class ColorRGB(Color):
     def __init__(self, r: Number, g: Number, b: Number):
         if not check_types((r, g, b), int) and not check_types((r, g, b), float):
             raise TypeError("The color components have different types.")
-        if (type(r) == float and (max(r, g, b) > 1.0 or min(r, g, b) < 0.0)) or (
-            type(r) == int and (max(r, g, b) > 255 or min(r, g, b) < 0)
+        if (type(r) is float and (max(r, g, b) > 1.0 or min(r, g, b) < 0.0)) or (
+            type(r) is int and (max(r, g, b) > 255 or min(r, g, b) < 0)
         ):
             raise ValueError("The color components have invalid values.")
         self.__r = r
@@ -48,14 +48,14 @@ class ColorRGB(Color):
 
         # We know that the type we are returning is correct, but the linter
         # doesn't. So, we use cast() to tell it that.
-        if _type == ColorHSL:
+        if _type is ColorHSL:
             h, l, s = colorsys.rgb_to_hls(*self.normalized().color)
             return cast(T, ColorHSL(h, s, l))
-        elif _type == ColorHex:
+        elif _type is ColorHex:
             r, g, b = self.denormalized().color
             color = f"{r:02x}{g:02x}{b:02x}"
             return cast(T, ColorHex(color))
-        elif _type == ColorRGB:
+        elif _type is ColorRGB:
             return cast(T, self)
         else:
             raise TypeError(f"Cannot convert to type {_type}")
@@ -109,17 +109,17 @@ class ColorRGB(Color):
         is_normal = self.color == self.normalized().color
 
         if is_normal:
-            if type(r) == float:
+            if type(r) is float:
                 self.__r = clamp(r, 0.0, 1.0)
                 return self
-            elif type(r) == int:
+            elif type(r) is int:
                 self.__r = clamp(r / 360.0, 0.0, 1.0)
             never()
         else:
-            if type(r) == float:
+            if type(r) is float:
                 self.__r = clamp(r * 360, 0, 360)
                 return self
-            elif type(r) == int:
+            elif type(r) is int:
                 self.__r = clamp(r, 0, 360)
             never()
 
@@ -127,17 +127,17 @@ class ColorRGB(Color):
         ig_normal = self.color == self.normalized().color
 
         if ig_normal:
-            if type(g) == float:
+            if type(g) is float:
                 self.__g = clamp(g, 0.0, 1.0)
                 return self
-            elif type(g) == int:
+            elif type(g) is int:
                 self.__g = clamp(g / 360.0, 0.0, 1.0)
             never()
         else:
-            if type(g) == float:
+            if type(g) is float:
                 self.__g = clamp(g * 360, 0, 360)
                 return self
-            elif type(g) == int:
+            elif type(g) is int:
                 self.__g = clamp(g, 0, 360)
             never()
 
@@ -145,17 +145,17 @@ class ColorRGB(Color):
         is_normal = self.color == self.normalized().color
 
         if is_normal:
-            if type(b) == float:
+            if type(b) is float:
                 self.__b = clamp(b, 0.0, 1.0)
                 return self
-            elif type(b) == int:
+            elif type(b) is int:
                 self.__b = clamp(b / 360.0, 0.0, 1.0)
             never()
         else:
-            if type(b) == float:
+            if type(b) is float:
                 self.__b = clamp(b * 360, 0, 360)
                 return self
-            elif type(b) == int:
+            elif type(b) is int:
                 self.__b = clamp(b, 0, 360)
             never()
 

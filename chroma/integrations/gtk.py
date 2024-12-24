@@ -12,7 +12,7 @@ import chroma
 from chroma import utils
 from chroma.integration import Integration
 from chroma.logger import Logger
-from chroma.exceptions import *
+from chroma.exceptions import ParentDirectoryException
 
 logger = Logger.get_logger()
 

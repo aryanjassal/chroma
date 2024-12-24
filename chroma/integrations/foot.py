@@ -32,7 +32,7 @@ class FootIntegration(Integration):
     def apply(self):
         colors = self.group.get("colors")
         if colors is None:
-            logger.info("Colors for Foot group is unset. Skipping handler.")
+            logger.info("Colors for Foot group is unset. Skipping integration.")
             return
 
         # TODO: actually support all the themable options in foot like this:

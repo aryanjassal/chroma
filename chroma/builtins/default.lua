@@ -2,8 +2,8 @@ local python = require "chroma.builtins.python"
 
 ---@class GroupTable
 -- Setting this field to false will make the application treat this table as a
--- data table. Data tables can not be handled by a handler. All data tables will
--- be sent to each handler.
+-- data table. Data tables can not be handled by an integration. All data tables
+-- will be sent to each integration.
 ---@field handle boolean|nil
 ---@field [string] any
 
@@ -18,9 +18,9 @@ local python = require "chroma.builtins.python"
 ---@field [string] GroupTable
 -- This table should contain all the theming information. There are pre-defined
 -- fields on this table to help guide you. All the values mentioned here are
--- optional, but represent valid themable handlers. This table can be extended
+-- optional, but represent valid themable integrations. This table can be extended
 -- by adding more fields resembling the standard ones. However, no type hinting
--- exist for any user-defined handlers (yet).
+-- exist for any user-defined integrations (yet).
 local theme = {}
 
 ---@class ThemeOptions
@@ -55,11 +55,11 @@ theme.options = {
 ---@field author string|nil
 ---@field version string|nil
 ---@field url string|nil
--- The metadata table provides useful metadata to Chroma and the handlers.
+-- The metadata table provides useful metadata to Chroma and the integrations.
 -- Adding metadata to your theme is optional, but recommended. The presence of
 -- metadata will not significantly alter the application's behaviour. However,
--- handlers are given access to the metadata. As such, the presence or absence
--- of metadata might impact the generated theme file.
+-- integrations are given access to the metadata. As such, the presence or
+-- absence of metadata might impact the generated theme file.
 theme.meta = {
   name = python.none,
   description = python.none,
@@ -272,10 +272,10 @@ theme.foot = {
   out = "~/.config/foot/theme.ini",
 }
 
--- You can define multiple tables for the raw handler, and each table can have
+-- You can define multiple tables for the raw integration, and each table can have
 -- its own attributes. All tables will be processed separately, and each table
 -- will be output to the specified output file following the specified
--- formatting. Note that each table inside the raw handler can have anything
+-- formatting. Note that each table inside the raw integration can have anything
 -- for names. It doesn't matter. They are just there for convenience and
 -- debugging purposes. However, DO NOT repeat names. That's bad. Very bad.
 ---@class GroupRawTheme

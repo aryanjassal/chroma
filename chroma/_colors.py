@@ -30,7 +30,8 @@ class Color:
                     return "hex"
                 if re.match(HEXVAL_REGEX, col):
                     return "hexval"
-            logger.fatal(f"Could not infer type of color {col}")
+            logger.error(f"Could not infer type of color {col}")
+            exit(1)
 
         if format is None:
             self.__format = _infer_type(color)
@@ -49,7 +50,8 @@ class Color:
                     assert type(c) == Number, f"Expected type number, got {type(c)}"
 
             else:
-                logger.fatal(f"Invalid format {format}")
+                logger.error(f"Invalid format {format}")
+                exit(1)
 
             self.__format: ColorFormat = format
 

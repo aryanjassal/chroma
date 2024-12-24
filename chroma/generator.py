@@ -6,7 +6,7 @@ from chroma.logger import Logger
 
 logger = Logger.get_logger()
 
-# TODO: Make the generators into a class, just like handlers
+# TODO: Make the generators into a class, just like integrations
 GENERATORS_REGISTRY: dict[str, Callable] = {}
 
 

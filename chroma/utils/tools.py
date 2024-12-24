@@ -8,6 +8,7 @@ from lupa import lua_type
 
 from chroma.logger import Logger
 from chroma.types import Number
+from chroma.exceptions import *
 
 logger = Logger.get_logger()
 
@@ -85,13 +86,13 @@ def check_program(
         if action == "WARN":
             logger.warn(
                 f"{program} was not found on your system. You can disable "
-                "the handler by assigning the table to nil in the overrides."
+                "the integration by assigning the table to nil in the overrides."
             )
             return False
         if action == "EXIT":
-            logger.fatal(
+            raise ProgramNotFoundException(
                 f"{program} was not found on your system. You must disable "
-                "the handler by assigning the table to nil in the overrides."
+                "the integration by assigning the table to nil in the overrides."
             )
     return True
 

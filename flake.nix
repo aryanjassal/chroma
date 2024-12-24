@@ -19,6 +19,7 @@
             black
             isort
             lupa
+            luajitPackages.luacheck
             pytest
             setuptools
             imagemagick

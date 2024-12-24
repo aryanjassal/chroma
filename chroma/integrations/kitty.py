@@ -66,7 +66,7 @@ class KittyIntegration(Integration):
         }
 
         if not utils.validate_header(Path(self.group["out"]), KITTY_HEADER):
-            logger.error("Cannot write configuration for Kitty. Skipping handler.")
+            logger.error("Cannot write configuration for Kitty. Skipping integration.")
             return
 
         generated_file = []

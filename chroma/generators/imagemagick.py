@@ -7,7 +7,7 @@ from chroma.colors import Color, ColorHex, ColorHSL
 from chroma.logger import Logger
 from chroma.types import HSLMap, HSLMapValue
 from chroma.utils.generator import clamp_color_to_hslrules, match_color_from_hslmap
-from chroma.utils.tools import clamp
+from chroma.utils.tools import check_program, clamp
 
 logger = Logger.get_logger()
 
@@ -170,6 +170,7 @@ def generate(
     max_colors: int = 1024,
     required_colors: dict = GENERATORS,
 ):
+    check_program("magick", "EXIT")
     command = [
         "magick",
         str(image_path),
@@ -205,9 +206,12 @@ def generate(
 
     prominent_color = None
     for color in raw_colors:
-        color = ColorHex(color).cast(ColorHSL)
-        # TODO: use hslmap
-        if color.color[1] > 0.4 and color.color[2] > 0.25:
+        color = ColorHex(color).cast(ColorHSL).denormalize()
+        is_promiment = match_color_from_hslmap(
+            color=color,
+            condition_map={"prominent": (None, (40, 100), (25, 100))},
+        )
+        if is_promiment:
             prominent_color = color.cast(ColorHex)
             logger.debug(f"Detected prominent color {prominent_color}")
             break

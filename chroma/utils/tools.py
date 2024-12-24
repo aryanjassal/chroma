@@ -80,7 +80,7 @@ def check_program(
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         text=True,
-        shell=False,
+        shell=True,
     )
     if result.returncode != 0:
         if action == "WARN":

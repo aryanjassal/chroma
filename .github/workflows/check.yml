@@ -26,8 +26,8 @@ jobs:
           # Ignoring E741 due to false positive when expanding HSL color to components
           # Ignoring E743 due to false positive when expanding HSL color to components
           # Ignoring W503 due to formatting rules
-          # Ignoring F401 in chroma/__init__.py due to false positives
-          # Ignoring F403 in chroma/__init__.py due to false positives
+          # Ignoring F401 in */__init__.py due to false positives
+          # Ignoring F403 in */__init__.py due to false positives
           flake8 chroma/**/*.py --count --show-source --statistics \
             --max-line-length=127 --doctests --ignore=E741,E743,W503 \
             --per-file-ignores="*/__init__.py:F401,F403"

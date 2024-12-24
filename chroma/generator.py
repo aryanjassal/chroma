@@ -1,8 +1,10 @@
 from pathlib import Path
 from typing import Callable
 
-from chroma import utils
 from chroma.logger import Logger
+from chroma.utils.dynamic import discover_modules
+from chroma.utils.generator import write_lua_colors
+from chroma.utils.paths import chroma_dir
 
 logger = Logger.get_logger()
 
@@ -11,7 +13,7 @@ GENERATORS_REGISTRY: dict[str, Callable] = {}
 
 
 def prepare():
-    generators = utils.discover_modules(utils.chroma_dir() / "generators")
+    generators = discover_modules(chroma_dir() / "generators")
 
     for generator in generators:
         if hasattr(generator, "register") and callable(getattr(generator, "register")):
@@ -31,4 +33,4 @@ def generate(name: str, image_path: Path | str, output_path: Path | str, **kwarg
     theme = generator(image_path, **kwargs)
 
     output_path = Path(output_path)
-    utils.write_lua_colors(output_path, theme)
+    write_lua_colors(output_path, theme)

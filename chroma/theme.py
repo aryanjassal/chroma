@@ -1,10 +1,13 @@
 import re
 
 import chroma
-from chroma import utils
 from chroma.exceptions import InvalidFieldException, VersionMismatchException
 from chroma.integration import Integration
 from chroma.logger import Logger
+from chroma.utils.dynamic import discover_modules
+from chroma.utils.paths import chroma_dir, chroma_themes_dir, config_dir, override_theme
+from chroma.utils.theme import parse_file, runtime
+from chroma.utils.tools import merge, to_dict
 
 logger = Logger.get_logger()
 
@@ -73,28 +76,26 @@ def load(filename):
     # default becomes the base, and we can override defaults with user theme
     # and override user theme from the override file.
     theme = {}
-    user_config = utils.parse_file(utils.runtime(), filename)
-    default_config = utils.parse_file(
-        utils.runtime(), utils.chroma_themes_dir() / "default.lua"
-    )
+    user_config = parse_file(runtime(), filename)
+    default_config = parse_file(runtime(), chroma_themes_dir() / "default.lua")
 
-    options = utils.merge(user_config["options"], default_config["options"])
+    options = merge(user_config["options"], default_config["options"])
     if options["merge_tables"]:
-        theme = utils.merge(default_config, user_config)
+        theme = merge(default_config, user_config)
     else:
         logger.warn(
             "Theme table will not be merged with default table. Some fields "
             "may be left unset, which can break the theme."
         )
 
-    override_file = utils.override_theme()
+    override_file = override_theme()
     if override_file.is_file():
-        override_config = utils.parse_file(utils.runtime(), override_file)
-        theme = utils.merge(theme, override_config)
+        override_config = parse_file(runtime(), override_file)
+        theme = merge(theme, override_config)
 
     assert_version(options["chroma_version"], theme["meta"])
     meta = parse_meta(theme["meta"])
-    theme = utils.to_dict(theme)
+    theme = to_dict(theme)
 
     # Filter all tables marked as `handle` to be data tables. Sanitize the input
     # to remove the `handle` field too. This can be done as the following
@@ -115,8 +116,8 @@ def load(filename):
     # TODO: Warn users if they are overriding a local integration, in case the
     # action was unintentional.
     integrations = [
-        *utils.discover_modules(utils.chroma_dir() / "integrations"),
-        *utils.discover_modules(utils.config_dir() / "integrations"),
+        *discover_modules(chroma_dir() / "integrations"),
+        *discover_modules(config_dir() / "integrations"),
     ]
 
     for integration in integrations:

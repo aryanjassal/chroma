@@ -3,10 +3,11 @@ import subprocess
 from pathlib import Path
 from typing import Callable
 
-from chroma import utils
 from chroma.colors import Color, ColorHex, ColorHSL
 from chroma.logger import Logger
 from chroma.types import HSLMap, HSLMapValue
+from chroma.utils.generator import clamp_color_to_hslrules, match_color_from_hslmap
+from chroma.utils.tools import clamp
 
 logger = Logger.get_logger()
 
@@ -44,9 +45,9 @@ def generator_fg(
     l1 = white.color[0]
     l2 = accent.color[0]
     hue = l1 * blend_ratio + l2 * blend_ratio
-    white.set_l(utils.clamp(hue, 0.0, 1.0))
+    white.set_l(clamp(hue, 0.0, 1.0))
     white = white.lighten(light_ratio)
-    color = utils.clamp_color_to_hslrules(white, condition)
+    color = clamp_color_to_hslrules(white, condition)
     return color.cast(ColorHex)
 
 
@@ -62,9 +63,9 @@ def generator_bg(
     l1 = black.color[0]
     l2 = accent.color[0]
     hue = l1 * blend_ratio + l2 * blend_ratio
-    black.set_l(utils.clamp(hue, 0.0, 1.0))
+    black.set_l(clamp(hue, 0.0, 1.0))
     black = black.darken(dark_ratio)
-    color = utils.clamp_color_to_hslrules(black, condition)
+    color = clamp_color_to_hslrules(black, condition)
     return color.cast(ColorHex)
 
 
@@ -85,7 +86,7 @@ def generator_norm(
     color = color.darkened(0.2)
     color = color.blend(mix, 0.15)
     color = color.lighten(0.25)
-    color = utils.clamp_color_to_hslrules(color, condition)
+    color = clamp_color_to_hslrules(color, condition)
     return color.cast(ColorHex)
 
 
@@ -105,7 +106,7 @@ def generator_black(prominent: Color, condition: HSLMapValue) -> ColorHex:
         .lightened(0.4)
         .blended(prominent, 0.1)
     )
-    color = utils.clamp_color_to_hslrules(color, condition)
+    color = clamp_color_to_hslrules(color, condition)
     return color.cast(ColorHex)
 
 
@@ -116,12 +117,12 @@ def generator_white(prominent: Color, condition: HSLMapValue) -> ColorHex:
         .darkened(0.4)
         .blended(prominent, 0.1)
     )
-    color = utils.clamp_color_to_hslrules(color, condition)
+    color = clamp_color_to_hslrules(color, condition)
     return color.cast(ColorHex)
 
 
 def generator_accent(prominent: Color, condition: HSLMapValue) -> ColorHex:
-    color = utils.clamp_color_to_hslrules(prominent.saturated(0.1), condition)
+    color = clamp_color_to_hslrules(prominent.saturated(0.1), condition)
     return color.cast(ColorHex)
 
 
@@ -221,7 +222,7 @@ def generate(
     colors = {}
     for color in raw_colors:
         color = ColorHex(color)
-        name = utils.match_color_from_hslmap(color, hsl_map, list(colors.keys()))
+        name = match_color_from_hslmap(color, hsl_map, list(colors.keys()))
 
         if name is not None:
             color = color.cast(ColorHex)

@@ -19,10 +19,10 @@ significant changes to the behaviour.
 from pathlib import Path
 
 import chroma
-from chroma import utils
+from chroma.exceptions import ParentDirectoryException
 from chroma.integration import Integration
 from chroma.logger import Logger
-from chroma.exceptions import ParentDirectoryException
+from chroma.utils.theme import validate_header
 
 logger = Logger.get_logger()
 
@@ -65,7 +65,7 @@ class KittyIntegration(Integration):
             "blurb": self.meta.get("description"),
         }
 
-        if not utils.validate_header(Path(self.group["out"]), KITTY_HEADER):
+        if not validate_header(Path(self.group["out"]), KITTY_HEADER):
             logger.error("Cannot write configuration for Kitty. Skipping integration.")
             return
 

@@ -5,7 +5,7 @@ Creates a dynamically generated color palette.
 from pathlib import Path
 
 import chroma
-from chroma import utils
+from chroma.utils.theme import validate_header
 from chroma.colors import ColorHex
 from chroma.integration import Integration
 from chroma.logger import Logger
@@ -31,7 +31,7 @@ class RawIntegration(Integration):
             if header_template is not None:
                 header = generate_header(header_template)
 
-            if not utils.validate_header(
+            if not validate_header(
                 Path(attr["out"]), header, attr.get("force", False)
             ):
                 logger.error(f"Cannot write configuration for {name}. Skipping group.")

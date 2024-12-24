@@ -7,7 +7,7 @@ from chroma.colors.base import Color, T
 from chroma.colors.utils import check_types
 from chroma.logger import Logger
 from chroma.types import Number
-from chroma.utils import clamp, never
+from chroma.utils.tools import clamp, never
 
 ColorTypeRGB = tuple[float, float, float] | tuple[int, int, int]
 

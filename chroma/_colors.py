@@ -12,9 +12,9 @@ import colorsys
 import re
 from typing import Optional, cast
 
-from chroma import utils
 from chroma.logger import Logger
 from chroma.types import ColorFormat, ColorTuple, ColorType, Number
+from chroma.utils.tools import clamp, never
 
 logger = Logger.get_logger()
 
@@ -83,7 +83,7 @@ class Color:
             rgb = Color(rgb, "rgb").denormalized().color
             return Color(rgb_to_hexval(*rgb), "hex")
         else:
-            utils.never()
+            never()
 
     def as_hexval(self) -> Color:
         def rgb_to_hexval(r, g, b):
@@ -102,11 +102,11 @@ class Color:
             rgb = Color(rgb, "rgb").denormalized()
             return Color(rgb_to_hexval(*rgb.color), "hexval")
         else:
-            utils.never()
+            never()
 
     def as_rgb(self) -> Color:
         def hexval_to_rgb(hexval):
-            vals = [int(hexval[i:i + 2], 16) / 255.0 for i in (0, 2, 4)]
+            vals = [int(hexval[i : i + 2], 16) / 255.0 for i in (0, 2, 4)]
             return (vals[0], vals[1], vals[2])
 
         if self.format == "hex":
@@ -119,7 +119,7 @@ class Color:
             h, l, s = cast(ColorTuple, self.color)
             return Color(colorsys.hls_to_rgb(h, l, s), "rgb")
         else:
-            utils.never()
+            never()
 
     def as_hsl(self) -> Color:
         if self.format == "hex":
@@ -136,7 +136,7 @@ class Color:
         elif self.format == "hsl":
             return self
         else:
-            utils.never()
+            never()
 
     def as_format(self, format: ColorFormat) -> Color:
         if format == "hex":
@@ -168,7 +168,9 @@ class Color:
     def denormalized(self) -> Color:
         assert self.format in ["rgb"]
         if all([type(x) is float for x in self.color]):
-            converted = tuple([int(col * 255.0) for col in cast(ColorTuple, self.color)])
+            converted = tuple(
+                [int(col * 255.0) for col in cast(ColorTuple, self.color)]
+            )
             return Color(cast(ColorTuple, converted), self.format)
         elif all([type(x) is int for x in self.color]):
             return self
@@ -188,7 +190,7 @@ class Color:
             l = amount
         else:
             l -= amount
-        l = utils.clamp(l, 0, 1)
+        l = clamp(l, 0, 1)
         return Color((h, s, l), "hsl").as_format(self.format)
 
     def darken(self, amount: float, absolute: bool = False) -> None:
@@ -200,7 +202,7 @@ class Color:
             l = amount
         else:
             l += amount
-        l = utils.clamp(l, 0, 1)
+        l = clamp(l, 0, 1)
         return Color((h, s, l), "hsl").as_format(self.format)
 
     def lighten(self, amount: float, absolute: bool = False) -> None:
@@ -227,7 +229,7 @@ class Color:
             s = amount
         else:
             s += amount
-        s = utils.clamp(s, 0, 1)
+        s = clamp(s, 0, 1)
         return Color((h, s, l), "hsl").as_format(self.format)
 
     def saturate(self, amount: float, absolute: bool = False) -> None:
@@ -242,4 +244,4 @@ class Color:
         elif self.format == "hsl":
             h, s, l = self.color
             return f"hsl({h}, {s}, {l})"
-        utils.never()
+        never()

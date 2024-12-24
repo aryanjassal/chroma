@@ -7,7 +7,7 @@ from chroma.colors.base import Color, T
 from chroma.colors.utils import check_types
 from chroma.logger import Logger
 from chroma.types import Number
-from chroma.utils import clamp, never
+from chroma.utils.tools import clamp, never
 
 ColorTypeHSL = tuple[float, float, float] | tuple[int, int, int]
 
@@ -185,6 +185,8 @@ class ColorHSL(Color):
     def __str__(self):
         from chroma.colors.impl import ColorHex
 
-        logger.warn(f"{self.__class__.__name__}: __str__ is only supported by ColorHex.")
+        logger.warn(
+            f"{self.__class__.__name__}: __str__ is only supported by ColorHex."
+        )
         logger.warn("Defaulting to __str__ of ColorHex")
         return self.cast(ColorHex).__str__()

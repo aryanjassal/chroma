@@ -9,10 +9,10 @@ both GTK 3 and 4.
 from pathlib import Path
 
 import chroma
-from chroma import utils
+from chroma.exceptions import ParentDirectoryException
 from chroma.integration import Integration
 from chroma.logger import Logger
-from chroma.exceptions import ParentDirectoryException
+from chroma.utils.theme import validate_header
 
 logger = Logger.get_logger()
 
@@ -93,8 +93,8 @@ class GTKIntegration(Integration):
                 "No palettes present. Please have at least one palette for the theme."
             )
 
-        gtk3_valid = utils.validate_header(Path(self.group["out"]["gtk3"]), GTK_HEADER)
-        gtk4_valid = utils.validate_header(Path(self.group["out"]["gtk4"]), GTK_HEADER)
+        gtk3_valid = validate_header(Path(self.group["out"]["gtk3"]), GTK_HEADER)
+        gtk4_valid = validate_header(Path(self.group["out"]["gtk4"]), GTK_HEADER)
         if not gtk3_valid or not gtk4_valid:
             logger.error("Cannot write configuration for GTK. Skipping integration.")
             return

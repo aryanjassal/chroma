@@ -4,8 +4,10 @@ import traceback as tb
 from pathlib import Path
 
 import chroma
-from chroma import generator, theme, utils
+from chroma import generator, theme
 from chroma.logger import Logger
+from chroma.utils.paths import cache_dir, themes_dir
+from chroma.utils.tools import set_exception_hook
 
 logger = Logger.get_logger()
 
@@ -90,7 +92,7 @@ def exception_hook(exc_type, exc_val, exc_tb):
 
 def main():
     # Set up custom error handler
-    utils.set_exception_hook(exception_hook)
+    set_exception_hook(exception_hook)
 
     # Get command-line arguments
     args = setup_args()
@@ -100,7 +102,7 @@ def main():
         # options across all themes. Make sure that the name is consistent, like
         # "current.lua", to ensure overrides can always refer to a single file
         # which will reflect the current theme.
-        shutil.copy(Path(args.theme_name), utils.themes_dir() / "current.lua")
+        shutil.copy(Path(args.theme_name), themes_dir() / "current.lua")
 
         # If we are not loading any user overrides, then load the theme directly.
         # Otherwise, the user override must load the theme file anyways, so we
@@ -113,7 +115,7 @@ def main():
         exit(0)
 
     if args.command == "generate":
-        out_path = utils.cache_dir() / "palettes/generated.lua"
+        out_path = cache_dir() / "palettes/generated.lua"
         generator.generate(
             "magick",
             args.image_path,
@@ -124,7 +126,7 @@ def main():
 
         if args.output:
             shutil.copy(
-                utils.cache_dir() / "palettes/generated.lua",
+                cache_dir() / "palettes/generated.lua",
                 Path(args.output).expanduser(),
             )
 

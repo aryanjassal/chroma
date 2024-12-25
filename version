@@ -19,7 +19,7 @@ def commit(version):
     """
     Make a Git commit with the new version and create a tag.
     """
-    commit_message = f"chore: bump version to {version}"
+    commit_message = f"version: bump chroma version to {version}"
 
     subprocess.run(["git", "add", *VERSIONED_FILES.keys()], check=True)
     subprocess.run(["git", "commit", "-m", commit_message], check=True)

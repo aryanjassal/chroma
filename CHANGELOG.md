@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.8.0 (in progress)
+## v0.8.0
 
 Massive changes to the internal structure of the code. Themers would need to make a lot of changes to ensure their integration remains compatible. Please note that during development (before major version 1), the API will fluctuate a lot.
 
@@ -17,6 +17,8 @@ Massive changes to the internal structure of the code. Themers would need to mak
 - Added newer and more robust `chroma.colors` module.
 - Added `exceptions.py` file to provide application-specific exceptions
 - Added linting and testing to CI
+- Added state to the runtime, so variables can be set before running the lua theming
+- Added `--ignore-generated` to ignore the generated colors for one session instead of removing them completely
 
 ## Changes
 

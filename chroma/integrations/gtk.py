@@ -1,13 +1,18 @@
 """
-Creates a color theme for GTK 4, and writes that to `~/.config/gtk-4.0/gtk.css`.
+Creates a color theme for GTK, and writes that to `~/.config/gtk-4.0/gtk.css`
+and `~/.config/gtk-3.0/gtk.css`. Note that currently theming GTK 3 and 4
+separately isn't supported. Instead, only the supported options are applied
+to GTK 3, and all options are applied to GTk 4. The custom css is applied to
+both GTK 3 and 4.
 """
 
 from pathlib import Path
 
 import chroma
-from chroma import utils
-from chroma.handler import Handler
+from chroma.exceptions import ParentDirectoryException
+from chroma.integration import Integration
 from chroma.logger import Logger
+from chroma.utils.theme import validate_header
 
 logger = Logger.get_logger()
 
@@ -57,10 +62,10 @@ def validate_palette(palette: dict, index: int) -> dict | None:
         }
 
 
-class GTKHandler(Handler):
+class GTKIntegration(Integration):
     def apply(self):
         if self.group.get("colors") is None:
-            logger.info("Colors for GTK group is unset. Skipping handler.")
+            logger.info("Colors for GTK group is unset. Skipping integration.")
             return
         palettes = []
 
@@ -88,10 +93,10 @@ class GTKHandler(Handler):
                 "No palettes present. Please have at least one palette for the theme."
             )
 
-        gtk3_valid = utils.validate_header(Path(self.group["out"]["gtk3"]), GTK_HEADER)
-        gtk4_valid = utils.validate_header(Path(self.group["out"]["gtk4"]), GTK_HEADER)
+        gtk3_valid = validate_header(Path(self.group["out"]["gtk3"]), GTK_HEADER)
+        gtk4_valid = validate_header(Path(self.group["out"]["gtk4"]), GTK_HEADER)
         if not gtk3_valid or not gtk4_valid:
-            logger.error("Cannot write configuration for GTK. Skipping handler.")
+            logger.error("Cannot write configuration for GTK. Skipping integration.")
             return
 
         generated_file = []
@@ -119,11 +124,13 @@ class GTKHandler(Handler):
             with open(Path(self.group["out"]["gtk4"]).expanduser(), "w") as f:
                 f.writelines(generated_file)
         except FileNotFoundError as e:
-            logger.error(e)
-            logger.fatal("Failed to open file. Does the parent directory exist?")
+            ParentDirectoryException(
+                f"{e.__str__()}\n"
+                "Failed to open file. Does the parent directory exist?"
+            )
 
-        logger.info("Successfully applied GTK theme!")
+        logger.info("Successfully applied GTK theme")
 
 
 def register():
-    return {"gtk": GTKHandler}
+    return {"gtk": GTKIntegration}

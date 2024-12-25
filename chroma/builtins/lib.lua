@@ -1,3 +1,7 @@
+if use_generated == nil then
+  error("Required state 'use_generated' is unset")
+end
+
 ---@class Lib
 local lib = {}
 
@@ -8,7 +12,11 @@ local lib = {}
 -- instead.
 function lib.generated_or(theme_colors)
   local success, generated_colors = pcall(require, "chroma.palettes.generated")
-  if success and type(generated_colors) == "table" and next(generated_colors) ~= nil then
+  if success
+    and use_generated
+    and type(generated_colors) == "table"
+    and next(generated_colors) ~= nil
+  then
     return generated_colors
   else
     return theme_colors

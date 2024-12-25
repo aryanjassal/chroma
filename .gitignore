@@ -14,3 +14,6 @@ tmp
 
 # Ignore the result file
 result
+
+# Ignore cache files
+.*_cache/

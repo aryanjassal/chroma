@@ -3,13 +3,13 @@ import shutil
 import traceback as tb
 from pathlib import Path
 
-from chroma.logger import Logger, LogLevel
-
-logger = Logger(LogLevel.DEBUG)
-Logger.set_logger(logger)
-
 import chroma
-from chroma import generator, theme, utils
+from chroma import generator, theme
+from chroma.logger import Logger
+from chroma.utils.paths import cache_dir, themes_dir
+from chroma.utils.tools import set_exception_hook
+
+logger = Logger.get_logger()
 
 
 def setup_args():
@@ -20,6 +20,12 @@ def setup_args():
         action="version",
         version=f"Chroma {chroma.__version__}",
     )
+    parser.add_argument(
+        "-i",
+        "--ignore-generated",
+        action="store_true",
+        help="Ignores generated theme",
+    )
     subparsers = parser.add_subparsers(dest="command")
 
     # Parse commands for keyword load
@@ -29,19 +35,40 @@ def setup_args():
 
     # Parse commands for keyword generate
     gen_parser = subparsers.add_parser(
-        "generate", aliases=["gen"], help="Generates a theme from an image"
+        "generate",
+        aliases=["gen"],
+        help="Generates a palette from an image",
     )
     gen_parser.add_argument(
-        "image_path", help="Path to the image to extract colors from"
+        "image_path",
+        help="Path to the image to extract colors from",
     )
-    gen_parser.add_argument("-u", "--override", type=str, help="Override settings")
     gen_parser.add_argument(
-        "-o", "--output", type=str, help="Output path of generated color scheme"
+        "-u",
+        "--override",
+        type=str,
+        help="Override settings",
+    )
+    gen_parser.add_argument(
+        "-o",
+        "--output",
+        type=str,
+        help="Output path of generated color scheme",
+    )
+    gen_parser.add_argument(
+        "--max-colors",
+        type=int,
+        help="Get top n colors by prominency for generation",
+        default=1024,
+    )
+    gen_parser.add_argument(
+        "--image-size",
+        type=int,
+        help="Image size in NxN pixels to downscale to",
+        default=256,
     )
 
-    subparsers.add_parser(
-        "remove", help="Removes the generated palette, allowing theme colors"
-    )
+    subparsers.add_parser("remove", help="Removes the generated palette")
 
     known_args, unknown = parser.parse_known_args()
     args = parser.parse_args(unknown, namespace=known_args)
@@ -71,7 +98,7 @@ def exception_hook(exc_type, exc_val, exc_tb):
 
 def main():
     # Set up custom error handler
-    utils.set_exception_hook(exception_hook)
+    set_exception_hook(exception_hook)
 
     # Get command-line arguments
     args = setup_args()
@@ -81,28 +108,37 @@ def main():
         # options across all themes. Make sure that the name is consistent, like
         # "current.lua", to ensure overrides can always refer to a single file
         # which will reflect the current theme.
-        shutil.copy(Path(args.theme_name), utils.themes_dir() / "current.lua")
+        shutil.copy(Path(args.theme_name), themes_dir() / "current.lua")
 
         # If we are not loading any user overrides, then load the theme directly.
         # Otherwise, the user override must load the theme file anyways, so we
         # can just load the overrides, which will automatically compile the current
         # theme for us.
         if args.override:
-            theme.load(args.overide)
+            theme.load(
+                filename=args.overide,
+                state={"use_generated": not args.ignore_generated},
+            )
         else:
-            theme.load(args.theme_name)
+            theme.load(
+                filename=args.theme_name,
+                state={"use_generated": not args.ignore_generated},
+            )
         exit(0)
 
     if args.command == "generate":
-        if args.output:
-            out_path = args.output
-        else:
-            out_path = utils.cache_dir() / "palettes/generated.lua"
-        generator.generate("magick", args.image_path, out_path, image_size=768)
+        out_path = cache_dir() / "palettes/generated.lua"
+        generator.generate(
+            "magick",
+            args.image_path,
+            out_path,
+            image_size=args.image_size,
+            max_colors=args.max_colors,
+        )
 
         if args.output:
             shutil.copy(
-                utils.cache_dir() / "palettes/generated.lua",
+                cache_dir() / "palettes/generated.lua",
                 Path(args.output).expanduser(),
             )
 

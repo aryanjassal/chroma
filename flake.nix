@@ -19,6 +19,11 @@
             black
             isort
             lupa
+            luajitPackages.luacheck
+            pylint
+            mypy
+            flake8
+            pytest
             setuptools
             imagemagick
           ];

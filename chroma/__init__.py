@@ -1,3 +1,10 @@
+from .logger import Logger, LogLevel
+
+# Set up the logger and logging
+logger = Logger(LogLevel.DEBUG)
+Logger.set_logger(logger)
+
+# Set the version accessible from within the application
 __version__ = "0.7.1"
 
 # Useful for consistency. Use string formatting to use it in whatever format.

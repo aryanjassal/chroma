@@ -1,32 +1,50 @@
 from pathlib import Path
+from typing import Callable
 
-from chroma import utils
+from chroma.colors import Color
 from chroma.logger import Logger
+from chroma.utils.dynamic import discover_modules
+from chroma.utils.generator import write_lua_colors
+from chroma.utils.paths import chroma_dir
 
 logger = Logger.get_logger()
 
-BACKENDS = {}
+# TODO: Make the generators into a class, just like integrations
+GENERATORS_REGISTRY: dict[str, Callable] = {}
 
 
 def prepare():
-    backends = utils.discover_modules(utils.chroma_dir() / "backends")
+    generators = discover_modules(chroma_dir() / "generators")
 
-    for backend in backends:
-        if hasattr(backend, "register") and callable(getattr(backend, "register")):
-            entry = getattr(backend, "register")()
-            BACKENDS.update(entry)
+    for generator in generators:
+        if hasattr(generator, "register") and callable(getattr(generator, "register")):
+            entry = getattr(generator, "register")()
+            GENERATORS_REGISTRY.update(entry)
             for name in entry:
-                logger.debug(f"Registered generator backend {name}")
+                logger.debug(f"Registered generator '{name}'")
 
 
-def generate(backend: str, image_path: Path | str, output_path: Path | str, **kwargs):
+def generate(
+    name: str,
+    image_path: Path | str,
+    output_path: Path | str | None = None,
+    **kwargs,
+) -> dict[str, Color] | None:
+    """
+    If `output_path` is None, then the colors are returned as a dict of color
+    name and the resultant color object. Otherwise, the color is converted to
+    a lua theme and written to the output path provided it is valid.
+    """
     prepare()
-    generator = BACKENDS.get(backend)
+    generator = GENERATORS_REGISTRY.get(name)
     if generator is None:
-        logger.fatal(f"Backend {backend}: no such backend")
+        raise ValueError(f"Backend '{name}': no such backend")
 
     image_path = Path(image_path)
     theme = generator(image_path, **kwargs)
 
-    output_path = Path(output_path)
-    utils.write_lua_colors(output_path, theme)
+    if output_path is None:
+        return theme
+    else:
+        output_path = Path(output_path)
+        write_lua_colors(output_path, theme)

@@ -9,11 +9,33 @@ from .tools import backup, to_dict
 
 logger = Logger.get_logger()
 
+DEFAULT_STATE: dict = {"use_generated": True}
 
-def runtime():
-    runtime = LuaRuntime(unpack_returned_tuples=True)
+
+def sanitize_python(state: dict = dict(), **kwargs) -> dict:
+    state.update(kwargs)
+    out = dict()
+    for name, value in state.items():
+        # Sanitize the boolean type to match lua expectations
+        if type(value) is bool:
+            value = "true" if value else "false"
+
+        # Output the sanitized state
+        out[name] = value
+    return out
+
+
+def runtime(state: dict | None = DEFAULT_STATE):
+    runtime = LuaRuntime(unpack_returned_tuples=True)  # pyright: ignore
     runtime.execute(f"package.path = package.path .. ';{chroma_dir().parent}/?.lua'")
     runtime.execute(f"package.path = package.path .. ';{cache_dir().parent}/?.lua'")
+
+    if state is not None:
+        state = sanitize_python(state)
+        for name, value in state.items():
+            runtime.execute(f"{name} = {value}")
+            logger.debug(f"Setting state '{name}' = '{value}'")
+
     return runtime
 
 

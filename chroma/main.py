@@ -20,6 +20,12 @@ def setup_args():
         action="version",
         version=f"Chroma {chroma.__version__}",
     )
+    parser.add_argument(
+        "-i",
+        "--ignore-generated",
+        action="store_true",
+        help="Ignores generated theme",
+    )
     subparsers = parser.add_subparsers(dest="command")
 
     # Parse commands for keyword load
@@ -109,9 +115,15 @@ def main():
         # can just load the overrides, which will automatically compile the current
         # theme for us.
         if args.override:
-            theme.load(args.overide)
+            theme.load(
+                filename=args.overide,
+                state={"use_generated": not args.ignore_generated},
+            )
         else:
-            theme.load(args.theme_name)
+            theme.load(
+                filename=args.theme_name,
+                state={"use_generated": not args.ignore_generated},
+            )
         exit(0)
 
     if args.command == "generate":

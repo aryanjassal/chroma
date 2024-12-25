@@ -129,7 +129,7 @@ class GTKIntegration(Integration):
                 "Failed to open file. Does the parent directory exist?"
             )
 
-        logger.info("Successfully applied GTK theme!")
+        logger.info("Successfully applied GTK theme")
 
 
 def register():

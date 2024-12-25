@@ -57,7 +57,7 @@ class RawIntegration(Integration):
             try:
                 with open(Path(attr["out"]).expanduser(), "w") as f:
                     f.writelines(generated_file)
-                logger.info(f"Successfully generated theme for {name}!")
+                logger.info(f"Successfully generated theme for {name}")
                 applied_count += 1
             except FileNotFoundError as e:
                 logger.error(e)
@@ -65,7 +65,7 @@ class RawIntegration(Integration):
                 continue
 
         if applied_count > 0 or len(self.group) == 0:
-            logger.info("Successfully generated raw themes!")
+            logger.info("Successfully generated raw themes")
         else:
             logger.error("Failed to apply one or more raw themes")
 

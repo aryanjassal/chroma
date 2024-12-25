@@ -94,7 +94,7 @@ class KittyIntegration(Integration):
                 "Failed to open file. Does the parent directory exist?"
             )
 
-        logger.info("Successfully applied Kitty theme!")
+        logger.info("Successfully applied Kitty theme")
 
 
 def register():

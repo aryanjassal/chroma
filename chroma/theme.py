@@ -2,11 +2,17 @@ import re
 
 import chroma
 from chroma.exceptions import InvalidFieldException, VersionMismatchException
-from chroma.integration import Integration
+from chroma.integration import Integration, IntegrationT
 from chroma.logger import Logger
 from chroma.utils.dynamic import discover_modules
 from chroma.utils.paths import chroma_dir, chroma_themes_dir, config_dir, override_theme
-from chroma.utils.theme import parse_file, parse_lua, runtime
+from chroma.utils.theme import (
+    DEFAULT_STATE,
+    parse_file,
+    parse_lua,
+    runtime,
+    sanitize_python,
+)
 from chroma.utils.tools import merge, to_dict
 
 logger = Logger.get_logger()
@@ -20,7 +26,7 @@ VALID_META_KEYS = ["name", "description", "url", "author", "version"]
 SPECIAL_GROUPS = ["meta", "options", "colors"]
 
 # A registry for all the integrations and their corresponding constructor classes.
-INTEGRATION_REGISTRY: dict[str, Integration] = {}
+INTEGRATION_REGISTRY: dict[str, IntegrationT] = {}
 
 
 def assert_version(version, meta) -> None:
@@ -71,16 +77,26 @@ def parse_meta(meta) -> dict:
     return parsed_meta
 
 
-def load(filename=None, lua=None):
+def load(filename=None, lua=None, state: dict = dict()):
     # Create a blank dict for the theme, then assign themes in such a way that
     # default becomes the base, and we can override defaults with user theme
     # and override user theme from the override file.
     theme = {}
+
+    # Set the default state
+    runtime_state = DEFAULT_STATE
+    runtime_state.update(sanitize_python(state))
+    # for key, value in state.items():
+    #     runtime_state[key] = value
+
     if lua is None:
-        user_config = parse_file(runtime(), filename)
+        user_config = parse_file(runtime(runtime_state), filename)
     else:
-        user_config = parse_lua(runtime(), lua)
-    default_config = parse_file(runtime(), chroma_themes_dir() / "default.lua")
+        user_config = parse_lua(runtime(runtime_state), lua)
+
+    default_config = parse_file(
+        runtime(runtime_state), chroma_themes_dir() / "default.lua"
+    )
 
     options = merge(user_config["options"], default_config["options"])
     if options["merge_tables"]:
@@ -93,7 +109,7 @@ def load(filename=None, lua=None):
 
     override_file = override_theme()
     if override_file.is_file():
-        override_config = parse_file(runtime(), override_file)
+        override_config = parse_file(runtime(runtime_state), override_file)
         theme = merge(theme, override_config)
 
     assert_version(options["chroma_version"], theme["meta"])
@@ -134,18 +150,17 @@ def load(filename=None, lua=None):
             # TEST: testing is required for this
             for key, sub_int in entry.items():
                 try:
-                    subclass = isinstance(sub_int, Integration)
+                    subclass = issubclass(sub_int, Integration)
                     if subclass:
                         INTEGRATION_REGISTRY[key] = sub_int
+                        logger.debug(f"Registered integration {key}")
                     else:
+                        logger.debug(
+                            f"Integration {key} is not subclass of Integration"
+                        )
                         raise TypeError
                 except TypeError:
                     logger.error(f"Integration {key} is malformed. Skipping.")
-
-            # Finally update the registry with the correct pairs
-            INTEGRATION_REGISTRY.update(entry)
-            for name in entry:
-                logger.debug(f"Registered integration {name}")
 
     for group, config in theme.items():
         if group in SPECIAL_GROUPS:

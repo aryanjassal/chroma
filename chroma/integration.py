@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Type
 
 
 class Integration(ABC):
@@ -11,3 +12,6 @@ class Integration(ABC):
     @abstractmethod
     def apply(self) -> None:
         pass
+
+
+IntegrationT = Type[Integration]

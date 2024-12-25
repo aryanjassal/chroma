@@ -526,7 +526,7 @@ Unfortunately, while this is going against the design philosophy of Chroma, addi
 
 Unfortunately, just like custom generator backends, adding custom colors isn't supported yet either. The current implementation isn't suitable for that. See [this comment](https://github.com/aryanjassal/chroma/pull/1#issuecomment-2481729224). If you still want to do it anyways, you will need to add it inside the project files manually. Moreover, there will be no official support for custom color spaces until the API stabilizes.
 
-Chroma also supplies a custom library to deal with colors in different color spaces.
+Chroma supplies a custom library to deal with colors in different color spaces.
 
 ```py
 from chroma.colors import Color, ColorHex, ColorRGB
@@ -624,9 +624,9 @@ For an exhaustive changelog, refer to the [Changelog](https://github.com/aryanja
 - Make lua integrations more powerful
   - Add pre and post inserts for the files
   - Add support for template files
-- Add tests
 - QT SUPPORT [HIGH PRIORITY] (probably via kvantum)
 - Separate backup to validity check in utils
+- Make free-standing `darken`, etc. methods for colors
 
 ## Credits
 

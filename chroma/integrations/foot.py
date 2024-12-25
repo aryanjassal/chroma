@@ -70,7 +70,7 @@ class FootIntegration(Integration):
 
         for k, v in theme.items():
             if v is None:
-                logger.info(f"Key {k} is unset.")
+                logger.info(f"Key {k} is unset")
                 continue
             col = ColorHex(v).value
             generated_theme.append(f"{k}={col}")
@@ -86,7 +86,7 @@ class FootIntegration(Integration):
                 f"{e.__str__()}\n"
                 "Failed to open file. Does the parent directory exist?"
             )
-        logger.info("Successfully applied Foot theme!")
+        logger.info("Successfully applied Foot theme")
 
 
 def register():

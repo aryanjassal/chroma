@@ -4,4 +4,6 @@
 -- return a value of python's None instead of lua's nil, which has a
 -- different meaning of a field not existing.
 
-return {}
+return {
+  none = {},
+}

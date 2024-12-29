@@ -14,11 +14,13 @@ We finally have a `config.lua` file to better allow configuration of the applica
 
 - Added `-v --verbose` flag to change log level from INFO to DBUG
 - Added `lib.hslmap_condition` to help easily build hsl maps from config
+- Added free-standing methods for `darken`, `lighten`, `saturate`, `desaturate`, `blend`
 
 ### Changes
 
 - Changed error formatting to be more concise
 - Moved error traceback from error level to debug level
+- `chroma.logger.Logger.level` is now modifiable
 
 ### Removals
 

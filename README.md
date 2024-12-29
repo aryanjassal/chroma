@@ -631,7 +631,6 @@ For an exhaustive changelog, refer to the [Changelog](https://github.com/aryanja
   - Add support for template files
 - QT SUPPORT [HIGH PRIORITY] (probably via kvantum)
 - Separate backup to validity check in utils
-- Make free-standing `darken`, etc. methods for colors
 - Unify exit codes (like 64 for incorrect usage, 1 for other errors, etc.)
 - Split lua types into another file
 - Make lua state into all caps matching lua expectation

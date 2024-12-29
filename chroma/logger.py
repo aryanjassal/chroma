@@ -24,31 +24,31 @@ class Logger:
     __logger: Optional[Logger] = None
 
     def __init__(self, log_level):
-        self.__level = log_level
+        self.level = log_level
 
     def debug(self, message) -> None:
-        if self.__level <= LogLevel.DEBUG:
+        if self.level <= LogLevel.DEBUG:
             Logger.__out(
                 f"{Term.FG_MUTE} DBUG {Term.RESET}",
                 f"{Term.FG_MUTE}{message}{Term.RESET}",
             )
 
     def info(self, message) -> None:
-        if self.__level <= LogLevel.INFO:
+        if self.level <= LogLevel.INFO:
             Logger.__out(
                 f"{Term.FG_INFO} INFO {Term.RESET}",
                 f"{Term.FG_MUTE}{message}{Term.RESET}",
             )
 
     def warn(self, message) -> None:
-        if self.__level <= LogLevel.WARN:
+        if self.level <= LogLevel.WARN:
             Logger.__out(
                 f"{Term.FG_WARN} WARN {Term.RESET}",
                 f"{message}{Term.RESET}",
             )
 
     def error(self, message) -> None:
-        if self.__level <= LogLevel.ERROR:
+        if self.level <= LogLevel.ERROR:
             Logger.__out(
                 f"{Term.FG_EROR} EROR {Term.RESET}",
                 f"{message}{Term.RESET}",

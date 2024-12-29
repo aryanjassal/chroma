@@ -1,4 +1,5 @@
 local lib = require("chroma.builtins.lib")
+local colors = require("chroma.builtins.colors")
 
 local config = {}
 
@@ -29,12 +30,15 @@ config.generators = {
   },
 
   generator_modes = {
-    accent = "saturate 0.1",
-    norm = "",
-    bright = "lighten 0.1",
-    background = "darken 0.15",
-    foreground = "lighten 0.15",
-  }
+    accent = colors.transform.saturate(0.1),
+    norm = colors.transform.noop(),
+    bright = colors.transform.lighten(0.1),
+    background = colors.transform.darken(0.15),
+    foreground = colors.transform.lighten(0.15),
+  },
+
+  -- Modify how individual colors are generated
+  ganerator_colors = { }
 }
 
 return config

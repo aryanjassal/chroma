@@ -5,7 +5,12 @@ from chroma.exceptions import InvalidFieldException, VersionMismatchException
 from chroma.integration import Integration, IntegrationT
 from chroma.logger import Logger
 from chroma.utils.dynamic import discover_modules
-from chroma.utils.paths import chroma_dir, chroma_builtins_dir, config_dir, override_theme
+from chroma.utils.paths import (
+    chroma_builtins_dir,
+    chroma_dir,
+    config_dir,
+    override_theme,
+)
 from chroma.utils.theme import (
     DEFAULT_STATE,
     parse_file,
@@ -14,6 +19,7 @@ from chroma.utils.theme import (
     sanitize_python,
 )
 from chroma.utils.tools import merge, to_dict
+from chroma.colors import ColorHex
 
 logger = Logger.get_logger()
 
@@ -86,21 +92,25 @@ def load(filename=None, lua=None, state: dict = dict()):
     # Set the default state
     runtime_state = DEFAULT_STATE
     runtime_state.update(sanitize_python(state))
-    # for key, value in state.items():
-    #     runtime_state[key] = value
+
+    config = parse_file(runtime(runtime_state), chroma_builtins_dir() / "config.lua")
+    print(config)
+    c = config["generators"]["generator_modes"]["background"](ColorHex('#ffffff'))
+    print(c)
+    exit()
 
     if lua is None:
-        user_config = parse_file(runtime(runtime_state), filename)
+        user_theme = parse_file(runtime(runtime_state), filename)
     else:
-        user_config = parse_lua(runtime(runtime_state), lua)
+        user_theme = parse_lua(runtime(runtime_state), lua)
 
-    default_config = parse_file(
+    default_theme = parse_file(
         runtime(runtime_state), chroma_builtins_dir() / "default.lua"
     )
 
-    options = merge(user_config["options"], default_config["options"])
+    options = merge(user_theme["options"], default_theme["options"])
     if options["merge_tables"]:
-        theme = merge(default_config, user_config)
+        theme = merge(default_theme, user_theme)
     else:
         logger.warn(
             "Theme table will not be merged with default table. Some fields "
@@ -147,7 +157,6 @@ def load(filename=None, lua=None, state: dict = dict()):
             # The issubclass() can only throw one error: TypeError when the
             # first argument isn't a class. In that case, our integration would
             # be malformed, so we can safely detect and ignore that exception.
-            # TEST: testing is required for this
             for key, sub_int in entry.items():
                 try:
                     subclass = issubclass(sub_int, Integration)

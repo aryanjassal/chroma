@@ -108,12 +108,8 @@ def main():
     args = setup_args()
 
     # Change the logger to be verbose if the flag is set
-    # TODO: I don't like how this works. Fix it.
     if args.verbose:
-        debug_logger = Logger(LogLevel.DEBUG)
-        Logger.set_logger(debug_logger)
-        global logger
-        logger = debug_logger
+        logger.level = LogLevel.DEBUG
 
     if args.command == "load":
         # If the theme file does not exist, then check if a theme file (with or

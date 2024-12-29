@@ -522,6 +522,7 @@ Unfortunately, while this is going against the design philosophy of Chroma, addi
 
 > [!NOTE]
 > For theme writers: The `chroma.colors` API will be very unstable during development, as I'm not happy with where it is right now. Be warned.
+>
 > For users: Make sure to check for updates for your theme if a chroma update breaks your theme.
 
 Unfortunately, just like custom generator backends, adding custom colors isn't supported yet either. The current implementation isn't suitable for that. See [this comment](https://github.com/aryanjassal/chroma/pull/1#issuecomment-2481729224). If you still want to do it anyways, you will need to add it inside the project files manually. Moreover, there will be no official support for custom color spaces until the API stabilizes.
@@ -579,7 +580,7 @@ new_color.darkened(amount=0.1)  # Darken a color with the given amount
 new_color.lightened(amount=0.1)  # Lighten a color with the given amount
 new_color.saturated(amount=0.1)  # Saturate a color with the given amount
 new_color.desaturated(amount=0.1)  # Desaturate a color with the given amount
-new_color.blended(color=color_hsl, ratio=0.1)  # Blend a color with another color by the given ratio
+new_color.blended(color=color_hsl, ratio=0.1)  # Blend two colors by the given ratio
 
 # These methods aren't supported by all color types.
 new_color.normalize()    # Normalization and denormalization is currently
@@ -608,16 +609,15 @@ For an exhaustive changelog, refer to the [Changelog](https://github.com/aryanja
       - Merge namespace for themes (`chroma.themes` will include both user themes and builtin themes)
       - If not possible, then move user config to `chroma.user` namespace
 - Update integrations to rely on `Color` more heavily
-  - Update the integrations to implement a versioning system like the themes, so older/newer integrations won't be supported or will throw a warning/error.
 - Make icon (inspired by Prism Launcher)
 - Allow custom variable substitution for paths (or just use regular path substitution for that)
 - Add upstream metadata field
+  - Update the integrations to implement a versioning system like the themes, so older/newer integrations won't be supported or will throw a warning/error.
   - Allow themes to be updated by a command, replacing local with remote content
 - Add a `config.lua` file which the users can configure the default integrations in
   - Add enabled modules config option
   - Add config for backends
     - HSL_MAP for imagemagick backend
-      - Can be set via both the theme and options. if unset in opts, theme setting would take precedence
 - Add `chroma.lib` for utility functions within lua
   - Add `Color` class and conversion utilities for lua
   - By default, all colors should be `Color` objects

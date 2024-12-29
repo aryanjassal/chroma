@@ -6,7 +6,7 @@ from pathlib import Path
 import chroma
 from chroma import generator, theme
 from chroma.logger import Logger
-from chroma.utils.paths import cache_dir, themes_dir
+from chroma.utils.paths import cache_dir, find_theme_from_name, themes_dir
 from chroma.utils.tools import set_exception_hook
 
 logger = Logger.get_logger()
@@ -104,11 +104,22 @@ def main():
     args = setup_args()
 
     if args.command == "load":
+        # If the theme file does not exist, then check if a theme file (with or
+        # without the extension) exists in the expected directories. If there is
+        # match, then load that. If that also fails, then no theme exists.
+        theme_name = Path(args.theme_name)
+        if not theme_name.exists():
+            theme_name = find_theme_from_name(args.theme_name)
+
+            if theme_name is None:
+                logger.error(f"File with name '{args.theme_name}' doesn't exist")
+                exit(1)
+
         # Cache the theme we are going to apply. This will be useful for overriding
         # options across all themes. Make sure that the name is consistent, like
         # "current.lua", to ensure overrides can always refer to a single file
         # which will reflect the current theme.
-        shutil.copy(Path(args.theme_name), themes_dir() / "current.lua")
+        shutil.copy(theme_name, themes_dir() / "current.lua")
 
         # If we are not loading any user overrides, then load the theme directly.
         # Otherwise, the user override must load the theme file anyways, so we
@@ -121,7 +132,7 @@ def main():
             )
         else:
             theme.load(
-                filename=args.theme_name,
+                filename=str(theme_name),
                 state={"use_generated": not args.ignore_generated},
             )
         exit(0)
@@ -129,17 +140,17 @@ def main():
     if args.command == "generate":
         out_path = cache_dir() / "palettes/generated.lua"
         generator.generate(
-            "magick",
-            args.image_path,
-            out_path,
+            name="magick",
+            image_path=args.image_path,
+            output_path=out_path,
             image_size=args.image_size,
             max_colors=args.max_colors,
         )
 
         if args.output:
             shutil.copy(
-                cache_dir() / "palettes/generated.lua",
-                Path(args.output).expanduser(),
+                src=cache_dir() / "palettes/generated.lua",
+                dst=Path(args.output).expanduser(),
             )
 
     if args.command == "remove":

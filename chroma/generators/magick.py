@@ -244,5 +244,4 @@ def generate(
 def register():
     return {
         "magick": generate,
-        "imagemagick": generate,
     }

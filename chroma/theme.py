@@ -5,7 +5,7 @@ from chroma.exceptions import InvalidFieldException, VersionMismatchException
 from chroma.integration import Integration, IntegrationT
 from chroma.logger import Logger
 from chroma.utils.dynamic import discover_modules
-from chroma.utils.paths import chroma_dir, chroma_themes_dir, config_dir, override_theme
+from chroma.utils.paths import chroma_dir, chroma_builtins_dir, config_dir, override_theme
 from chroma.utils.theme import (
     DEFAULT_STATE,
     parse_file,
@@ -95,7 +95,7 @@ def load(filename=None, lua=None, state: dict = dict()):
         user_config = parse_lua(runtime(runtime_state), lua)
 
     default_config = parse_file(
-        runtime(runtime_state), chroma_themes_dir() / "default.lua"
+        runtime(runtime_state), chroma_builtins_dir() / "default.lua"
     )
 
     options = merge(user_config["options"], default_config["options"])

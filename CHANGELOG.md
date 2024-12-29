@@ -1,5 +1,28 @@
 # Changelog
 
+## v0.8.1
+
+Instead of needing the full file path, Chroma can now automatically find files in expected directories (i.e. chroma inbuilt themes directory and `~/.config/chroma/themes`).
+
+### Key changes
+
+- Renamed the `imagemagick.py` generator to `magick.py`
+- Chroma can find the theme name automatically by providing the file name only
+
+### Additions
+
+- Added `chroma.utils.paths.find_theme_from_name`. This finds theme paths from the theme name
+
+### Changes
+
+- Renamed `imagemagick.py` to `magick.py`
+- Renamed `chroma.utils.paths.chroma_themes_dir` to `chroma_builtins_dir`
+- Updated the chroma version of `chroma.themes.tokyodark` from `0.7.0` to `0.8.1`
+
+### Removals
+
+- Removed `imagemagick` alias for the `magick` generator
+
 ## v0.8.0
 
 Massive changes to the internal structure of the code. Themers would need to make a lot of changes to ensure their integration remains compatible. Please note that during development (before major version 1), the API will fluctuate a lot.
@@ -7,6 +30,7 @@ Massive changes to the internal structure of the code. Themers would need to mak
 ### Key changes
 
 - Renamed `handlers` to `integrations`. The code otherwise works the same. Make sure to update your integrations to the new names for the classes. This is a breaking change.
+- Renamed `backends` to `generators` for color generators.
 - Changed `chroma.colors` from a file to a module. The old colors file is now deprecated under `chroma._colors`. Usage guide can be found in the README.
 - The new API has removed in-place modifying of variables. Now, all methods will return a copy with the modified values, making the usage more pythonic.
 - `chroma.utils` has now been split into its own module. You need to use the relevant file to import the utility function now.
@@ -35,7 +59,7 @@ Massive changes to the internal structure of the code. Themers would need to mak
 - Removed `iterations` parameter from `magick` generator.
 - Removed `--estimate` flag from the program. This is the default behaviour.
 - Removed `--iterations` flag from the program. This is now redundant.
-- Removed `Chroma.logger.Logger.fatal()`. Logger should not exit the application.
+- Removed `chroma.logger.Logger.fatal()`. Logger should not exit the application.
 
 ## v0.7.0
 

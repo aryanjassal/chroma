@@ -2,13 +2,8 @@ from chroma import generator
 from chroma.utils.theme import parse_file, runtime
 from tests.utils import generate_name
 
-def test_magick_aliases(global_setup_teardown, fixtures):
+def test_magick_alias(global_setup_teardown, fixtures):
     tmpdir = global_setup_teardown
-    generator.generate(
-        name="imagemagick",
-        image_path=fixtures / "images/image_small.jpg",
-        output_path=tmpdir / generate_name(),
-    )
     generator.generate(
         name="magick",
         image_path=fixtures / "images/image_small.jpg",
@@ -21,7 +16,7 @@ def test_magick_output_file(global_setup_teardown, fixtures):
     filename = tmpdir / generate_name()
 
     retval = generator.generate(
-        name="imagemagick",
+        name="magick",
         image_path=fixtures / "images/image_small.jpg",
         output_path=filename,
     )
@@ -41,7 +36,7 @@ def test_magick_output_file(global_setup_teardown, fixtures):
 
 def test_magick_output_dict(fixtures):
     retval = generator.generate(
-        name="imagemagick",
+        name="magick",
         image_path=fixtures / "images/image_small.jpg",
     )
     assert type(retval) is dict, f"Unexpected return value, expected dict, got {retval}"

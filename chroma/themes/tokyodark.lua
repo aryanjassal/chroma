@@ -2,7 +2,7 @@ local theme = require "chroma.builtins.default"
 local lib = require "chroma.builtins.lib"
 
 theme.options = {
-  chroma_version = "0.7.0",
+  chroma_version = "0.8.1",
 }
 
 theme.meta = {

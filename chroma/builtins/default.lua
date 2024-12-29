@@ -27,7 +27,7 @@ local theme = {}
 ---@field merge_tables boolean|nil
 ---@field chroma_version string
 -- The options table provides many options that govern the application's
--- behaviour. Some options might even end up breaking the application if
+-- behavior. Some options might even end up breaking the application if
 -- configured incorrectly, so know what you are doing before changing any
 -- option.
 theme.options = {
@@ -57,7 +57,7 @@ theme.options = {
 ---@field url string|nil
 -- The metadata table provides useful metadata to Chroma and the integrations.
 -- Adding metadata to your theme is optional, but recommended. The presence of
--- metadata will not significantly alter the application's behaviour. However,
+-- metadata will not significantly alter the application's behavior. However,
 -- integrations are given access to the metadata. As such, the presence or
 -- absence of metadata might impact the generated theme file.
 theme.meta = {
@@ -312,7 +312,7 @@ theme.foot = {
 ---@field header string|nil
 -- You can also expand all environment variables available to the program
 -- like in the shell. DO NOT OVERWRITE THE SAME FILE AGAIN! Lua is
--- intrinsically random with table order, so it is undefined behaviour to
+-- intrinsically random with table order, so it is undefined behavior to
 -- replace the same file!
 ---@field out string
 

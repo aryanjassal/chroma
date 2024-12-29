@@ -1,7 +1,7 @@
 from .logger import Logger, LogLevel
 
 # Set up the logger and logging
-logger = Logger(LogLevel.DEBUG)
+logger = Logger(LogLevel.INFO)
 Logger.set_logger(logger)
 
 # Set the version accessible from within the application

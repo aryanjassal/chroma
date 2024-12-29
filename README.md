@@ -4,7 +4,7 @@ Use a single command to theme your entire system.
 
 Why does this exist, you ask? I wasn't happy with how other theming applications worked. Granted, "other" means only three applications: [Gradience](https://github.com/GradienceTeam/Gradience), [Pywal](https://github.com/dylanaraps/pywal), and [Chameleon](https://github.com/GideonWolfe/Chameleon). I know two of those applications are archived, and the third one relies on one of the archived application. But still. I don't like that.
 
-And, what started off as a simple script to take in a lua file theme file and write it to some set applications' configuration became this. It's like you were trying to build a sand castle on the beach, but you somehow end up building Rome within a day. Crazy things.
+And, what started off as a simple script to take in a lua file theme file and write it to some set applications' configuration became this. It's like you were trying to build a sand castle on the beach, but you somehow end up building Rome within a day. Crazy stuff, huh?
 
 ## Installation
 
@@ -88,7 +88,7 @@ Do note that there are way more options available. Take a look at the help menu 
 To keep using the default theme palette and remove the auto-generated palette, run this command. You will need to regenerate the palette if you have already run this command.
 
 > [!IMPORTANT]
-> The colors generated are heavily opinionated and might not work perfectly for all images. Please understand this, and raise any issues with the image palette generation along with an image on which we see that behaviour. Of course, we fix one image, we break another.
+> The colors generated are heavily opinionated and might not work perfectly for all images. Please understand this, and raise any issues with the image palette generation along with an image on which we see that behavior. Of course, we fix one image, we break another.
 
 ```console
 [aryanj@laptop:~]$ chroma remove
@@ -131,7 +131,7 @@ local python = require "chroma.builtins.python"
 local lib = require "chroma.builtins.lib"
 
 --[[
-  These options control the behaviour of theme generation. Know what you are
+  These options control the behavior of theme generation. Know what you are
   doing before chaging any option here, as you most likely don't want to be
   changing anything here.
 ]]
@@ -148,7 +148,7 @@ theme.options = {
   --[[
     By default, the theme generator merges the table with the default table.
     This ensures doing something like this would not result in other values,
-    like the default out file, being nil. To disable this behaviour, set this
+    like the default out file, being nil. To disable this behavior, set this
     flag to false.
 
     themes.gtk { colors = { red = "#ff0000", } }
@@ -160,7 +160,7 @@ theme.meta = {
   --[[
     These fields are the metadata of the actual theme. They need to be filled
     out manually, but the fields are optional. All parameters within the meta
-    table are purely cosmetic and shouldn't seriously impact the behaviour of
+    table are purely cosmetic and shouldn't seriously impact the behavior of
     Chroma.
   ]]
   name = "Example",
@@ -271,7 +271,7 @@ theme.gtk = {
 
   --[[
     Want to customize your experience EVEN MORE? There's an option for that.
-    Inject custom CSS into the css files to change behaviour in interesting
+    Inject custom CSS into the css files to change behavior in interesting
     ways.
   ]]
   extra_css = "",
@@ -500,7 +500,7 @@ This might give a warning that Chroma doesn't exist as a library. Worry not, as 
 You can use the palette generator to generate a palette from an image. You can do this dynamically whenever a wallpaper is changed by using this script to do the changing.
 
 ```bash
-#/usr/bin/env bash
+#!/usr/bin/env bash
 
 # Assume changing wallpapers using `swww` and `$1` (first argument) is path to
 # the image to set as the wallpaper.
@@ -513,11 +513,11 @@ chroma load /path/to/theme.lua
 
 This script will first set an image as a wallpaper, then generate and load a theme using Chroma.
 
-Chroma generates a theme palette and saves the generated palette to either a specified path, or `~/.config/chroma/palettes/generated.lua`. By default
+Chroma generates a theme palette and saves the generated palette to either a specified path, or `~/.config/chroma/palettes/generated.lua` by default.
 
 Unlike Pywal, which can set the wallpaper based on a theme, Chroma can generate a theme based on the wallpaper. While some palettes might end up looking less than perfect, others might look fitting. It's kind of a hit-or-miss. If you really want a perfect color palette, make it yourself.
 
-However, changing some variables could result in interesting behaviour. As such, options to further customise currently hardcoded values will be provided in the future, but for now, it is all static.
+However, changing some variables could result in interesting behavior. As such, options to further customise currently hardcoded values will be provided in the future, but for now, it is all static.
 
 All a generated color palette does is that it overrides the base color palette provided by the theme. The theme's settings are still applicable. For example, if the theme assigns `theme.colors.blue` to `theme.gtk.colors.accent`, then the generated blue color will be used as the accent instead of the actual generated accent color.
 
@@ -623,7 +623,6 @@ For an exhaustive changelog, refer to the [Changelog](https://github.com/aryanja
 - Add a `config.lua` file which the users can configure the default integrations in
   - Add enabled modules config option
   - Add config for backends
-    - HSL_MAP for imagemagick backend
 - Add `chroma.lib` for utility functions within lua
   - Add `Color` class and conversion utilities for lua
   - By default, all colors should be `Color` objects
@@ -634,6 +633,8 @@ For an exhaustive changelog, refer to the [Changelog](https://github.com/aryanja
 - Separate backup to validity check in utils
 - Make free-standing `darken`, etc. methods for colors
 - Unify exit codes (like 64 for incorrect usage, 1 for other errors, etc.)
+- Split lua types into another file
+- Make lua state into all caps matching lua expectation
 
 ## Credits
 

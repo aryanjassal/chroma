@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.9.0 (in progress)
+
+We finally have a `config.lua` file to better allow configuration of the application!
+
+### Key changes
+
+- Added `-v --verbose` flag to change log level from INFO to DBUG
+- Added default `config.lua` file
+- Added `lib.hslmap_condition` to help easily build hsl maps from config
+
+### Additions
+
+- Added `-v --verbose` flag to change log level from INFO to DBUG
+- Added `lib.hslmap_condition` to help easily build hsl maps from config
+
+### Changes
+
+- Changed error formatting to be more concise
+- Moved error traceback from error level to debug level
+
+### Removals
+
+- Removed deprecated `chroma._colors.py`
+
 ## v0.8.1
 
 Instead of needing the full file path, Chroma can now automatically find files in expected directories (i.e. chroma inbuilt themes directory and `~/.config/chroma/themes`).
@@ -57,7 +81,7 @@ Massive changes to the internal structure of the code. Themers would need to mak
 - Removed in-place changing. All operations return the modified object.
 - Removed `estimate_missing` parameter from `magick` generator.
 - Removed `iterations` parameter from `magick` generator.
-- Removed `--estimate` flag from the program. This is the default behaviour.
+- Removed `--estimate` flag from the program. This is the default behavior.
 - Removed `--iterations` flag from the program. This is now redundant.
 - Removed `chroma.logger.Logger.fatal()`. Logger should not exit the application.
 

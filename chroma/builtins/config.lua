@@ -1,32 +1,33 @@
-local lib = require("chroma.builtins.lib")
-local colors = require("chroma.builtins.colors")
+local lib = require "chroma.builtins.lib"
+local colors = require "chroma.builtins.colors"
+local python = require "chroma.builtins.python"
 
 local config = {}
 
 config.integrations = {
-  themable = { "gtk", "kitty" }
+  themable = { "gtk", "kitty" },
 }
 
 config.behavior = {
   missing_local_integration = "IGNORE",
-  missing_theme_integration = "IGNORE"
+  missing_theme_integration = "IGNORE",
 }
 
 config.generators = {
   hslmap = {
-    accent = lib.hslmap_condition(nil, {60, 100}, {50, 90}),
-    black = lib.hslmap_condition(nil, nil, {5, 20}),
-    white = lib.hslmap_condition(nil, nil, {80, 95}),
-    background = lib.hslmap_condition(nil, {0, 20}, {5, 10}),
-    foreground = lib.hslmap_condition(nil, {0, 20}, {90, 95}),
-    red = lib.hslmap_condition({{0, 35}, {325, 360}}, {40, 90}, {30, 90}),
-    orange = lib.hslmap_condition({35, 75}, {30, 90}, {40, 80}),
-    brown = lib.hslmap_condition({35, 75}, {30, 70}, {20, 70}),
-    yellow = lib.hslmap_condition({65, 105}, {40, 90}, {30, 90}),
-    green = lib.hslmap_condition({100, 160}, {40, 90}, {30, 90}),
-    blue = lib.hslmap_condition({200, 230}, {40, 50}, {40, 60}),
-    cyan = lib.hslmap_condition({170, 200}, {40, 90}, {40, 90}),
-    magenta = lib.hslmap_condition({280, 310}, {30, 50}, {30, 50}),
+    accent = lib.hslmap_condition(python.none, { 60, 100 }, { 50, 90 }),
+    black = lib.hslmap_condition(python.none, python.none, { 5, 20 }),
+    white = lib.hslmap_condition(python.none, python.none, { 80, 95 }),
+    background = lib.hslmap_condition(python.none, { 0, 20 }, { 5, 10 }),
+    foreground = lib.hslmap_condition(python.none, { 0, 20 }, { 90, 95 }),
+    red = lib.hslmap_condition({ { 0, 35 }, { 325, 360 } }, { 40, 90 }, { 30, 90 }),
+    orange = lib.hslmap_condition({ 35, 75 }, { 30, 90 }, { 40, 80 }),
+    brown = lib.hslmap_condition({ 35, 75 }, { 30, 70 }, { 20, 70 }),
+    yellow = lib.hslmap_condition({ 65, 105 }, { 40, 90 }, { 30, 90 }),
+    green = lib.hslmap_condition({ 100, 160 }, { 40, 90 }, { 30, 90 }),
+    blue = lib.hslmap_condition({ 200, 230 }, { 40, 50 }, { 40, 60 }),
+    cyan = lib.hslmap_condition({ 170, 200 }, { 40, 90 }, { 40, 90 }),
+    magenta = lib.hslmap_condition({ 280, 310 }, { 30, 50 }, { 30, 50 }),
   },
 
   generator_modes = {
@@ -38,7 +39,7 @@ config.generators = {
   },
 
   -- Modify how individual colors are generated
-  ganerator_colors = { }
+  generator_colors = {},
 }
 
 return config

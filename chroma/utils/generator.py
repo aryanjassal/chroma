@@ -189,3 +189,46 @@ def write_lua_colors(path: Path, colors: dict, indent: int = 2):
         contents.append(f"{' ' * indent}{name} = \"{color}\",\n")
     contents.append("}")
     path.write_text("".join(contents))
+
+
+def assert_hslmap_condition(condition) -> HSLMapValue:
+    """
+    Validates and converts a raw HSL map condition (list or tuple) to a Python HSLMapValue.
+
+    :param condition: The raw condition to validate and convert.
+    :return: A valid HSLMapValue.
+    :raises ValueError: If the condition does not match the expected structure.
+    """
+    if not isinstance(condition, (list, tuple)) or len(condition) != 3:
+        raise ValueError(
+            f"Value {condition} does not match requirements for HSLMap condition"
+        )
+
+    def validate_field(field) -> HSLMapField:
+        """Validates and converts a single field."""
+        if field is None:
+            return None
+
+        if isinstance(field, list):
+            if all(
+                isinstance(pair, (list, tuple))
+                and len(pair) == 2
+                and all(isinstance(x, int) for x in pair)
+                for pair in field
+            ):
+                return [tuple(pair) for pair in field]
+            raise ValueError(f"Invalid list field: {field}")
+
+        if isinstance(field, (list, tuple)) and len(field) == 2:
+            if all(isinstance(x, int) for x in field):
+                return tuple(field)
+            raise ValueError(f"Invalid tuple field: {field}")
+
+        raise ValueError(f"Invalid field: {field}")
+
+    # Validate and convert all three fields
+    return (
+        validate_field(condition[0]),
+        validate_field(condition[1]),
+        validate_field(condition[2]),
+    )

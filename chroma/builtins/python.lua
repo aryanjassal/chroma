@@ -5,5 +5,5 @@
 -- different meaning of a field not existing.
 
 return {
-  none = {},
+  none = python.none,
 }

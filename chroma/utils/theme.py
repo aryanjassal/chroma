@@ -12,22 +12,14 @@ logger = Logger.get_logger()
 
 DEFAULT_STATE: dict = {
     "use_generated": True,
-
     "darken": darken,
     "lighten": lighten,
     "saturate": saturate,
     "desaturate": desaturate,
-
-    # "chroma": {
-    #     "colors": {
-    #         "methods": {
-    #             "darken": darken,
-    #             "lighten": lighten,
-    #             "saturate": saturate,
-    #             "desaturate": desaturate,
-    #         }
-    #     }
-    # },
+    "__chroma_darken": darken,
+    "__chroma_lighten": lighten,
+    "__chroma_saturate": saturate,
+    "__chroma_desaturate": desaturate,
 }
 
 
@@ -57,9 +49,8 @@ def sanitize_python(state: dict = dict(), **kwargs) -> dict:
     return sanitized
 
 
-# TODO: add tabled global methods
 def runtime(state: dict | None = DEFAULT_STATE):
-    runtime = LuaRuntime(unpack_returned_tuples=True)  # pyright: ignore
+    runtime = LuaRuntime(unpack_returned_tuples=True)  # pyright: ignore (This parameter exists)
     runtime.execute(f"package.path = package.path .. ';{chroma_dir().parent}/?.lua'")
     runtime.execute(f"package.path = package.path .. ';{cache_dir().parent}/?.lua'")
 
@@ -69,7 +60,7 @@ def runtime(state: dict | None = DEFAULT_STATE):
                 register_state(value)
             elif callable(value):
                 logger.debug(f"Setting function '{key}'")
-                runtime.globals()[key] = value
+                runtime.globals()[key] = value  # pyright: ignore (You can set global state)
             else:
                 logger.debug(f"Setting state '{key}' = '{value}'")
                 runtime.execute(f"{key} = {value}")

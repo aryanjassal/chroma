@@ -11,77 +11,27 @@ from chroma.utils.tools import check_program, clamp
 
 logger = Logger.get_logger()
 
-HSL_MAP: HSLMap = {
-    "accent": (None, (60, 100), (50, 90)),
-    "black": (None, None, (5, 20)),
-    "white": (None, None, (80, 95)),
-    "background": (None, (0, 20), (5, 10)),
-    "foreground": (None, (0, 20), (90, 95)),
-    "red": ([(0, 35), (325, 360)], (40, 90), (30, 90)),
-    "orange": ((35, 75), (30, 90), (40, 80)),
-    "brown": ((35, 75), (30, 70), (20, 70)),
-    "yellow": ((65, 105), (40, 90), (30, 90)),
-    "green": ((100, 160), (40, 90), (30, 90)),
-    "blue": ((200, 230), (40, 50), (40, 60)),
-    "cyan": ((170, 200), (40, 90), (40, 90)),
-    "magenta": ((280, 310), (30, 50), (30, 50)),
-}
 
-
-# NOTE: These generators are used when the corresponding color cannot be inferred
-# from the image.
-# NOTE: Each generator must return a ColorHex object.
-
-
-def generator_fg(
-    white: Color,
-    accent: Color,
-    blend_ratio: float,
-    light_ratio: float,
-    condition: HSLMapValue,
+def generator_from(
+    source: ColorHex, transform: Callable[[ColorHex], ColorHex], condition: HSLMapValue
 ) -> ColorHex:
-    white = white.cast(ColorHSL).normalize()
-    accent = accent.cast(ColorHSL).normalize()
-    l1 = white.color[0]
-    l2 = accent.color[0]
-    hue = l1 * blend_ratio + l2 * blend_ratio
-    white.set_l(clamp(hue, 0.0, 1.0))
-    white = white.lighten(light_ratio)
-    color = clamp_color_to_hslrules(white, condition)
-    return color.cast(ColorHex)
-
-
-def generator_bg(
-    black: Color,
-    accent: Color,
-    blend_ratio: float,
-    dark_ratio: float,
-    condition: HSLMapValue,
-) -> ColorHex:
-    black = black.cast(ColorHSL).normalize()
-    accent = accent.cast(ColorHSL).normalize()
-    l1 = black.color[0]
-    l2 = accent.color[0]
-    hue = l1 * blend_ratio + l2 * blend_ratio
-    black.set_l(clamp(hue, 0.0, 1.0))
-    black = black.darken(dark_ratio)
-    color = clamp_color_to_hslrules(black, condition)
+    color = transform(source)
+    color = clamp_color_to_hslrules(color, condition)
     return color.cast(ColorHex)
 
 
 def generator_norm(
-    white: Color,
-    accent: Color,
-    mix_hex: str,
+    base: str,
+    colors: dict[str, Color],
     condition: HSLMapValue,
 ) -> ColorHex:
-    mix = ColorHex(mix_hex)
+    mix = ColorHex(base)
     if mix.cast(ColorHSL).l < 0.3:
         mix = mix.cast(ColorHSL).set_l(0.45)
     else:
         mix = mix.darkened(0.25)
-    color = white.blended(mix, 0.75)
-    color = color.blended(accent, 0.15)
+    color = colors["white"].blended(mix, 0.75)
+    color = color.blended(colors["accent"], 0.15)
     color = color.saturated(0.2)
     color = color.darkened(0.2)
     color = color.blend(mix, 0.15)
@@ -91,85 +41,67 @@ def generator_norm(
 
 
 def generator_bright(
-    white: Color,
-    accent: Color,
-    mix_hex: str,
+    base: str,
+    colors: dict[str, Color],
     condition: HSLMapValue,
 ) -> ColorHex:
-    return generator_norm(white, accent, mix_hex, condition).lightened(0.15)
+    return generator_norm(base, colors, condition).lightened(0.15)
 
 
-def generator_black(prominent: Color, condition: HSLMapValue) -> ColorHex:
-    color = (
-        prominent.darkened(0.4)
-        .blended(prominent, 0.2)
-        .lightened(0.4)
-        .blended(prominent, 0.1)
-    )
-    color = clamp_color_to_hslrules(color, condition)
+def generator_fg(
+    lightness: float,
+    colors: dict[str, Color],
+    condition: HSLMapValue,
+) -> ColorHex:
+    white = colors["white"].cast(ColorHSL).normalize()
+    accent = colors["accent"].cast(ColorHSL).normalize()
+    l1 = white.color[0]
+    l2 = accent.color[0]
+    hue = (l1 + l2) / 2
+    white.set_l(clamp(hue, 0.0, 1.0))
+    white = white.lighten(lightness)
+    color = clamp_color_to_hslrules(white, condition)
     return color.cast(ColorHex)
 
 
-def generator_white(prominent: Color, condition: HSLMapValue) -> ColorHex:
-    color = (
-        prominent.lightened(0.4)
-        .blended(prominent, 0.2)
-        .darkened(0.4)
-        .blended(prominent, 0.1)
-    )
-    color = clamp_color_to_hslrules(color, condition)
+def generator_bg(
+    darkness: float,
+    colors: dict[str, Color],
+    condition: HSLMapValue,
+) -> ColorHex:
+    black = colors["black"].cast(ColorHSL).normalize()
+    accent = colors["accent"].cast(ColorHSL).normalize()
+    l1 = black.color[0]
+    l2 = accent.color[0]
+    hue = (l1 + l2) / 2
+    black.set_l(clamp(hue, 0.0, 1.0))
+    black = black.darken(darkness)
+    color = clamp_color_to_hslrules(black, condition)
     return color.cast(ColorHex)
 
 
-def generator_accent(prominent: Color, condition: HSLMapValue) -> ColorHex:
-    color = clamp_color_to_hslrules(prominent.saturated(0.1), condition)
-    return color.cast(ColorHex)
-
-
-# fmt: off
-# TODO: enable customisation of the generators
-GENERATORS: dict[str, Callable[[dict], ColorHex]] = {
-    "accent": lambda x: generator_accent(x["prominent"], HSL_MAP["accent"]),
-    "black": lambda x: generator_black(x["prominent"], HSL_MAP["black"]),
-    "white": lambda x: generator_white(x["prominent"], HSL_MAP["white"]),
-    "bright_black": lambda x: x["black"].lightened(0.1),
-    "bright_white": lambda x: x["white"].lightened(0.1),
-    "accent_bg": lambda x: x["accent"].desaturated(0.2).darkened(0.1),
-    "accent_fg": lambda x: x["white"].lightened(0.15),
-    "foreground": lambda x: generator_fg(x["white"], x["accent"], 0.5, 0.08, HSL_MAP["foreground"]),
-    "foreground_alt": lambda x: generator_fg(x["white"], x["accent"], 0.5, 0.1, HSL_MAP["foreground"]),
-    "foreground_unfocus": lambda x: generator_fg(x["white"], x["accent"], 0.5, 0.12, HSL_MAP["foreground"]),
-    "background": lambda x: generator_bg(x["black"], x["accent"], 0.5, 0.08, HSL_MAP["background"]),
-    "background_alt": lambda x: generator_bg(x["black"], x["accent"], 0.5, 0.1, HSL_MAP["background"]),
-    "background_unfocus": lambda x: generator_bg(x["black"], x["accent"], 0.5, 0.12, HSL_MAP["background"]),
-    "red": lambda x: generator_norm(x["white"], x["accent"], "#ff0000", HSL_MAP["red"]),
-    "orange": lambda x: generator_norm(x["white"], x["accent"], "#ff8800", HSL_MAP["orange"]),
-    "brown": lambda x: generator_norm(x["white"], x["accent"], "#884400", HSL_MAP["brown"]),
-    "yellow": lambda x: generator_norm(x["white"], x["accent"], "#ffff00", HSL_MAP["yellow"]),
-    "green": lambda x: generator_norm(x["white"], x["accent"], "#00ff00", HSL_MAP["green"]),
-    "blue": lambda x: generator_norm(x["white"], x["accent"], "#0000ff", HSL_MAP["blue"]),
-    "cyan": lambda x: generator_norm(x["white"], x["accent"], "#00ffff", HSL_MAP["cyan"]),
-    "magenta": lambda x: generator_norm(x["white"], x["accent"], "#ff00ff", HSL_MAP["magenta"]),
-    "bright_red": lambda x: generator_bright(x["white"], x["accent"], "#ff0000", HSL_MAP["red"]),
-    "bright_orange": lambda x: generator_bright(x["white"], x["accent"], "#ff8800", HSL_MAP["orange"]),
-    "bright_brown": lambda x: generator_bright(x["white"], x["accent"], "#884400", HSL_MAP["brown"]),
-    "bright_yellow": lambda x: generator_bright(x["white"], x["accent"], "#ffff00", HSL_MAP["yellow"]),
-    "bright_green": lambda x: generator_bright(x["white"], x["accent"], "#00ff00", HSL_MAP["green"]),
-    "bright_blue": lambda x: generator_bright(x["white"], x["accent"], "#0000ff", HSL_MAP["blue"]),
-    "bright_cyan": lambda x: generator_bright(x["white"], x["accent"], "#00ffff", HSL_MAP["cyan"]),
-    "bright_magenta": lambda x: generator_bright(x["white"], x["accent"], "#ff00ff", HSL_MAP["magenta"]),
+# These generators are used when the corresponding color cannot be inferred from
+# the image. Each generator must return a ColorHex object.
+GENERATOR_REGISTRY = {
+    "from_color": generator_from,
+    "foreground": generator_fg,
+    "background": generator_bg,
+    "norm": generator_norm,
+    "bright": generator_bright,
 }
-# fmt: on
 
 
 def generate(
     image_path: Path,
+    hsl_map: HSLMap,
+    colors_map: dict[str, dict],
     depth: int = 8,
     image_size: int = 256,
-    hsl_map: dict = HSL_MAP,
     max_colors: int = 1024,
-    required_colors: dict = GENERATORS,
 ):
+    for k, v in hsl_map.items():
+        print(k, " ", v)
+
     check_program("magick", "EXIT")
     command = [
         "magick",
@@ -233,11 +165,54 @@ def generate(
             colors[name] = color
             logger.debug(f"Found color {name} to be {color}")
 
-    for name, generator in required_colors.items():
-        if colors.get(name) is None:
-            colors[name] = generator({"prominent": prominent_color, **colors})
-            logger.debug(f"Color {name} doesn't exist. Generated to {colors[name]}")
+    def pass_key(item):
+        _, spec = item
+        return spec.get("pass", float("inf"))
 
+    # If any colors don't exist, then synthesize them
+    for name, args in sorted(colors_map.items(), key=pass_key):
+        if colors.get(name) is None:
+            # Condition can be None, so no enforcing.
+            # TODO: Properly enforce hsl condition
+            condition = hsl_map.get(name)
+            generator_name = args["generator"]
+            generator_args = args["args"]
+            generator = GENERATOR_REGISTRY[generator_name]
+            calculated_colors = {"prominent": prominent_color, **colors}
+
+            if generator_name == "from_color":
+                colors[name] = generator(
+                    calculated_colors[generator_args["source"]],
+                    generator_args["transform"],
+                    condition,
+                )
+            elif generator_name == "foreground":
+                colors[name] = generator(
+                    generator_args["lightness"],
+                    calculated_colors,
+                    condition,
+                )
+            elif generator_name == "background":
+                colors[name] = generator(
+                    generator_args["darkness"],
+                    calculated_colors,
+                    condition,
+                )
+            elif generator_name == "norm":
+                colors[name] = generator(
+                    generator_args["base"],
+                    calculated_colors,
+                    condition,
+                )
+            elif generator_name == "bright":
+                colors[name] = generator(
+                    generator_args["base"],
+                    calculated_colors,
+                    condition,
+                )
+            else:
+                logger.error(f"Generator name {generator_name} is invalid")
+            logger.debug(f"Color {name} doesn't exist. Generated to {colors[name]}")
     return colors
 
 

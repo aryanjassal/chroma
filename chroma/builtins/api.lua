@@ -3,19 +3,16 @@ local assert_api = function(name)
   if _G[name] == nil then
     error("Required state '" .. name .. "' is unset")
   end
+  return _G[name]
 end
-
--- All paths prefixed with a '__' are internal paths. Don't use them.
-local _darken = assert_api "__chroma_darken"
-local _lighten = assert_api "__chroma_lighten"
-local _saturate = assert_api "__chroma_saturate"
-local _desaturate = assert_api "__chroma_desaturate"
 
 local api = {}
 
-api.darken = _darken
-api.lighten = _lighten
-api.saturate = _saturate
-api.desaturate = _desaturate
+-- All paths prefixed with a '__' are internal paths. Don't use them.
+api.darken = assert_api "__darken"
+api.lighten = assert_api "__lighten"
+api.saturate = assert_api "__saturate"
+api.desaturate = assert_api "__desaturate"
+api.blend = assert_api "__blend"
 
 return api

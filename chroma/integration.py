@@ -1,3 +1,4 @@
+import tempfile
 from abc import ABC, abstractmethod
 from typing import Type
 
@@ -8,6 +9,13 @@ class Integration(ABC):
         self.group = group
         self.meta = meta
         self.data = data
+
+    def tempdir_create(self) -> str:
+        self.__tempdir = tempfile.TemporaryDirectory()
+        return self.__tempdir.name
+
+    def tempdir_cleanup(self) -> None:
+        self.__tempdir.cleanup()
 
     @abstractmethod
     def apply(self) -> None:

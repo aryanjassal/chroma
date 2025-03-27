@@ -87,7 +87,7 @@ def match_color_from_hslmap(
 
 def clamp_color_to_hslrules(
     color: Color,
-    condition: HSLMapValue,
+    condition: HSLMapValue | None,
 ) -> ColorHSL:
     """Converts a color to satisfy the provided condition.
 
@@ -122,6 +122,10 @@ def clamp_color_to_hslrules(
     condition = ([(0, 10), (50, 60)], (50, 80), None)
     ```
     """
+
+    # If the condition is none, then the color passes by default case
+    if condition is None:
+        return color.cast(ColorHSL)
 
     def get_closest_value(element: int, limits: HSLMapField):
         if limits is None:
@@ -158,8 +162,10 @@ def check_value(value: int, condition: HSLMapField):
         checks = [condition]
     elif type(condition) is list:
         checks = condition
-    else:
+    elif condition is None:
         checks = [None]
+    else:
+        logger.error(f"Invalid type {type(condition)} for HSLMapField")
 
     results = []
     for check in checks:
@@ -210,6 +216,7 @@ def assert_hslmap_condition(condition) -> HSLMapValue:
             return None
 
         if isinstance(field, list):
+            # Check for multiple conditions
             if all(
                 isinstance(pair, (list, tuple))
                 and len(pair) == 2
@@ -217,12 +224,13 @@ def assert_hslmap_condition(condition) -> HSLMapValue:
                 for pair in field
             ):
                 return [tuple(pair) for pair in field]
-            raise ValueError(f"Invalid list field: {field}")
 
-        if isinstance(field, (list, tuple)) and len(field) == 2:
-            if all(isinstance(x, int) for x in field):
+            # Check for single condition
+            if all(isinstance(val, int) for val in field) and len(field) == 2:
                 return tuple(field)
-            raise ValueError(f"Invalid tuple field: {field}")
+
+            # Otherwise
+            raise ValueError(f"Invalid field: {field}")
 
         raise ValueError(f"Invalid field: {field}")
 

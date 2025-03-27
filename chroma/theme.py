@@ -5,21 +5,15 @@ from chroma.exceptions import InvalidFieldException, VersionMismatchException
 from chroma.integration import Integration, IntegrationT
 from chroma.logger import Logger
 from chroma.utils.dynamic import discover_modules
+from chroma.utils.lua import DEFAULT_STATE, parse_lua, runtime, sanitize_python
 from chroma.utils.paths import (
     chroma_builtins_dir,
     chroma_dir,
     config_dir,
     override_theme,
 )
-from chroma.utils.theme import (
-    DEFAULT_STATE,
-    parse_file,
-    parse_lua,
-    runtime,
-    sanitize_python,
-)
+from chroma.utils.theme import parse_file
 from chroma.utils.tools import merge, to_dict
-from chroma.colors import ColorHex
 
 logger = Logger.get_logger()
 
@@ -93,11 +87,11 @@ def load(filename=None, lua=None, state: dict = dict()):
     runtime_state = DEFAULT_STATE
     runtime_state.update(sanitize_python(state))
 
-    config = parse_file(runtime(runtime_state), chroma_builtins_dir() / "config.lua")
-    print(config)
-    c = config["generators"]["generator_modes"]["background"](ColorHex('#ffffff'))
-    print(c)
-    exit()
+    # config = parse_file(runtime(runtime_state), chroma_builtins_dir() / "config.lua")
+    # print(config)
+    # print(config["generators"]["generator_modes"]["background"](ColorHex('#ffffff')))
+    # print(config["generators"]["generator_modes"]["norm"](ColorHex('#ffffff')))
+    # exit()
 
     if lua is None:
         user_theme = parse_file(runtime(runtime_state), filename)

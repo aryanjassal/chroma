@@ -13,7 +13,8 @@ from chroma.types import Number
 logger = Logger.get_logger()
 
 
-def to_dict(table):
+# TODO: fix lint
+def to_dict(table) -> dict:
     """Recursively converts lua tables to python dicts"""
 
     def convert_dict(t):
@@ -94,14 +95,7 @@ def check_program(
     program: str,
     action: Literal["WARN"] | Literal["NOOP"] | Literal["EXIT"] = "WARN",
 ) -> bool:
-    result = subprocess.run(
-        ["command", "-v", program],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        text=True,
-        shell=True,
-    )
-    if result.returncode != 0:
+    if shutil.which(program) is None:
         if action == "WARN":
             logger.warn(
                 f"{program} was not found on your system. You can disable "
@@ -113,6 +107,7 @@ def check_program(
                 f"{program} was not found on your system. You must disable "
                 "the integration by assigning the table to nil in the overrides."
             )
+        return False
     return True
 
 

@@ -16,9 +16,7 @@ local colors = {}
 -- target color(s) as an argument.
 colors.transform = {
   noop = function()
-    return create_transform(function(color)
-      return color
-    end)
+    return function(color) return color end
   end,
 
   darken = function(amount)

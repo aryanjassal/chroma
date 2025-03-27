@@ -99,9 +99,6 @@ def generate(
     image_size: int = 256,
     max_colors: int = 1024,
 ):
-    for k, v in hsl_map.items():
-        print(k, " ", v)
-
     check_program("magick", "EXIT")
     command = [
         "magick",

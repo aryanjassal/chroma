@@ -63,35 +63,15 @@ config.generators = {
     mode is a function which takes at least one parameter - an input color, and
     returns a single color as its output. The function may take more parameters
     and can do an arbitrary amount of processing, like chaining transforms.
-    
-    Basic transforms have been provided as a part of 
-    `chroma.builtins.colors.transform.*`, which take in a list of arguments for
-    that transform and returns a function which will be executed at the time of
-    generation to transform an incoming color. Note that transforms are designed
-    for the simplest case of having one incoming color, an arbitrary number of
-    arguments to the transformation API, then a single resulting color. This will
-    likely not see much use. 
 
     To perform complex chaining, rely on the exposed functions under 
     `chroma.builtins.api`. These functions refer back to the python code and is
     likely to be more useful for complex cases.
-    TODO: should colors.transform be removed? seems redundant but useful for 
-     beginners
   ]]
-  -- generator_modes = {
-  --   accent = colors.transform.saturate(0.1),
-  --   norm = colors.transform.noop(),
-  --   bright = colors.transform.lighten(0.1),
-  --   background = function(color)
-  --     color = api.darken(color, 0.15)
-  --     color = api.lighten(color, 0.15)
-  --     return color
-  --   end,
-  --   foreground = colors.transform.lighten(0.15),
-  -- },
 
   -- NOTE: Make sure to define `accent`, `black`, and `white` before using any
   -- other generators, as many of then require these colors to be set beforehand.
+  -- TODO: order/priority/pass terminology?
   colors = {
     accent = {
       generator = "from_color",
@@ -160,7 +140,7 @@ config.generators = {
         source = "black",
         transform = function(color)
           return api.lighten(color, 0.1)
-        end
+        end,
       },
     },
     bright_white = {
@@ -169,7 +149,7 @@ config.generators = {
         source = "white",
         transform = function(color)
           return api.lighten(color, 0.1)
-        end
+        end,
       },
     },
     foreground = { generator = "foreground", args = { lightness = 0.08 } },

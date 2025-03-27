@@ -102,7 +102,7 @@ def load(filename=None, lua=None, state: dict = dict()):
         runtime(runtime_state), chroma_builtins_dir() / "default.lua"
     )
 
-    options = merge(user_theme["options"], default_theme["options"])
+    options = merge(default_theme["options"], user_theme["options"])
     if options["merge_tables"]:
         theme = merge(default_theme, user_theme)
     else:

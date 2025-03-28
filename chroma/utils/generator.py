@@ -87,7 +87,7 @@ def match_color_from_hslmap(
 
 def clamp_color_to_hslrules(
     color: Color,
-    condition: HSLMapValue,
+    condition: HSLMapValue | None,
 ) -> ColorHSL:
     """Converts a color to satisfy the provided condition.
 
@@ -122,6 +122,10 @@ def clamp_color_to_hslrules(
     condition = ([(0, 10), (50, 60)], (50, 80), None)
     ```
     """
+
+    # If the condition is none, then the color passes by default case
+    if condition is None:
+        return color.cast(ColorHSL)
 
     def get_closest_value(element: int, limits: HSLMapField):
         if limits is None:
@@ -158,8 +162,10 @@ def check_value(value: int, condition: HSLMapField):
         checks = [condition]
     elif type(condition) is list:
         checks = condition
-    else:
+    elif condition is None:
         checks = [None]
+    else:
+        logger.error(f"Invalid type {type(condition)} for HSLMapField")
 
     results = []
     for check in checks:
@@ -189,3 +195,48 @@ def write_lua_colors(path: Path, colors: dict, indent: int = 2):
         contents.append(f"{' ' * indent}{name} = \"{color}\",\n")
     contents.append("}")
     path.write_text("".join(contents))
+
+
+def assert_hslmap_condition(condition) -> HSLMapValue:
+    """
+    Validates and converts a raw HSL map condition (list or tuple) to a Python HSLMapValue.
+
+    :param condition: The raw condition to validate and convert.
+    :return: A valid HSLMapValue.
+    :raises ValueError: If the condition does not match the expected structure.
+    """
+    if not isinstance(condition, (list, tuple)) or len(condition) != 3:
+        raise ValueError(
+            f"Value {condition} does not match requirements for HSLMap condition"
+        )
+
+    def validate_field(field) -> HSLMapField:
+        """Validates and converts a single field."""
+        if field is None:
+            return None
+
+        if isinstance(field, list):
+            # Check for multiple conditions
+            if all(
+                isinstance(pair, (list, tuple))
+                and len(pair) == 2
+                and all(isinstance(x, int) for x in pair)
+                for pair in field
+            ):
+                return [tuple(pair) for pair in field]
+
+            # Check for single condition
+            if all(isinstance(val, int) for val in field) and len(field) == 2:
+                return tuple(field)
+
+            # Otherwise
+            raise ValueError(f"Invalid field: {field}")
+
+        raise ValueError(f"Invalid field: {field}")
+
+    # Validate and convert all three fields
+    return (
+        validate_field(condition[0]),
+        validate_field(condition[1]),
+        validate_field(condition[2]),
+    )

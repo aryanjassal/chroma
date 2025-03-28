@@ -5,7 +5,7 @@ from pathlib import Path
 
 import chroma
 from chroma import generator, theme
-from chroma.logger import Logger
+from chroma.logger import LogLevel, Logger
 from chroma.utils.paths import cache_dir, find_theme_from_name, themes_dir
 from chroma.utils.tools import set_exception_hook
 
@@ -19,6 +19,12 @@ def setup_args():
         "--version",
         action="version",
         version=f"Chroma {chroma.__version__}",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Display logs of level DEBUG and higher",
     )
     parser.add_argument(
         "-i",
@@ -88,12 +94,10 @@ def setup_args():
 
 
 def exception_hook(exc_type, exc_val, exc_tb):
-    logger.error("An unhandled exception occured. Bailing!")
-    logger.error(f"Raised: {exc_type.__name__}")
-    logger.error(f"Reason: {exc_val}")
-    logger.error("Traceback (most recent call last):")
-    logger.error("".join(tb.format_tb(exc_tb)).rstrip())
+    logger.error(f"{exc_type.__name__} - {exc_val}")
     logger.error("Report this at https://github.com/aryanjassal/chroma/issues")
+    logger.debug("Traceback (most recent call last):")
+    logger.debug("".join(tb.format_tb(exc_tb)).rstrip())
 
 
 def main():
@@ -103,6 +107,10 @@ def main():
     # Get command-line arguments
     args = setup_args()
 
+    # Change the logger to be verbose if the flag is set
+    if args.verbose:
+        logger.level = LogLevel.DEBUG
+
     if args.command == "load":
         # If the theme file does not exist, then check if a theme file (with or
         # without the extension) exists in the expected directories. If there is
@@ -111,9 +119,8 @@ def main():
         if not theme_name.exists():
             theme_name = find_theme_from_name(args.theme_name)
 
-            if theme_name is None:
-                logger.error(f"File with name '{args.theme_name}' doesn't exist")
-                exit(1)
+        if theme_name is None:
+            raise FileNotFoundError(f"File with name '{args.theme_name}' doesn't exist")
 
         # Cache the theme we are going to apply. This will be useful for overriding
         # options across all themes. Make sure that the name is consistent, like
@@ -154,7 +161,7 @@ def main():
             )
 
     if args.command == "remove":
-        path = Path("~/.cache/chroma/palettes/generated.lua").expanduser()
+        path = Path(cache_dir() / "palettes/generated.lua")
         if path.exists():
             path.unlink()
 

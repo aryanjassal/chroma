@@ -1,6 +1,6 @@
 from lupa import LuaRuntime
 
-from chroma.colors.methods import blend, darken, desaturate, lighten, saturate
+from chroma.colors.methods import blend, darken, desaturate, lighten, saturate, set_hue, set_saturation, set_luminance
 from chroma.logger import Logger
 
 from .paths import cache_dir, chroma_dir
@@ -13,6 +13,9 @@ DEFAULT_STATE: dict = {
     "__saturate": saturate,
     "__desaturate": desaturate,
     "__blend": blend,
+    "__set_hue": set_hue,
+    "__set_saturation": set_saturation,
+    "__set_luminance": set_luminance,
 }
 
 logger = Logger.get_logger()

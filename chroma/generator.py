@@ -41,7 +41,6 @@ def generate(
         raise ValueError(f"Backend '{name}': no such backend")
 
     config = parse_file(runtime(), chroma_builtins_dir() / "config.lua")
-    print(config)
 
     hslmap = {
         k: assert_hslmap_condition(v) for k, v in config["generators"]["hslmap"].items()

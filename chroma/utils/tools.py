@@ -93,7 +93,7 @@ def clamp(x: Number, _min: Number, _max: Number):
 
 def check_program(
     program: str,
-    action: Literal["WARN"] | Literal["NOOP"] | Literal["EXIT"] = "WARN",
+    action: Literal["WARN"] | Literal["NOOP"] | Literal["EXIT"] = "EXIT",
 ) -> bool:
     if shutil.which(program) is None:
         if action == "WARN":

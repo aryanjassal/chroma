@@ -57,8 +57,8 @@ def generator_fg(
     accent = colors["accent"].cast(ColorHSL).normalize()
     l1 = white.color[0]
     l2 = accent.color[0]
-    hue = (l1 + l2) / 2
-    white.set_l(clamp(hue, 0.0, 1.0))
+    lum = (l1 + l2) / 2
+    white.set_l(clamp(lum, 0.75, 1.0))
     white = white.lighten(lightness)
     color = clamp_color_to_hslrules(white, condition)
     return color.cast(ColorHex)
@@ -73,8 +73,8 @@ def generator_bg(
     accent = colors["accent"].cast(ColorHSL).normalize()
     l1 = black.color[0]
     l2 = accent.color[0]
-    hue = (l1 + l2) / 2
-    black.set_l(clamp(hue, 0.0, 1.0))
+    lum = (l1 + l2) / 2
+    black.set_l(clamp(lum, 0.0, 0.15))
     black = black.darken(darkness)
     color = clamp_color_to_hslrules(black, condition)
     return color.cast(ColorHex)
@@ -99,7 +99,7 @@ def generate(
     image_size: int = 256,
     max_colors: int = 1024,
 ):
-    check_program("magick", "EXIT")
+    check_program("magick")
     command = [
         "magick",
         str(image_path),
@@ -115,7 +115,12 @@ def generate(
         str(depth),
         "histogram:info:-",
     ]
-    proc_io = subprocess.run(command, capture_output=True, check=True)
+    proc_io = subprocess.run(command, capture_output=True)
+
+    if proc_io.returncode != 0:
+        raise ValueError(
+            f"Failed to parse image. Program returned with code {proc_io.returncode}"
+        )
 
     # If anything went wrong, inform the user.
     if proc_io.stderr:
@@ -179,7 +184,7 @@ def generate(
 
             if generator_name == "from_color":
                 colors[name] = generator(
-                    calculated_colors[generator_args["source"]],
+                    calculated_colors[generator_args["base"]],
                     generator_args["transform"],
                     condition,
                 )

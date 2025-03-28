@@ -87,11 +87,9 @@ def load(filename=None, lua=None, state: dict = dict()):
     runtime_state = DEFAULT_STATE
     runtime_state.update(sanitize_python(state))
 
-    # config = parse_file(runtime(runtime_state), chroma_builtins_dir() / "config.lua")
-    # print(config)
-    # print(config["generators"]["generator_modes"]["background"](ColorHex('#ffffff')))
-    # print(config["generators"]["generator_modes"]["norm"](ColorHex('#ffffff')))
-    # exit()
+    user_config = parse_file(
+        runtime(runtime_state), chroma_builtins_dir() / "config.lua"
+    )
 
     if lua is None:
         user_theme = parse_file(runtime(runtime_state), filename)
@@ -169,13 +167,22 @@ def load(filename=None, lua=None, state: dict = dict()):
         if group in SPECIAL_GROUPS:
             continue
 
+        if group not in user_config["integrations"]["themable"]:
+            logger.debug(f"Skipping integration {group}")
+            continue
+
         logger.info(f"Applying theme for {group}")
         integration = INTEGRATION_REGISTRY.get(group)
 
-        # If the integration doesn't exist, then skip it.
         if integration is None:
-            logger.error(f"No integrations found for {group}. Skipping.")
-            continue
+            if user_config["behaviour"]["missing_local_integration"] == "WARN":
+                logger.warn(f"No integrations found for {group}. Skipping.")
+                continue
+            elif user_config["behaviour"]["missing_local_integration"] == "IGNORE":
+                continue
+            else:
+                # Default-case the failure
+                raise NameError(f"No integration found for {group}")
 
         # Otherwise, check if the required signatures match. If they do,
         # then run the respective integration.

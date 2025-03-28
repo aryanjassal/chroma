@@ -35,4 +35,19 @@ api.blend = function(color1, color2, ratio)
   return method(color1, color2, ratio)
 end
 
+api.set_h = function(color, amount)
+  local method = assert_api "__set_hue"
+  return method(color, amount)
+end
+
+api.set_s = function(color, amount)
+  local method = assert_api "__set_saturation"
+  return method(color, amount)
+end
+
+api.set_l = function(color, amount)
+  local method = assert_api "__set_luminance"
+  return method(color, amount)
+end
+
 return api

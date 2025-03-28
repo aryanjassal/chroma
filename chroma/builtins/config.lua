@@ -1,6 +1,5 @@
 local api = require "chroma.builtins.api"
 local lib = require "chroma.builtins.lib"
-local colors = require "chroma.builtins.colors"
 local python = require "chroma.builtins.python"
 
 local config = {}
@@ -13,8 +12,7 @@ config.integrations = {
 
 -- Modify the behavior of chroma.
 config.behavior = {
-  missing_local_integration = "IGNORE",
-  missing_theme_integration = "IGNORE",
+  missing_local_integration = "WARN",
 }
 
 -- Modify the conditions for the generator and what it considers a color.
@@ -56,27 +54,33 @@ config.generators = {
   },
 
   --[[
-    There are multiple modes which modify the behavior of color generation.
-    They are present to allow for differences in the calculation of the normal
-    colors and their bright counterparts, for example. Look at the type
-    signature to see the expected input type for each mode. Each value in the
-    mode is a function which takes at least one parameter - an input color, and
-    returns a single color as its output. The function may take more parameters
-    and can do an arbitrary amount of processing, like chaining transforms.
+    Each color must be given a procedure to generate the color if it can't be
+    automatically matched from the image. These procedures can be specified
+    here. To perform complex chaining, rely on the exposed functions under 
+    `chroma.builtins.api`. These functions refer back to the python code for
+    standalone color modification.
 
-    To perform complex chaining, rely on the exposed functions under 
-    `chroma.builtins.api`. These functions refer back to the python code and is
-    likely to be more useful for complex cases.
+    These are the available generators and their description.
+     - from_color: takes a base color and applies a transform to it
+     - foreground: relies on lightness values to give different colors
+     - background: relies on darkness values to give different colors
+     - norm: creates a normal color based on a base color
+     - bright: creates a bright color based on a base color
+
+    NOTE: any colors missing from the config will not be generated and simply
+    ignored. Make sure you know what you are doing.
+
+    NOTE: ensure 'accent', 'black', and 'white' have the lowest pass value to
+    ensure they are processed first. Other generators rely on them.
+
+    TODO: order/priority/pass terminology?
+    TODO: move under magick to allow custom generators to have custom config
   ]]
-
-  -- NOTE: Make sure to define `accent`, `black`, and `white` before using any
-  -- other generators, as many of then require these colors to be set beforehand.
-  -- TODO: order/priority/pass terminology?
   colors = {
     accent = {
       generator = "from_color",
       args = {
-        source = "prominent",
+        base = "prominent",
         transform = function(color)
           return api.saturate(color, 0.1)
         end,
@@ -86,7 +90,7 @@ config.generators = {
     black = {
       generator = "from_color",
       args = {
-        source = "prominent",
+        base = "prominent",
         transform = function(color)
           local prominent = color
           color = api.darken(color, 0.4)
@@ -101,7 +105,7 @@ config.generators = {
     white = {
       generator = "from_color",
       args = {
-        source = "prominent",
+        base = "prominent",
         transform = function(color)
           local prominent = color
           color = api.lighten(color, 0.4)
@@ -116,7 +120,7 @@ config.generators = {
     accent_bg = {
       generator = "from_color",
       args = {
-        source = "accent",
+        base = "accent",
         transform = function(color)
           color = api.desaturate(color, 0.2)
           color = api.darken(color, 0.1)
@@ -127,7 +131,7 @@ config.generators = {
     accent_fg = {
       generator = "from_color",
       args = {
-        source = "white",
+        base = "white",
         transform = function(color)
           color = api.lighten(color, 0.15)
           return color
@@ -137,7 +141,7 @@ config.generators = {
     bright_black = {
       generator = "from_color",
       args = {
-        source = "black",
+        base = "black",
         transform = function(color)
           return api.lighten(color, 0.1)
         end,
@@ -146,7 +150,7 @@ config.generators = {
     bright_white = {
       generator = "from_color",
       args = {
-        source = "white",
+        base = "white",
         transform = function(color)
           return api.lighten(color, 0.1)
         end,

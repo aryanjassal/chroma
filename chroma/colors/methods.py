@@ -37,3 +37,21 @@ def blend(color1: Color, color2: Color, ratio: float) -> Color:
 
     blended = color1.cast(ColorRGB).blended(color2, ratio)
     return blended.cast(_type1)  # The two types are guaranteed to be the same
+
+
+def set_hue(color: Color, amount: float) -> Color:
+    _type = type(color)
+    desaturated = color.cast(ColorHSL).set_h(amount)
+    return desaturated.cast(_type)
+
+
+def set_saturation(color: Color, amount: float) -> Color:
+    _type = type(color)
+    desaturated = color.cast(ColorHSL).set_s(amount)
+    return desaturated.cast(_type)
+
+
+def set_luminance(color: Color, amount: float) -> Color:
+    _type = type(color)
+    desaturated = color.cast(ColorHSL).set_l(amount)
+    return desaturated.cast(_type)
